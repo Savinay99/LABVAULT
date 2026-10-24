@@ -93,25 +93,39 @@ def _get_bool(name, default=False):
         return default
     return str(value).strip().lower() in ("1", "true", "yes", "on")
 
+# Database: SQL Server is the default for development and production.
+# Read all connection details from .env. SQLite is used only in
+# settings_test.py (tests) and never in dev or prod.
+DB_ENGINE = os.environ.get("DB_ENGINE", "mssql")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = os.environ.get("DB_PORT", "1433")
+DB_NAME = os.environ.get("DB_NAME", "LabVault")
+DB_USER = os.environ.get("DB_USER", "")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_DRIVER = os.environ.get("DB_DRIVER", "ODBC Driver 18 for SQL Server")
+DB_TRUSTED_CONNECTION = _get_bool("DB_TRUSTED_CONNECTION", False)
+DB_ENCRYPT = _get_bool("DB_ENCRYPT", False)
 
-# Database: Azure SQL / SQL Server via django-mssql-backend when configured,
-# otherwise SQLite for local development without live Azure credentials.
-DB_SERVER = os.environ.get("DB_SERVER")
-if DB_SERVER:
+if DB_ENGINE == "mssql":
     DATABASES = {
         "default": {
             "ENGINE": "mssql",
-            "NAME": os.environ.get("DB_DATABASE", "LabVault"),
-            "HOST": DB_SERVER,
-            "PORT": os.environ.get("DB_PORT", "1433"),
-            "USER": os.environ.get("DB_USERNAME", ""),
-            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "NAME": DB_NAME,
+            "HOST": DB_HOST,
+            "PORT": DB_PORT,
+            "USER": DB_USER,
+            "PASSWORD": DB_PASSWORD,
             "OPTIONS": {
-                "driver": os.environ.get("DB_DRIVER", "ODBC Driver 17 for SQL Server"),
-                "trusted_connection": _get_bool("DB_TRUSTED_CONNECTION", False),
+                "driver": DB_DRIVER,
+                "trusted_connection": DB_TRUSTED_CONNECTION,
             },
         }
     }
+
+    if DB_ENCRYPT:
+        DATABASES["default"]["OPTIONS"][
+            "extra_params"
+        ] = "Encrypt=yes;TrustServerCertificate=no"
 else:
     DATABASES = {
         "default": {
