@@ -1,0 +1,1 @@
+"""LabVault Django project package."""

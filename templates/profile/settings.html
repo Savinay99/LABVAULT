@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+{% block title_text %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Account Settings</h1>
+</div>
+
+{% if messages %}
+  <ul class="flash-messages" aria-live="polite">
+    {% for message in messages %}
+      <li class="flash flash-{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<div class="account-card" data-animate="fade-up">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="field">
+      <label for="id_old_password">Current password <span class="required">*</span></label>
+      {{ form.old_password }}
+      {{ form.old_password.errors }}
+    </div>
+    <div class="field">
+      <label for="id_new_password1">New password <span class="required">*</span></label>
+      {{ form.new_password1 }}
+      {{ form.new_password1.errors }}
+    </div>
+    <div class="field">
+      <label for="id_new_password2">Confirm new password <span class="required">*</span></label>
+      {{ form.new_password2 }}
+      {{ form.new_password2.errors }}
+    </div>
+    <div class="field actions">
+      <button type="submit" class="btn btn-primary">Change password</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block title_text %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>Dashboard</h1>
+  <p>Welcome back, {{ user.get_full_name|default:user.email }} ({{ user.get_role_display }}).</p>
+</div>
+
+<div class="stat-cards">
+  <div class="stat-card" data-animate="fade-up">
+    <span class="stat-label">Total resources</span>
+    <span class="stat-value">{{ total_resources }}</span>
+  </div>
+  <div class="stat-card" data-animate="fade-up">
+    <span class="stat-label">Your uploads</span>
+    <span class="stat-value">{{ user_resources }}</span>
+  </div>
+  <div class="stat-card" data-animate="fade-up">
+    <span class="stat-label">Categories</span>
+    <span class="stat-value">{{ category_counts|length }}</span>
+  </div>
+  <div class="stat-card" data-animate="fade-up">
+    <span class="stat-label">Your role</span>
+    <span class="stat-value">{{ user.get_role_display }}</span>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="card" data-animate="fade-up">
+    <h2>Recently added resources</h2>
+    {% if recent_activity %}
+      <table>
+        <thead><tr><th>Resource</th><th>Category</th><th>Uploaded by</th><th>Added</th></tr></thead>
+        <tbody>
+          {% for r in recent_activity %}
+            <tr>
+              <td>{{ r.title }}</td>
+              <td>{{ r.category.name|default:'—' }}</td>
+              <td>{{ r.uploaded_by.get_full_name|default:r.uploaded_by.email }}</td>
+              <td>{{ r.created_at }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">No resources yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="card" data-animate="fade-up">
+    <h2>Resources by category</h2>
+    {% if category_counts %}
+      <table>
+        <thead><tr><th>Category</th><th>Resources</th></tr></thead>
+        <tbody>
+          {% for c in category_counts %}
+            <tr><td>{{ c.category__name }}</td><td>{{ c.count }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">No categories defined.</p>
+    {% endif %}
+  </section>
+
+  <section class="card" data-animate="fade-up">
+    <h2>Quick actions</h2>
+    <div class="quick-actions">
+      <a href="{% url 'resources:library' %}" class="btn btn-primary">Browse library</a>
+      {% if not user.is_administrator %}
+        <a href="{% url 'resources:upload' %}" class="btn btn-primary">Upload resource</a>
+      {% endif %}
+      {% if user.is_administrator %}
+        <a href="{% url 'admin:index' %}" class="btn btn-primary">Administration</a>
+      {% endif %}
+      <a href="{% url 'accounts:profile' %}" class="btn btn-ghost">Profile</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

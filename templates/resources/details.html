@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ resource.title }}{% endblock %}
+{% block title_text %}{{ resource.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ resource.title }}</h1>
+</div>
+
+<div class="details-grid">
+  <div class="details-meta">
+    <dl>
+      <dt>Category</dt><dd>{{ resource.category.name|default:'Uncategorized' }}</dd>
+      <dt>Uploaded by</dt><dd>{{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.email }}</dd>
+      <dt>Visibility</dt><dd>{{ resource.get_visibility_display }}</dd>
+      <dt>File</dt><dd>{{ resource.original_filename }}</dd>
+      <dt>Size</dt><dd>{{ resource.file_size_formatted }}</dd>
+      <dt>Type</dt><dd>{{ resource.content_type }}</dd>
+      <dt>Added</dt><dd>{{ resource.created_at }}</dd>
+      <dt>Updated</dt><dd>{{ resource.updated_at }}</dd>
+    </dl>
+    {% if resource.subjects.all %}
+      <div class="subjects">
+        <strong>Subjects:</strong>
+        {% for s in resource.subjects.all %}<span class="subject-tag">{{ s.subject_code }} &mdash; {{ s.subject_name }}</span>{% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="details-actions">
+    <a href="{% url 'resources:download' resource.pk %}" class="btn btn-primary">Download</a>
+    {% if user.is_authenticated and (resource.uploaded_by_id == user.pk or user.is_administrator) %}
+      <a href="{% url 'resources:edit' resource.pk %}" class="btn btn-ghost">Edit</a>
+      <form method="post" action="{% url 'resources:delete' resource.pk %}"
+            data-confirm="Delete this resource? This cannot be undone."
+            style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if resource.description %}
+  <section class="card">
+    <h2>Description</h2>
+    <p>{{ resource.description }}</p>
+  </section>
+{% endif %}
+{% endblock %}

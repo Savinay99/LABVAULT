@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in{% endblock %}
+{% block title_text %}Sign in{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card" data-animate="fade-up">
+    <h1>Sign in</h1>
+    {% if messages %}
+      <ul class="flash-messages" aria-live="polite">
+        {% for message in messages %}
+          <li class="flash flash-{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="field">
+        <label for="id_username">Email address</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      <div class="field">
+        <label for="id_password">Password</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+      </div>
+      {% if form.next.value %}
+        <input type="hidden" name="next" value="{{ form.next.value }}">
+      {% endif %}
+      <div class="field actions">
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      </div>
+      <p class="auth-footer">Don't have an account? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+    </form>
+  </div>
+</div>
+{% endblock %}
