@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Resource Library</h1>
+  <a href="{{ url_for('resources.upload') }}" class="btn btn-primary">Upload resource</a>
+</div>
+
+<form method="get" class="filter-bar" aria-label="Search and filter resources">
+  <div class="filter-group">
+    <label for="search">Search</label>
+    <input type="search" id="search" name="search" value="{{ search }}" placeholder="Title or description">
+  </div>
+  <div class="filter-group">
+    <label for="category_id">Category</label>
+    <select id="category_id" name="category_id">
+      <option value="">All</option>
+      {% for c in categories %}
+        <option value="{{ c.CategoryId }}" {% if category_id == c.CategoryId %}selected{% endif %}>{{ c.Name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="subject_id">Subject</label>
+    <select id="subject_id" name="subject_id">
+      <option value="">All</option>
+      {% for s in subjects %}
+        <option value="{{ s.SubjectId }}" {% if subject_id == s.SubjectId %}selected{% endif %}>{{ s.SubjectCode }} — {{ s.SubjectName }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-group sort-group">
+    <label for="sort">Sort by</label>
+    <select id="sort" name="sort">
+      <option value="CreatedAt" {% if sort=='CreatedAt' %}selected{% endif %}>Date added</option>
+      <option value="Title" {% if sort=='Title' %}selected{% endif %}>Title</option>
+    </select>
+    <select id="direction" name="direction">
+      <option value="DESC" {% if direction=='DESC' %}selected{% endif %}>Newest first</option>
+      <option value="ASC" {% if direction=='ASC' %}selected{% endif %}>Oldest first</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Apply</button>
+</form>
+
+{% if resources %}
+  <div class="results-summary">{{ total }} resource{% if total != 1 %}s{% endif %} found.</div>
+  <div class="resource-grid">
+    {% for r in resources %}
+      <a href="{{ url_for('resources.details', resource_id=r.ResourceId) }}" class="resource-card">
+        <h3>{{ r.Title }}</h3>
+        <p class="meta">{{ r.CategoryName or 'Uncategorized' }} · {{ r.UploadedByName or '—' }}</p>
+        {% if r.Subjects %}
+          <p class="subjects">
+            {% for s in r.Subjects %}<span class="subject-tag">{{ s.SubjectCode }}</span>{% endfor %}
+          </p>
+        {% endif %}
+        <p class="desc">{{ r.Description[:160] }}{% if r.Description|length > 160 %}…{% endif %}</p>
+        <span class="file-info">{{ r.OriginalFileName }} · {{ r.FileSizeBytes | filesizeformat }}</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <nav class="pagination" aria-label="Pagination">
+    {% if page > 1 %}
+      <a href="{{ url_for('resources.library', page=page-1, search=search, category_id=category_id, subject_id=subject_id, sort=sort, direction=direction) }}">Previous</a>
+    {% endif %}
+    <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+      <a href="{{ url_for('resources.library', page=page+1, search=search, category_id=category_id, subject_id=subject_id, sort=sort, direction=direction) }}">Next</a>
+    {% endif %}
+  </nav>
+{% else %}
+  <div class="empty-state">
+    <p>No resources match your filters.</p>
+  </div>
+{% endif %}
+{% endblock %}

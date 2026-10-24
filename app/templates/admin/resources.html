@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Resource Moderation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Resource Moderation</h1>
+  <a href="{{ url_for('admin.index') }}" class="btn btn-ghost">Back to administration</a>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Title</th><th>Category</th><th>Uploaded by</th><th>Visibility</th><th>Added</th></tr>
+  </thead>
+  <tbody>
+    {% for r in resources %}
+      <tr>
+        <td><a href="{{ url_for('resources.details', resource_id=r.ResourceId) }}">{{ r.Title }}</a></td>
+        <td>{{ r.CategoryName or '—' }}</td>
+        <td>{{ r.UploadedByName or '—' }}</td>
+        <td>{{ r.Visibility | capitalize }}</td>
+        <td>{{ r.CreatedAt }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<nav class="pagination" aria-label="Pagination">
+  {% if page > 1 %}
+    <a href="{{ url_for('admin.resources', page=page-1) }}">Previous</a>
+  {% endif %}
+  <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+  {% if page < total_pages %}
+    <a href="{{ url_for('admin.resources', page=page+1) }}">Next</a>
+  {% endif %}
+</nav>
+{% endblock %}

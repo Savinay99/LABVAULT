@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Administration{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Administration</h1>
+</div>
+
+<div class="admin-overview">
+  <div class="stat-card">
+    <span class="stat-label">Total users</span><span class="stat-value">{{ total_users }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total resources</span><span class="stat-value">{{ total_resources }}</span>
+  </div>
+</div>
+
+<section class="card">
+  <h2>Recent activity</h2>
+  {% if activity %}
+    <table>
+      <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>ID</th></tr></thead>
+      <tbody>
+        {% for a in activity %}
+          <tr><td>{{ a.CreatedAt }}</td><td>{{ a.ActorName or 'System' }}</td><td>{{ a.Action }}</td><td>{{ a.EntityType }}</td><td>{{ a.EntityId }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">No recent activity.</p>
+  {% endif %}
+</section>
+
+<div class="admin-links">
+  <a href="{{ url_for('admin.users') }}" class="btn btn-primary">User management</a>
+  <a href="{{ url_for('admin.resources') }}" class="btn btn-primary">Resource moderation</a>
+  <a href="{{ url_for('admin.audit') }}" class="btn btn-ghost">Audit log</a>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LabVault{% endblock %} — Academic Laboratory Resource Portal</title>
+  <meta name="description" content="Secure academic laboratory resource and document management portal.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">LabVault</span>
+    </div>
+    <nav aria-label="Main navigation">
+      <ul>
+        {% if session.user_id %}
+          <li><a href="{{ url_for('dashboard.dashboard_view') }}" class="{% if request.endpoint == 'dashboard.dashboard_view' %}active{% endif %}">Dashboard</a></li>
+          <li><a href="{{ url_for('resources.library') }}" class="{% if request.endpoint == 'resources.library' %}active{% endif %}">Resource Library</a></li>
+          <li><a href="{{ url_for('resources.upload') }}" class="{% if request.endpoint == 'resources.upload' %}active{% endif %}">Upload Resource</a></li>
+          <li><a href="{{ url_for('profile.view') }}" class="{% if request.endpoint == 'profile.view' %}active{% endif %}">Profile</a></li>
+          {% if session.role == 'administrator' %}
+            <li><a href="{{ url_for('admin.index') }}" class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">Administration</a></li>
+          {% endif %}
+          <li><a href="{{ url_for('auth.logout') }}">Sign out</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.login') }}">Sign in</a></li>
+          <li><a href="{{ url_for('auth.register') }}">Create an account</a></li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      LabVault &middot; Academic resource portal
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="{{ url_for('dashboard.index') }}" class="brand">LabVault</a>
+
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+
+        <nav class="top-nav" aria-label="Primary navigation">
+          {% if session.user_id %}
+            <a href="{{ url_for('resources.library') }}">Library</a>
+            {% if session.role == 'administrator' %}
+              <a href="{{ url_for('admin.index') }}">Administration</a>
+            {% endif %}
+            <a href="{{ url_for('resources.upload') }}">Upload</a>
+            <a href="{{ url_for('profile.view') }}">Profile</a>
+            <a href="{{ url_for('auth.logout') }}">Sign out</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">Sign in</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="page">
+      <div class="page-inner">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flash-messages" aria-live="polite">
+              {% for category, message in messages %}
+                <li class="flash flash-{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <span>&copy; 2026 LabVault. Academic laboratory resource portal.</span>
+        <span class="footer-note">No AI features. Secure by design.</span>
+      </div>
+    </footer>
+  </div>
+
+  {% block extra_js %}{% endblock %}
+  <script>
+    (function () {
+      var toggle = document.getElementById('sidebar-toggle');
+      var sidebar = document.getElementById('sidebar');
+      var overlay = document.getElementById('mobile-overlay');
+      if (!toggle || !sidebar || !overlay) return;
+      function openMenu() {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+      function closeMenu() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+      toggle.addEventListener('click', function () {
+        if (sidebar.classList.contains('open')) closeMenu(); else openMenu();
+      });
+      overlay.addEventListener('click', closeMenu);
+      window.addEventListener('resize', function () {
+        if (window.innerWidth >= 900) closeMenu();
+      });
+    })();
+  </script>
+</body>
+</html>

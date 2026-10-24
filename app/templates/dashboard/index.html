@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>Dashboard</h1>
+  <p>Welcome back, {{ session.full_name }} ({{ session.role }}).</p>
+</div>
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <span class="stat-label">Total resources</span>
+    <span class="stat-value">{{ total_resources }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Your role</span>
+    <span class="stat-value">{{ session.role | capitalize }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Categories</span>
+    <span class="stat-value">{{ category_counts | length }}</span>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="card">
+    <h2>Recently added resources</h2>
+    {% if activity %}
+      <table>
+        <thead><tr><th>Resource</th><th>Category</th><th>Uploaded by</th><th>Added</th></tr></thead>
+        <tbody>
+          {% for a in activity %}
+            <tr><td>{{ a.Title }}</td><td>{{ a.CategoryName or '—' }}</td><td>{{ a.UploadedByName or '—' }}</td><td>{{ a.CreatedAt }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">No resources yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Resources by category</h2>
+    {% if category_counts %}
+      <table>
+        <thead><tr><th>Category</th><th>Resources</th></tr></thead>
+        <tbody>
+          {% for c in category_counts %}
+            <tr><td>{{ c.CategoryName }}</td><td>{{ c.ResourceCount }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">No categories defined.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Quick actions</h2>
+    <div class="quick-actions">
+      <a href="{{ url_for('resources.library') }}" class="btn btn-primary">Browse library</a>
+      {% if session.role != 'administrator' %}
+        <a href="{{ url_for('resources.upload') }}" class="btn btn-primary">Upload resource</a>
+      {% endif %}
+      {% if session.role == 'administrator' %}
+        <a href="{{ url_for('admin.index') }}" class="btn btn-primary">Administration</a>
+      {% endif %}
+      <a href="{{ url_for('profile.view') }}" class="btn btn-ghost">Profile</a>
+    </div>
+  </section>
+</div>
+{% endblock %}
