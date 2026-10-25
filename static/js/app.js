@@ -48,7 +48,8 @@
     });
   })();
 
-  // ---------- GSAP entrance animations (reduced-motion aware) ----------
+  // ---------- GSAP reduced-motion handling -----------
+  // Page-specific hero entrance and scroll reveals live in gsap-init.js.
   (function initGSAP() {
     if (typeof gsap === "undefined") return;
 
@@ -59,18 +60,10 @@
         el.style.opacity = "1";
         el.style.transform = "none";
       });
-      return;
+      document.querySelectorAll(".hero-graphic svg").forEach(function (svg) {
+        svg.style.opacity = "1";
+        svg.style.transform = "none";
+      });
     }
-
-    gsap.registerPlugin ? gsap.registerPlugin() : null;
-
-    gsap.from("[data-animate='fade-up']", {
-      duration: 0.5,
-      y: 12,
-      opacity: 0,
-      ease: "power2.out",
-      stagger: 0.06,
-      delay: 0.1,
-    });
   })();
 })();

@@ -38,3 +38,8 @@ htmlcov/
 
 # Windows
 desktop.ini
+
+db.sqlite3
+db_test.sqlite3
+.env
+storage/
