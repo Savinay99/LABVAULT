@@ -1,52 +1,102 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Edit {{ resource.title }}{% endblock %}
-{% block title_text %}Edit Resource{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Edit Resource</h1>
+  <div class="page-header-content">
+    <h1 class="page-title">Edit Resource Metadata</h1>
+    <p class="page-description">Update title, description, classification, or visibility settings for this document.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'resources:details' resource.pk %}" class="btn btn-ghost">&larr; Back to Details</a>
+  </div>
 </div>
 
-{% if messages %}
-  <ul class="flash-messages" aria-live="polite">
-    {% for message in messages %}
-      <li class="flash flash-{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
+<div style="max-width: 760px; margin: 0 auto;">
+  <div class="card" data-animate="fade-up">
+    <form method="post" novalidate aria-label="Edit resource form">
+      {% csrf_token %}
 
-<form method="post" class="upload-form" novalidate>
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <div class="field">
-    <label for="id_title">Title <span class="required">*</span></label>
-    {{ form.title }}
-    {{ form.title.errors }}
+      {% if form.non_field_errors %}
+        <div class="flash flash-error" style="margin-bottom: var(--space-4);" role="alert">
+          {% for error in form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="id_title" class="form-label">
+          <span>Document Title</span>
+          <span class="required-indicator" aria-hidden="true">*</span>
+        </label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <div class="form-error">
+            {% for e in form.title.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_description" class="form-label">
+          <span>Description &amp; Objectives</span>
+        </label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="form-error">
+            {% for e in form.description.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+        <div class="form-group">
+          <label for="id_category" class="form-label">
+            <span>Category</span>
+            <span class="required-indicator" aria-hidden="true">*</span>
+          </label>
+          {{ form.category }}
+          {% if form.category.errors %}
+            <div class="form-error">
+              {% for e in form.category.errors %}<span>{{ e }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_visibility" class="form-label">
+            <span>Visibility Level</span>
+          </label>
+          {{ form.visibility }}
+          {% if form.visibility.errors %}
+            <div class="form-error">
+              {% for e in form.visibility.errors %}<span>{{ e }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_subjects" class="form-label">
+          <span>Associated Academic Subjects</span>
+        </label>
+        {{ form.subjects }}
+        <div class="form-hint">{{ form.subjects.help_text }}</div>
+        {% if form.subjects.errors %}
+          <div class="form-error">
+            {% for e in form.subjects.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div style="display: flex; gap: var(--space-3); margin-top: var(--space-6); align-items: center;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          Save Changes
+        </button>
+        <a href="{% url 'resources:details' resource.pk %}" class="btn btn-ghost btn-lg">Cancel</a>
+      </div>
+    </form>
   </div>
-  <div class="field">
-    <label for="id_description">Description</label>
-    {{ form.description }}
-    {{ form.description.errors }}
-  </div>
-  <div class="field">
-    <label for="id_category">Category <span class="required">*</span></label>
-    {{ form.category }}
-    {{ form.category.errors }}
-  </div>
-  <div class="field">
-    <label for="id_visibility">Visibility</label>
-    {{ form.visibility }}
-    {{ form.visibility.errors }}
-  </div>
-  <div class="field">
-    <label for="id_subjects">Subjects</label>
-    {{ form.subjects }}
-    {{ form.subjects.errors }}
-  </div>
-  <div class="field actions">
-    <button type="submit" class="btn btn-primary">Save changes</button>
-    <a href="{% url 'resources:details' resource.pk %}" class="btn btn-ghost">Cancel</a>
-  </div>
-</form>
+</div>
 {% endblock %}

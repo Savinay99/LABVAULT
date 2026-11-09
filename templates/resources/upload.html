@@ -1,59 +1,125 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Upload{% endblock %}
-{% block title_text %}Upload Resource{% endblock %}
+{% block title %}Upload Resource{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Upload Resource</h1>
+  <div class="page-header-content">
+    <h1 class="page-title">Upload Resource</h1>
+    <p class="page-description">Add a verified document, lab manual, or practical dataset to the academic repository.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'resources:library' %}" class="btn btn-ghost">&larr; Return to Library</a>
+  </div>
 </div>
 
-{% if messages %}
-  <ul class="flash-messages" aria-live="polite">
-    {% for message in messages %}
-      <li class="flash flash-{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
+<div style="max-width: 760px; margin: 0 auto;">
+  <div class="card" data-animate="fade-up">
+    <form method="post" enctype="multipart/form-data" id="upload-form" novalidate aria-label="Resource upload form">
+      {% csrf_token %}
 
-<form method="post" enctype="multipart/form-data" class="upload-form" novalidate>
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <div class="field">
-    <label for="id_title">Title <span class="required">*</span></label>
-    {{ form.title }}
-    {{ form.title.errors }}
+      {% if form.non_field_errors %}
+        <div class="flash flash-error" style="margin-bottom: var(--space-4);" role="alert">
+          {% for error in form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="id_title" class="form-label">
+          <span>Document Title</span>
+          <span class="required-indicator" aria-hidden="true">*</span>
+        </label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <div class="form-error">
+            {% for e in form.title.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_description" class="form-label">
+          <span>Description &amp; Experiment Objectives</span>
+        </label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="form-error">
+            {% for e in form.description.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="id_category" class="form-label">
+            <span>Category</span>
+            <span class="required-indicator" aria-hidden="true">*</span>
+          </label>
+          {{ form.category }}
+          {% if form.category.errors %}
+            <div class="form-error">
+              {% for e in form.category.errors %}<span>{{ e }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_visibility" class="form-label">
+            <span>Visibility Level</span>
+          </label>
+          {{ form.visibility }}
+          {% if form.visibility.errors %}
+            <div class="form-error">
+              {% for e in form.visibility.errors %}<span>{{ e }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_subjects" class="form-label">
+          <span>Associated Academic Subjects</span>
+        </label>
+        {{ form.subjects }}
+        <div class="form-hint">{{ form.subjects.help_text }}</div>
+        {% if form.subjects.errors %}
+          <div class="form-error">
+            {% for e in form.subjects.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- File Dropzone -->
+      <div class="form-group" style="margin-top: var(--space-2);">
+        <label class="form-label">
+          <span>Laboratory File</span>
+          <span class="required-indicator" aria-hidden="true">*</span>
+        </label>
+        <div class="file-dropzone" id="file-dropzone" tabindex="0" role="button" aria-label="Upload laboratory file dropzone">
+          <svg class="file-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <div class="file-dropzone-title" id="dropzone-file-name">Choose a file or drag and drop here</div>
+          <div class="file-dropzone-desc">Accepted: PDF, DOCX, XLSX, PPTX, TXT, CSV, ZIP, JPG, PNG &bull; Max 10 MB</div>
+          <input type="file" name="file" id="id_file" class="file-dropzone-input" required>
+        </div>
+        {% if form.file.errors %}
+          <div class="form-error" style="margin-top: var(--space-1);">
+            {% for e in form.file.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div style="display: flex; gap: var(--space-3); margin-top: var(--space-6); align-items: center;">
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+          Upload &amp; Verify Document
+        </button>
+        <a href="{% url 'resources:library' %}" class="btn btn-ghost btn-lg">Cancel</a>
+      </div>
+    </form>
   </div>
-  <div class="field">
-    <label for="id_description">Description</label>
-    {{ form.description }}
-    {{ form.description.errors }}
-  </div>
-  <div class="field">
-    <label for="id_category">Category <span class="required">*</span></label>
-    {{ form.category }}
-    {{ form.category.errors }}
-  </div>
-  <div class="field">
-    <label for="id_visibility">Visibility</label>
-    {{ form.visibility }}
-    {{ form.visibility.errors }}
-  </div>
-  <div class="field">
-    <label for="id_subjects">Subjects</label>
-    {{ form.subjects }}
-    {{ form.subjects.errors }}
-    <p class="field-hint">{{ form.subjects.help_text }}</p>
-  </div>
-  <div class="field">
-    <label for="id_file">File <span class="required">*</span></label>
-    {{ form.file }}
-    {{ form.file.errors }}
-    <p class="field-hint">Max 10 MB. Allowed: PDF, DOCX, XLSX, PPTX, TXT, CSV, ZIP, images, and source files.</p>
-  </div>
-  <div class="field actions">
-    <button type="submit" class="btn btn-primary">Upload resource</button>
-    <a href="{% url 'resources:library' %}" class="btn btn-ghost">Cancel</a>
-  </div>
-</form>
+</div>
 {% endblock %}

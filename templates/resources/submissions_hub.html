@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Laboratory Submissions &amp; Evaluation Hub - LabVault{% endblock %}
+
+{% block content %}
+<div style="max-width: var(--max-width); margin: 0 auto; padding: var(--space-4) 0 var(--space-12);">
+
+  <!-- Header -->
+  <div style="margin-bottom: var(--space-8);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px;">
+          <span>Academic Records</span> &bull; <span>Experiment Reports</span>
+        </div>
+        <h1 style="font-size: clamp(1.8rem, 3.2vw, 2.4rem); font-weight: 700; color: var(--text); margin: 0 0 6px;">
+          {% if is_faculty %}Laboratory Evaluation &amp; Grading Hub{% else %}My Laboratory Report Submissions{% endif %}
+        </h1>
+        <p style="font-size: var(--text-sm); color: var(--text-muted); max-width: 680px; margin: 0;">
+          {% if is_faculty %}
+            Review student practical experiment submissions, verify code and report outputs, and assign certified grades.
+          {% else %}
+            Track the status of your uploaded laboratory observation reports, review instructor feedback, and monitor your grades.
+          {% endif %}
+        </p>
+      </div>
+
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <a href="{% url 'resources:library' %}" class="btn btn-pill btn-pill-outline btn-sm">
+          Browse Lab Manuals
+        </a>
+        {% if is_faculty %}
+          <a href="{% url 'resources:export_audit_log' %}" class="btn btn-pill btn-pill-outline btn-sm">
+            Export Audit CSV
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filter Pills -->
+  <div style="display: flex; gap: 8px; margin-bottom: var(--space-6); flex-wrap: wrap;">
+    <a href="{% url 'resources:submissions_hub' %}" class="btn btn-sm btn-pill {% if not status_filter %}btn-pill-dark{% else %}btn-pill-outline{% endif %}">
+      All Submissions
+    </a>
+    <a href="{% url 'resources:submissions_hub' %}?status=submitted" class="btn btn-sm btn-pill {% if status_filter == 'submitted' %}btn-pill-dark{% else %}btn-pill-outline{% endif %}">
+      Pending Review {% if is_faculty and pending_count %}({{ pending_count }}){% endif %}
+    </a>
+    <a href="{% url 'resources:submissions_hub' %}?status=reviewed" class="btn btn-sm btn-pill {% if status_filter == 'reviewed' %}btn-pill-dark{% else %}btn-pill-outline{% endif %}">
+      Evaluated &amp; Graded
+    </a>
+    <a href="{% url 'resources:submissions_hub' %}?status=resubmission" class="btn btn-sm btn-pill {% if status_filter == 'resubmission' %}btn-pill-dark{% else %}btn-pill-outline{% endif %}">
+      Resubmission Required
+    </a>
+  </div>
+
+  <!-- Submissions Table Card -->
+  <div class="card" style="border-radius: var(--radius-lg); overflow: hidden; padding: 0;">
+    <div class="table-container">
+      <table class="table" style="margin: 0;">
+        <thead>
+          <tr>
+            <th>Experiment / Resource</th>
+            {% if is_faculty %}<th>Student Contributor</th>{% endif %}
+            <th>Submitted File</th>
+            <th>File SHA-256</th>
+            <th>Status</th>
+            <th>Grade / Score</th>
+            <th>Submitted At</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in submissions %}
+            <tr>
+              <td>
+                <a href="{% url 'resources:details' sub.resource.pk %}" style="font-weight: 600; color: var(--text); text-decoration: none;">
+                  {{ sub.resource.title }}
+                </a>
+                {% if sub.student_notes %}
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                    Note: {{ sub.student_notes|truncatechars:45 }}
+                  </div>
+                {% endif %}
+              </td>
+              {% if is_faculty %}
+                <td>
+                  <strong>{{ sub.student.get_full_name|default:sub.student.username }}</strong>
+                  <div style="font-size: 11px; color: var(--text-subtle);">{{ sub.student.email }}</div>
+                </td>
+              {% endif %}
+              <td>
+                <code style="font-size: 11px; background: #F3F4F6; padding: 2px 6px; border-radius: 4px;">
+                  {{ sub.original_filename|truncatechars:22 }}
+                </code>
+                <div style="font-size: 10px; color: var(--text-muted);">{{ sub.file_size_formatted }}</div>
+              </td>
+              <td>
+                <code style="font-size: 10px; background: #F9FAFB; padding: 2px 5px; border-radius: 3px;" title="{{ sub.sha256_checksum }}">
+                  {{ sub.sha256_checksum|slice:":10" }}...
+                </code>
+              </td>
+              <td>
+                {% if sub.status == 'submitted' %}
+                  <span class="badge badge-warning">Pending Review</span>
+                {% elif sub.status == 'reviewed' %}
+                  <span class="badge badge-success">Evaluated</span>
+                {% else %}
+                  <span class="badge badge-error">Resubmission</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if sub.grade is not None %}
+                  <strong style="color: var(--brand-purple); font-size: 1.05rem;">{{ sub.grade }}</strong>
+                  <span style="font-size: 11px; color: var(--text-muted);">/ 100</span>
+                {% else %}
+                  <span style="color: var(--text-subtle); font-size: 11px;">Unmarked</span>
+                {% endif %}
+                {% if sub.faculty_feedback %}
+                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;" title="{{ sub.faculty_feedback }}">
+                    &ldquo;{{ sub.faculty_feedback|truncatechars:30 }}&rdquo;
+                  </div>
+                {% endif %}
+              </td>
+              <td style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">
+                {{ sub.submitted_at|date:"M d, H:i" }}
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
+                <a href="{% url 'resources:download_submission' sub.pk %}" class="btn btn-sm btn-pill btn-pill-outline" title="Download submitted report file">
+                  Download
+                </a>
+                {% if is_faculty %}
+                  <button type="button" class="btn btn-sm btn-pill btn-pill-dark" onclick="openGradeModal('{{ sub.pk }}', '{{ sub.student.email }}', '{{ sub.grade|default:'' }}', '{{ sub.faculty_feedback|escapejs }}', '{{ sub.status }}')">
+                    Evaluate
+                  </button>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{% if is_faculty %}8{% else %}7{% endif %}" style="text-align: center; padding: var(--space-8); color: var(--text-muted);">
+                <p style="margin: 0 0 6px;">No laboratory submissions found in this category.</p>
+                <a href="{% url 'resources:library' %}" class="btn btn-pill btn-pill-outline btn-sm">Explore Resource Library</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Faculty Grading Modal (vanilla JS) -->
+{% if is_faculty %}
+<div id="grade-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+  <div class="card" style="width: 100%; max-width: 480px; padding: var(--space-6); border-radius: var(--radius-xl); box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text);">Evaluate Laboratory Report</h3>
+      <button type="button" onclick="closeGradeModal()" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: var(--text-muted);">&times;</button>
+    </div>
+
+    <form id="grade-form" method="post" action="">
+      {% csrf_token %}
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;" id="modal-student-name">
+        Student: <strong></strong>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Score / Marks (0 to 100):</label>
+        <input type="number" step="0.5" min="0" max="100" name="grade" id="modal-grade-input" required class="form-control" placeholder="e.g. 85.0">
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Review Status:</label>
+        <select name="status" id="modal-status-select" class="form-control">
+          <option value="reviewed">Reviewed &amp; Verified</option>
+          <option value="resubmission">Resubmission Required</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Instructor Feedback Remarks:</label>
+        <textarea name="faculty_feedback" id="modal-feedback-input" class="form-control" rows="3" placeholder="Provide constructive technical notes on calculations, graph results, or code execution..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeGradeModal()">Cancel</button>
+        <button type="submit" class="btn btn-pill btn-pill-dark btn-sm">Save &amp; Notify Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openGradeModal(submissionId, studentEmail, currentGrade, currentFeedback, currentStatus) {
+    var modal = document.getElementById('grade-modal-backdrop');
+    var form = document.getElementById('grade-form');
+    form.action = '/resources/submissions/' + submissionId + '/grade/';
+    document.getElementById('modal-student-name').innerHTML = 'Student: <strong>' + studentEmail + '</strong>';
+    document.getElementById('modal-grade-input').value = currentGrade;
+    document.getElementById('modal-feedback-input').value = currentFeedback;
+    document.getElementById('modal-status-select').value = currentStatus || 'reviewed';
+    modal.style.display = 'flex';
+  }
+
+  function closeGradeModal() {
+    var modal = document.getElementById('grade-modal-backdrop');
+    modal.style.display = 'none';
+  }
+</script>
+{% endif %}
+{% endblock %}

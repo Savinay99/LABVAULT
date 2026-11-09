@@ -25,6 +25,8 @@ class CustomAuthenticationForm(AuthenticationForm):
         email = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
         if email and password:
+            email = email.strip().lower()
+            self.cleaned_data["username"] = email
             self.user_cache = authenticate(
                 self.request, username=email, password=password
             )
@@ -40,6 +42,9 @@ class CustomAuthenticationForm(AuthenticationForm):
 
 class CustomUserCreationForm(forms.ModelForm):
     """Registration form."""
+
+    first_name = forms.CharField(max_length=150, required=True)
+    last_name = forms.CharField(max_length=150, required=True)
 
     password1 = forms.CharField(
         label="Password",
@@ -67,8 +72,15 @@ class CustomUserCreationForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
-        if email and User.objects.filter(email=email).exists():
-            raise ValidationError("An account with this email already exists.")
+        if not email:
+            return email
+
+        email = email.strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(
+                "Unable to create an account with these details. "
+                "If you already have an account, sign in."
+            )
         return email
 
     def save(self, commit=True):

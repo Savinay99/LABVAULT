@@ -3,15 +3,35 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
-.env
+
+# Virtualenv
 .venv/
 venv/
-.venv
-.env.*
+**/node_modules/
+**/.next/
+*.tsbuildinfo
 
-# Flask
-instance/
-.webassets-cache
+# Environment secrets — NEVER commit
+.env
+.env.*
+**/.env.local
+
+# Django local databases
+db.sqlite3
+db_test.sqlite3
+
+# Logs
+*.log
+
+# Local file storage
+storage/
+media/
+
+# Test & coverage artefacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
 
 # IDE
 .vscode/
@@ -23,23 +43,17 @@ instance/
 # OS
 .DS_Store
 Thumbs.db
-
-# LabVault
-storage/
-*.log
-*.sqlite
-instance/
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-
-# Windows
 desktop.ini
 
-db.sqlite3
-db_test.sqlite3
-.env
-storage/
+# Flask / legacy artefacts (leftover folders – kept for reference, not committed)
+instance/
+.webassets-cache
+# One-off local authoring scripts; not application source
+scratch/
+
+# Pre-rebuild snapshots
+_backup_before_rebuild/
+_backup_before_redesign/
+
+# Large, platform-specific Framer preview application. Keep locally, out of Git.
+Framer/

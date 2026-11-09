@@ -1,18 +1,15 @@
-"""LabVault application entry point.
+"""Compatibility entry point for the Django application.
 
-Creates the Flask application using the application factory and runs the
-development server. Intended for local development only.
+Prefer ``manage.py`` for Django management commands. With no arguments this
+starts the local development server, matching the historical ``run.py`` UX.
 """
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env if present (development only).
-load_dotenv()
-
-from app import create_app
-
-app = create_app()
+import sys
 
 if __name__ == "__main__":
-    # Never enable debug mode in production. Controlled via FLASK_ENV.
-    app.run(host="127.0.0.1", port=5000, debug=os.environ.get("FLASK_ENV") == "development")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "labvault_project.settings")
+    from django.core.management import execute_from_command_line
+
+    if len(sys.argv) == 1:
+        sys.argv.extend(["runserver", "127.0.0.1:8000"])
+    execute_from_command_line(sys.argv)

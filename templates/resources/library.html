@@ -1,81 +1,161 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Library{% endblock %}
-{% block title_text %}Resource Library{% endblock %}
+{% block title %}Resource Library{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Resource Library</h1>
-  <a href="{% url 'resources:upload' %}" class="btn btn-primary">Upload resource</a>
+  <div class="page-header-content">
+    <h1 class="page-title">Resource Library</h1>
+    <p class="page-description">
+      {% if total %}{{ total }} verified laboratory document{{ total|pluralize }} indexed{% else %}No resources available in repository{% endif %}
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'resources:upload' %}" class="btn btn-primary">+ Upload Resource</a>
+  </div>
 </div>
 
-<form method="get" class="filter-bar" aria-label="Search and filter resources">
+<!-- Search & Filtering Toolbar -->
+<form method="get" class="filter-toolbar" aria-label="Search and filter resources" id="filter-form">
   <div class="filter-group">
-    <label for="id_search">Search</label>
-    <input type="search" id="id_search" name="search" value="{{ search }}" placeholder="Title or description">
+    <div class="filter-input">
+      <input type="search" id="id_search" name="search" class="form-input" value="{{ search }}" placeholder="Search by title, subject or notes…">
+    </div>
+
+    <div>
+      <select id="id_category_id" name="category_id" class="form-select">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+          <option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_subject_id" name="subject_id" class="form-select">
+        <option value="">All Subjects</option>
+        {% for s in subjects %}
+          <option value="{{ s.pk }}" {% if subject_id == s.pk %}selected{% endif %}>{{ s.subject_code }}  -  {{ s.subject_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div style="display: flex; gap: var(--space-2);">
+      <select id="id_sort" name="sort" class="form-select">
+        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Date Added</option>
+        <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+        <option value="file_size" {% if sort == 'file_size' %}selected{% endif %}>File Size</option>
+      </select>
+      <select id="id_direction" name="direction" class="form-select">
+        <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>&darr; Newest</option>
+        <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>&uarr; Oldest</option>
+      </select>
+    </div>
   </div>
-  <div class="filter-group">
-    <label for="id_category_id">Category</label>
-    <select id="id_category_id" name="category_id">
-      <option value="">All</option>
-      {% for c in categories %}
-        <option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
-      {% endfor %}
-    </select>
+
+  <div style="display: flex; gap: var(--space-2);">
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a href="{% url 'resources:library' %}" class="btn btn-ghost">Reset</a>
   </div>
-  <div class="filter-group">
-    <label for="id_subject_id">Subject</label>
-    <select id="id_subject_id" name="subject_id">
-      <option value="">All</option>
-      {% for s in subjects %}
-        <option value="{{ s.pk }}" {% if subject_id == s.pk %}selected{% endif %}>{{ s.subject_code }} — {{ s.subject_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="filter-group sort-group">
-    <label for="id_sort">Sort by</label>
-    <select id="id_sort" name="sort">
-      <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Date added</option>
-      <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
-    </select>
-    <select id="id_direction" name="direction">
-      <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>Newest first</option>
-      <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>Oldest first</option>
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">Apply</button>
 </form>
 
 {% if resources %}
-  <div class="results-summary">{{ total }} resource{{ total|pluralize }} found.</div>
+  <div style="margin-bottom: var(--space-4); font-size: var(--text-xs); color: var(--text-muted);">
+    Showing {{ resources|length }} of {{ total }} result{{ total|pluralize }}
+    {% if search %} for &ldquo;<strong>{{ search }}</strong>&rdquo;{% endif %}
+    {% if page > 1 %} &bull; Page {{ page }} of {{ total_pages }}{% endif %}
+  </div>
+
   <div class="resource-grid">
     {% for r in resources %}
-      <a href="{% url 'resources:details' r.pk %}" class="resource-card">
-        <h3>{{ r.title }}</h3>
-        <p class="meta">{{ r.category.name|default:'Uncategorized' }} &middot; {{ r.uploaded_by.get_full_name|default:r.uploaded_by.email }}</p>
-        {% if r.subjects.all %}
-          <p class="subjects">
-            {% for s in r.subjects.all %}<span class="subject-tag">{{ s.subject_code }}</span>{% endfor %}
-          </p>
-        {% endif %}
-        <p class="desc">{{ r.description|truncatechars:160 }}</p>
-        <span class="file-info">{{ r.original_filename }} &middot; {{ r.file_size_formatted }}</span>
-      </a>
+      <div class="resource-card" data-animate="fade-up">
+        <div>
+          <div class="resource-card-header">
+            <h3 class="resource-card-title">
+              <a href="{% url 'resources:details' r.pk %}">{{ r.title }}</a>
+            </h3>
+            {% if r.visibility == 'public' %}
+              <span class="badge badge-success">Public</span>
+            {% else %}
+              <span class="badge">Private</span>
+            {% endif %}
+          </div>
+
+          <div class="resource-card-meta">
+            <span class="badge badge-primary">{{ r.category.name|default:'Uncategorized' }}</span>
+            <span>By {{ r.uploaded_by.get_full_name|default:r.uploaded_by.email }}</span>
+          </div>
+
+          {% if r.description %}
+            <p class="resource-card-desc">{{ r.description }}</p>
+          {% endif %}
+
+          {% if r.subjects.all %}
+            <div style="display: flex; gap: var(--space-1); flex-wrap: wrap; margin-bottom: var(--space-3);">
+              {% for s in r.subjects.all %}
+                <span class="badge" style="font-size: 11px;">{{ s.subject_code }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div style="display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-subtle); margin-bottom: var(--space-4);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span style="font-family: var(--font-mono);">{{ r.original_filename|truncatechars:26 }}</span>
+            <span>&bull;</span>
+            <span>{{ r.file_size_formatted }}</span>
+          </div>
+        </div>
+
+        <div class="resource-card-actions">
+          <a href="{% url 'resources:details' r.pk %}" class="btn btn-secondary btn-sm" style="flex: 1;">
+            View Details
+          </a>
+          <a href="{% url 'resources:download' r.pk %}" class="btn btn-outline btn-sm" aria-label="Download {{ r.title }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download</span>
+          </a>
+        </div>
+      </div>
     {% endfor %}
   </div>
 
-  <nav class="pagination" aria-label="Pagination">
-    {% if page > 1 %}
-      <a href="{% url 'resources:library' %}?page={{ page|add:-1 }}{% if search %}&search={{ search }}{% endif %}{% if category_id %}&category_id={{ category_id }}{% endif %}{% if subject_id %}&subject_id={{ subject_id }}{% endif %}&sort={{ sort }}&direction={{ direction }}">Previous</a>
-    {% endif %}
-    <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
-    {% if page < total_pages %}
-      <a href="{% url 'resources:library' %}?page={{ page|add:1 }}{% if search %}&search={{ search }}{% endif %}{% if category_id %}&category_id={{ category_id }}{% endif %}{% if subject_id %}&subject_id={{ subject_id }}{% endif %}&sort={{ sort }}&direction={{ direction }}">Next</a>
-    {% endif %}
-  </nav>
+  {% if total_pages > 1 %}
+    <nav class="pagination" aria-label="Resource catalog pagination">
+      {% if page > 1 %}
+        <a href="?page={{ page|add:-1 }}{% if search %}&search={{ search }}{% endif %}{% if category_id %}&category_id={{ category_id }}{% endif %}{% if subject_id %}&subject_id={{ subject_id }}{% endif %}&sort={{ sort }}&direction={{ direction }}" class="pagination-item" aria-label="Previous page">
+          &larr; Prev
+        </a>
+      {% else %}
+        <span class="pagination-item disabled">&larr; Prev</span>
+      {% endif %}
+
+      <span class="pagination-item active">
+        Page {{ page }} of {{ total_pages }}
+      </span>
+
+      {% if page < total_pages %}
+        <a href="?page={{ page|add:1 }}{% if search %}&search={{ search }}{% endif %}{% if category_id %}&category_id={{ category_id }}{% endif %}{% if subject_id %}&subject_id={{ subject_id }}{% endif %}&sort={{ sort }}&direction={{ direction }}" class="pagination-item" aria-label="Next page">
+          Next &rarr;
+        </a>
+      {% else %}
+        <span class="pagination-item disabled">Next &rarr;</span>
+      {% endif %}
+    </nav>
+  {% endif %}
+
 {% else %}
   <div class="empty-state">
-    <p>No resources match your filters.</p>
+    <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <h3 class="empty-state-title">No resources match your filters</h3>
+    <p class="empty-state-desc">Try clearing the search query or adjusting your category/subject selection to see more resources.</p>
+    <div style="display: flex; gap: var(--space-2); justify-content: center;">
+      <a href="{% url 'resources:library' %}" class="btn btn-secondary">Clear Filters</a>
+      <a href="{% url 'resources:upload' %}" class="btn btn-primary">Upload New Document</a>
+    </div>
   </div>
 {% endif %}
 {% endblock %}

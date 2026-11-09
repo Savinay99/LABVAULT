@@ -1,196 +1,119 @@
 # LabVault
 
-LabVault is a secure academic laboratory resource and document management portal. It helps students organize, upload, manage, search, and access academic laboratory resources — lab manuals, experiment documents, practical notes, source code files, project documents, and academic reference materials.
+LabVault is a Django web application for academic laboratory resources and equipment. It provides student and administrator accounts, a searchable resource library with protected file uploads, laboratory equipment inventory, instrument bookings and maintenance records, and student report submissions with review workflows.
 
-## Technology Stack
+## Current architecture
 
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript (no frameworks)
-- **Backend:** Python Flask (modular monolith)
-- **Database:** Microsoft SQL Server / Azure SQL Database via pyodbc
-- **Password hashing:** Werkzeug (pbkdf2:sha256)
-- **CSRF protection:** Flask-WTF
-- **Testing:** pytest, Flask test client
+- **Application:** Django 5.2 modular monolith (`core`, `accounts`, and `resources` apps).
+- **UI:** Django templates with HTML, CSS, and vanilla JavaScript in `templates/` and `static/`.
+- **Database:** Django ORM. SQL Server is supported through `mssql-django` and `pyodbc`; SQLite is available for local demonstrations and is used by the automated test settings.
+- **Files:** Local storage for development or Azure Blob Storage when explicitly configured. Azure connectivity has not been verified from this repository environment.
+- **Authentication:** Django sessions, a custom email-based user model, student/administrator roles, password reset, and Django's built-in `createsuperuser` command.
+- **Entrypoints:** `manage.py`, `run.ps1`, and `run.bat`. The root `run.py` is a Django compatibility entrypoint.
 
-## Project Structure
+`nextjs-frontend/` and `express-backend/` are a separate, currently unintegrated prototype; they are not needed to run the Django application. The old `app/` Flask package is legacy code and is not part of the active web application. The archived `_backup_*` directories and `Framer/` prototype are also not needed at runtime.
 
-```
-LabVault/
-  app/
-    __init__.py          Application factory + error handlers + security headers
-    config.py            Environment-based configuration
-    extensions.py        Flask extensions (CSRF)
-    routes/
-      auth.py            Registration, login, logout
-      dashboard.py       Landing page, dashboard
-      resources.py       Library, upload, details, edit, delete, download
-      profile.py         Profile, password change
-      admin.py           Administration (user management, resource moderation, audit)
-    services/
-      auth_service.py    Registration, login, password change, sessions
-      resource_service.py Resource business logic + authorization
-      storage_service.py Local + Azure Blob storage abstraction
-    repositories/
-      db.py              pyodbc connection management + transactions
-      user_repository.py User CRUD
-      resource_repository.py Resource CRUD, search, pagination, subjects
-      audit_repository.py Audit log
-    security/
-      validation.py      Input validation and output escaping
-      permissions.py     Role-based access control
-    templates/           Jinja2 templates (all pages)
-    static/
-      css/style.css      Application stylesheet
-  database/
-    schema.sql           Normalized (3NF) schema
-    indexes.sql          Query-pattern indexes
-    seed.sql             Optional sample data
-  tests/                 pytest suite (40 tests)
-  docs/                  Architecture, database design, security, testing
-  .env.example           Configuration placeholders
-  .gitignore
-  requirements.txt
-  run.py                 Application entry point
-  README.md
-```
+## Requirements
 
-## Features
+- Python 3.11 or later
+- For SQL Server: Microsoft ODBC Driver 18 for SQL Server and a reachable SQL Server/Azure SQL database
+- For Azure file storage: Azure Blob Storage configuration (optional)
 
-- User registration and login with secure password hashing
-- Server-side validation on all inputs
-- Role-based access control (student, administrator)
-- Resource upload, download, edit, delete with ownership enforcement
-- Search, filtering (category/subject), sorting, pagination
-- File type and size validation; unpredictable storage keys
-- Protected local storage outside the application directory
-- Audit logging for administrative actions
-- Security headers (CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
-- CSRF protection on all state-changing forms
-- Login rate-limiting guidance
-- Responsive, accessible UI
+## Local setup
 
-## Prerequisites
-
-- Python 3.11+
-- Microsoft ODBC Driver 17 for SQL Server (for Azure SQL / SQL Server)
-- A Microsoft SQL Server or Azure SQL Database instance
-
-## Local Development
-
-### 1. Clone / create the project
+From PowerShell in the project root:
 
 ```powershell
-cd E:\tryis
-```
-
-### 2. Create and activate a virtual environment
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
-
-```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-### 4. Configure environment
-
-Copy `.env.example` to `.env` and fill in values. **Never commit `.env`** — it is gitignored.
+The sample `.env` is for local development only and selects SQLite. Before starting, generate and set a unique local secret key:
 
 ```powershell
-copy .env.example .env
-# Edit .env with a text editor and set your database connection details
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-### 5. Initialize the database
-
-Run `database/schema.sql` against your SQL Server / Azure SQL Database, then optionally `database/indexes.sql` and `database/seed.sql`.
+Copy the generated value into `DJANGO_SECRET_KEY` in `.env`. Keep `.env` private; it is ignored by Git. Then apply migrations and start the server:
 
 ```powershell
-sqlcmd -S your-server.database.windows.net -U labvault_admin -P your-password -d LabVault -i database\schema.sql
-sqlcmd -S your-server.database.windows.net -U labvault_admin -P your-password -d LabVault -i database\indexes.sql
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 127.0.0.1:8000
 ```
 
-### 6. Run the application
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The `createsuperuser` command prompts for credentials; no demo account is created or printed by the launchers. Its account receives the LabVault administrator role.
+
+You can use `./run.ps1` or `run.bat` after installing dependencies and configuring `.env`. To reset an administrator password, use `python manage.py changepassword <email>`.
+
+## Configuration
+
+See `.env.example` for the supported variables. Important settings:
+
+| Variable | Purpose |
+|---|---|
+| `DJANGO_SECRET_KEY` | Required outside debug mode; generate a unique value and keep it private. |
+| `DJANGO_DEBUG` | Defaults to `False`; enable only for local development. |
+| `ALLOWED_HOSTS` | Comma-separated hostnames accepted by Django. |
+| `DB_ENGINE` | `sqlite` for a local demo or `mssql` for SQL Server/Azure SQL. |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | SQL Server connection details when using `mssql`. |
+| `DB_DRIVER`, `DB_ENCRYPT`, `DB_TRUSTED_CONNECTION` | ODBC driver and connection security options. Encryption defaults to enabled. |
+| `MEDIA_ROOT` | Local protected file location. Keep it outside a public static directory. |
+| `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_STORAGE_CONTAINER_NAME` | Optional Azure Blob Storage backend settings. |
+| `SESSION_COOKIE_SECURE` | Defaults to enabled when debug is off; requires HTTPS in production. |
+| `LOGIN_MAX_FAILED_ATTEMPTS`, `LOGIN_LOCKOUT_SECONDS` | Failed login threshold and lockout window (defaults: 5 attempts, 900 seconds). |
+
+Production deployments must set `DJANGO_DEBUG=False`, a unique `DJANGO_SECRET_KEY`, correct `ALLOWED_HOSTS`, and HTTPS cookie settings. The application rejects a missing production secret key. Do not put credentials in source files or commit `.env`.
+
+## Azure SQL and DP-900 mapping
+
+The application is prepared to use SQL Server through Django's ORM and the `mssql-django` backend. Configure the ODBC Driver 18 connection variables above to point to Azure SQL Database; the application and migration setup does not prove that a live Azure database is reachable. This repository has not been connected to an Azure subscription or deployed.
+
+The project demonstrates DP-900 concepts through relational tables, primary/foreign keys, unique and check constraints, normalized resource/subject relationships, ORM CRUD operations, indexes for common queries, and the separation of a relational database workload from object/file storage. Azure SQL Database is the intended managed relational service. Azure Blob Storage is optional for file objects; it is not required to demonstrate relational database concepts. Azure resource provisioning, identity integration, and live connectivity should be configured and verified by the project owner separately.
+
+Schema and architecture references: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DATABASE.md](docs/DATABASE.md), [docs/DP900_MAPPING.md](docs/DP900_MAPPING.md), and [docs/SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md). Some requirements in those documents remain planned; the completion report records verified status.
+
+## Main workflows
+
+- Register, sign in, reset a password, and manage a profile.
+- Browse, search, upload, edit, bookmark, download, and delete resources subject to ownership/visibility permissions.
+- Browse laboratory instruments, reserve available time slots, and review maintenance records.
+- Submit laboratory reports and allow the resource owner or administrator to review submissions.
+- Manage users through Django Admin and export available audit/equipment reports.
+
+## Tests and checks
+
+The test settings use an isolated SQLite database (`db_test.sqlite3`), so tests do not connect to SQL Server or Azure SQL:
 
 ```powershell
-$env:FLASK_ENV="development"
-python run.py
+python manage.py check --settings=labvault_project.settings_test
+python manage.py makemigrations --check --dry-run --settings=labvault_project.settings_test
+python -m pytest -q
 ```
 
-Open http://127.0.0.1:5000 in your browser.
-
-### Bootstrap the First Administrator
-
-There are no hardcoded administrator credentials. To create the first administrator:
-
-1. Register a normal account through the UI.
-2. Connect to the database and update the role:
-
-```sql
-UPDATE Users SET Role = 'administrator' WHERE Email = 'your-email@example.edu';
-```
-
-## Verified functionality
-
-The following have been exercised and pass without any external credentials:
-
-- User registration, login, logout, and password change
-- Resource upload, details, edit, delete, download
-- Library search/filter/sort/pagination and subject/category management
-- Admin user management, resource moderation, and audit log
-- Access control (ownership, visibility, admin bypass)
-- CSRF protection on all state-changing forms
-- Security headers (CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, HSTS)
-- File extension, size, and magic-byte signature validation
-- Open-redirect protection on login `next` parameter
-- Login rate limiting / lockout (5 failures → 900s lockout)
-
-Run the suite:
+To run only authentication and route checks:
 
 ```powershell
-python -m pytest tests/
+python -m pytest tests/test_account_setup.py tests/test_auth_flow.py tests/test_routes.py -q
 ```
 
-## External services required for production (not verified in this environment)
+## Project layout
 
-These require real credentials and are NOT exercised by the test suite:
+```text
+accounts/             Custom user model, authentication, account views
+core/                 Landing page and dashboards
+resources/            Resources, equipment, bookings, submissions, storage
+labvault_project/     Django settings, URL configuration, WSGI/ASGI
+templates/            Server-rendered pages and email templates
+static/               CSS and JavaScript
+database/             SQL schema and design reference scripts
+docs/                 Requirements, architecture, security, and academic mapping
+tests/                Django and legacy service tests
+```
 
-| Integration | Configured via | Notes |
-|-------------|---------------|-------|
-| SQL Server / Azure SQL Database | `DB_SERVER`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` (or `DB_TRUSTED_CONNECTION=yes`) | Required for all data persistence. Install Microsoft ODBC Driver 17 for SQL Server. |
-| Azure Blob Storage (optional) | `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_STORAGE_CONTAINER_NAME` | Falls back to local protected storage under `STORAGE_PATH` when unset. Requires `azure-storage-blob` package. |
-| SMTP / email verification | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Documented only — email verification and password reset are not implemented. |
+## Academic submission checklist
 
-Do not create paid cloud resources to test this project. Local development runs entirely on local storage and a configured SQL Server instance.
-
-## Azure SQL schema deployment
-
-Deploy `database/schema.sql` first against an empty target database. It creates the `LabVault` database if missing, then all tables (Users, Categories, Subjects, Resources, ResourceSubjects, AuditLogs) in 3NF with parameterized queries enforced by the repository layer. Then run `database/indexes.sql` for query-pattern indexes, and optionally `database/seed.sql` for sample data. Never drop/truncate an existing database automatically.
-
-## Azure Blob Storage configuration (optional production override)
-
-Set `AZURE_STORAGE_CONNECTION_STRING` and `AZURE_STORAGE_CONTAINER_NAME` (default `labvault`). The container is kept private and downloads are served via short-lived SAS URLs. Install the `azure-storage-blob` package. When unset, `LocalProtectedStorage` is used and files are stored under `STORAGE_PATH` (default `storage/`).
-
-## Security
-
-- Passwords are hashed with Werkzeug (pbkdf2:sha256). Never plaintext.
-- Sessions use HttpOnly, SameSite cookies; Secure in HTTPS deployments.
-- CSRF tokens on all state-changing forms.
-- All SQL queries are parameterized (no concatenation).
-- Files stored outside the application directory; downloads enforce authorization.
-- Content Security Policy restricts scripts/styles to same-origin.
-- No secrets in source code or frontend JavaScript.
-- Login rate limiting: 5 failed attempts → 900-second lockout window (per email, including unknown accounts to prevent enumeration).
-
-## Limitations
-
-- File content scanning is limited to magic-byte signature validation; it is not comprehensive malware scanning.
-- Email verification and password reset are not implemented (SMTP not configured).
-- Login lockout state is in-memory and not shared across processes/workers; for multi-worker production deployment, back it with Redis or a database table.
-
-## License
-
-Internal academic project.
+The repository includes requirements, architecture, database, security, DP-900, test-plan, and traceability documents. Before submission, confirm the institution's required format, add any requested ER/architecture diagrams or screenshots, demonstrate the main student and administrator workflows, and include the current test output. Do not claim a live Azure deployment unless it has been independently connected and verified.

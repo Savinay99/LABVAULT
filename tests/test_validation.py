@@ -52,3 +52,16 @@ def test_description_truncates_none():
 
 def test_escape_html():
     assert escape_html("<script>alert(1)</script>") == "&lt;script&gt;alert(1)&lt;/script&gt;"
+
+
+def test_password_hashers_led_by_argon2():
+    # Argon2 must be the primary password hasher (FR-04, NFR-03).
+    # Check the production settings module directly (tests override with MD5
+    # via settings_test.py for speed, so django.conf.settings is not the
+    # source of truth here).
+    import labvault_project.settings as prod_settings
+
+    hashers = prod_settings.PASSWORD_HASHERS
+    assert hashers[0].endswith("Argon2PasswordHasher"), hashers
+    assert any("PBKDF2PasswordHasher" in h for h in hashers)
+    assert any("PBKDF2SHA1PasswordHasher" in h for h in hashers)

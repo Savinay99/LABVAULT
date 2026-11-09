@@ -1,5 +1,6 @@
 """Tests for storage service: file validation and storage key generation."""
 import io
+import hashlib
 import pytest
 
 from app import create_app
@@ -9,6 +10,7 @@ from app.services.storage_service import (
     generate_storage_key,
     StorageError,
 )
+from resources.storage import compute_sha256
 
 
 @pytest.fixture
@@ -54,3 +56,24 @@ def test_generate_storage_key_unpredictable():
     assert k1 != k2
     assert k1.endswith(".pdf")
     assert len(k1) > 20
+
+
+def test_compute_sha256_deterministic():
+    content = b"lab manual contents"
+    stream = io.BytesIO(content)
+    digest = compute_sha256(stream)
+    assert digest == hashlib.sha256(content).hexdigest()
+    assert len(digest) == 64
+
+
+def test_compute_sha256_chunks_dont_match_partial():
+    # Different content must produce a different digest.
+    a = compute_sha256(io.BytesIO(b"hello"))
+    b = compute_sha256(io.BytesIO(b"world"))
+    assert a != b
+
+
+def test_compute_sha256_leaves_stream_at_start():
+    stream = io.BytesIO(b"data")
+    _ = compute_sha256(stream)
+    assert stream.read() == b"data"

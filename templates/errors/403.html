@@ -1,12 +1,21 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Error{% endblock %}
-{% block title_text %}Error{% endblock %}
+{% block title %}403  -  Access Denied{% endblock %}
 
 {% block content %}
-<div class="error-page">
-  <h1>{{ code|default:'Error' }}</h1>
-  <p>{{ message }}</p>
-  <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="btn btn-primary">Return</a>
+<div class="auth-page">
+  <div class="auth-card" style="text-align: center;" data-animate="fade-up">
+    <div style="font-family: var(--font-serif); font-size: 4rem; font-weight: bold; color: var(--error); line-height: 1; margin-bottom: var(--space-2);">
+      403
+    </div>
+    <h1 class="auth-title" style="margin-bottom: var(--space-2);">Access Denied</h1>
+    <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
+      {{ message|default:'You do not have permission to access or modify this confidential academic document.' }}
+    </p>
+    <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="btn btn-primary btn-block btn-lg">
+      Return to Safety
+    </a>
+  </div>
 </div>
 {% endblock %}

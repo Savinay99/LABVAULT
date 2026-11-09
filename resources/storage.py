@@ -1,5 +1,6 @@
 """Resources app storage backends: local protected storage + Azure Blob Storage."""
 
+import hashlib
 import logging
 import mimetypes
 import os
@@ -90,6 +91,20 @@ def generate_storage_key(original_filename):
     if original_filename and "." in original_filename:
         ext = "." + original_filename.rsplit(".", 1)[1].lower()
     return f"{uuid4().hex}{secrets.token_hex(8)}{ext}"
+
+
+def compute_sha256(file_stream):
+    """Compute the SHA-256 hex digest of a file-like object.
+
+    The stream is read in chunks and left positioned at the start (seek(0))
+    so callers can continue using it afterwards.
+    """
+    sha256 = hashlib.sha256()
+    file_stream.seek(0)
+    for chunk in iter(lambda: file_stream.read(65536), b""):
+        sha256.update(chunk)
+    file_stream.seek(0)
+    return sha256.hexdigest()
 
 
 class StorageBackend:

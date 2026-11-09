@@ -3,6 +3,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .managers import UserManager
+
 
 class User(AbstractUser):
     """LabVault user with role-based access control.
@@ -22,6 +24,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True, blank=False)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)
+    objects = UserManager()
 
     # Use email as the username field for authentication.
     USERNAME_FIELD = "email"
@@ -46,3 +49,27 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class LoginAttempt(models.Model):
+    """Per-email and per-client failed-login counter with a temporary lock."""
+
+    email = models.EmailField(max_length=254)
+    ip_address = models.GenericIPAddressField()
+    failed_attempts = models.PositiveSmallIntegerField(default=0)
+    last_attempt_at = models.DateTimeField(auto_now=True)
+    locked_until = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "LoginAttempts"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email", "ip_address"], name="unique_login_attempt_email_ip"
+            )
+        ]
+        indexes = [
+            models.Index(fields=["locked_until"], name="IX_LoginAttempts_LockedUntil"),
+        ]
+
+    def __str__(self):
+        return f"Login failures for {self.email} from {self.ip_address}"

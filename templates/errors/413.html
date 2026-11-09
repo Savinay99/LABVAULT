@@ -1,12 +1,21 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}File too large{% endblock %}
-{% block title_text %}File too large{% endblock %}
+{% block title %}413  -  File Too Large{% endblock %}
 
 {% block content %}
-<div class="error-page">
-  <h1>413</h1>
-  <p>{{ message|default:'The uploaded file exceeds the maximum allowed size.' }}</p>
-  <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="btn btn-primary">Return</a>
+<div class="auth-page">
+  <div class="auth-card" style="text-align: center;" data-animate="fade-up">
+    <div style="font-family: var(--font-serif); font-size: 4rem; font-weight: bold; color: var(--warning); line-height: 1; margin-bottom: var(--space-2);">
+      413
+    </div>
+    <h1 class="auth-title" style="margin-bottom: var(--space-2);">File Exceeds Size Limit</h1>
+    <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
+      The uploaded file exceeds the maximum permitted institutional threshold of 10 MB. Please compress or optimize the document.
+    </p>
+    <a href="{% url 'resources:upload' %}" class="btn btn-primary btn-block btn-lg">
+      Try Upload Again
+    </a>
+  </div>
 </div>
 {% endblock %}

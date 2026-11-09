@@ -1,4 +1,4 @@
-/* LabVault — Design tokens. Light theme only. No AI-themed visuals. */
+/* LabVault  -  Design tokens. Light theme only. No AI-themed visuals. */
 /* Display font: intended to be self-hosted under static/fonts/. Falls back
    to a system serif until font files are added. */
 /* Text font: intended to be self-hosted under static/fonts/. Falls back to
@@ -68,7 +68,7 @@ body {
   margin: 0;
 }
 
-/* Self-hosted font placeholders — add font files under static/fonts/ and
+/* Self-hosted font placeholders  -  add font files under static/fonts/ and
    uncomment/adjust these when available.
 @font-face {
   font-family: "LabVault Display";

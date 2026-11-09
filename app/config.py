@@ -5,6 +5,7 @@ provided for local development; production must supply real values through
 the environment. No secrets are stored in this file.
 """
 import os
+import secrets
 from dotenv import load_dotenv
 
 # Load .env automatically when present (local development only).
@@ -29,7 +30,7 @@ class Config:
     """Base configuration."""
 
     # Flask
-    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
+    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY")
     # pyodbc driver name. ODBC Driver 17 for SQL Server is the supported
     # Microsoft driver for Azure SQL Database.
     DB_DRIVER = os.environ.get("DB_DRIVER", "ODBC Driver 17 for SQL Server")
@@ -110,16 +111,23 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    SECRET_KEY = Config.SECRET_KEY or secrets.token_urlsafe(48)
 
 
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
 
+    @staticmethod
+    def init_app(app):
+        if not app.config.get("SECRET_KEY"):
+            raise RuntimeError("FLASK_SECRET_KEY must be configured in production")
+
 
 class TestingConfig(Config):
     TESTING = True
     DEBUG = True
+    SECRET_KEY = Config.SECRET_KEY or "test-only-secret-key"
     SESSION_COOKIE_SECURE = False
     PERMANENT_SESSION_LIFETIME = 300
     WTF_CSRF_ENABLED = False  # tests use test client directly

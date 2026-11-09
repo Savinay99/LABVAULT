@@ -4,14 +4,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}LabVault{% endblock %} — Academic Laboratory Resource Portal</title>
-  <meta name="description" content="Secure academic laboratory resource and document management portal.">
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <link rel="stylesheet" href="{% static 'css/design.css' %}">
-  <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+  <title>{% block title %}LabVault{% endblock %} - Academic Resource Management Platform</title>
+  <meta name="description" content="Professional, secure academic laboratory resource and document repository.">
+
+  <!-- Typography: Fraunces (Headings) + Inter (Body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Design Tokens loaded first, followed by Shared Components -->
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body {% block body_attrs %}{% endblock %}>
+  <!-- 3D Cinematic Loader Overlay with Smooth Transitions -->
+  {% include "includes/loader_3d.html" %}
+
   {% block skip_link %}
   <a class="skip-link" href="#main-content">Skip to main content</a>
   {% endblock %}
@@ -19,64 +28,134 @@
   {% block header %}
   <header class="site-header" id="site-header">
     <div class="header-inner">
-      <a href="{% url 'core:landing' %}" class="brand">
-        <span class="brand-mark">LV</span><span class="brand-name">LabVault</span>
+      <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}" class="brand" aria-label="LabVault Home">
+        {% include "includes/logo.html" with size="md" %}
       </a>
 
-      <button class="sidebar-toggle" id="sidebar-toggle"
-              aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
-        <span class="hamburger"></span>
-      </button>
-
+      {% if user.is_authenticated %}
       <nav class="top-nav" aria-label="Primary navigation">
-        {% if user.is_authenticated %}
-          <a href="{% url 'resources:library' %}">Library</a>
-          {% if user.is_administrator %}
-            <a href="{% url 'admin:index' %}">Administration</a>
-          {% endif %}
-          <a href="{% url 'resources:upload' %}">Upload</a>
-          <a href="{% url 'accounts:profile' %}">Profile</a>
-          <a href="{% url 'accounts:logout' %}">Sign out</a>
-        {% else %}
-          <a href="{% url 'accounts:login' %}">Sign in</a>
-          <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Create account</a>
-        {% endif %}
+        <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'resources:library' %}" class="nav-link {% if request.resolver_match.url_name == 'library' %}active{% endif %}">Library</a>
+        <a href="{% url 'resources:instruments' %}" class="nav-link {% if request.resolver_match.url_name == 'instruments' %}active{% endif %}">Instruments</a>
+        <a href="{% url 'resources:submissions_hub' %}" class="nav-link {% if request.resolver_match.url_name == 'submissions_hub' %}active{% endif %}">Submissions</a>
+        <a href="{% url 'resources:departments' %}" class="nav-link {% if request.resolver_match.url_name == 'departments' %}active{% endif %}">Departments</a>
+        <a href="{% url 'resources:verify' %}" class="nav-link {% if request.resolver_match.url_name == 'verify' %}active{% endif %}">Verify File</a>
+        <a href="{% url 'core:about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+        <a href="{% url 'resources:upload' %}" class="nav-link {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Upload</a>
+        <form method="post" action="{% url 'accounts:logout' %}" style="display: inline; margin-left: 8px;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline btn-sm">Sign out</button>
+        </form>
       </nav>
+
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      {% else %}
+      <nav class="top-nav" aria-label="Authentication navigation">
+        <a href="{% url 'core:landing' %}" class="nav-link">Home</a>
+        <a href="{% url 'resources:library' %}" class="nav-link">Library</a>
+        <a href="{% url 'resources:instruments' %}" class="nav-link {% if request.resolver_match.url_name == 'instruments' %}active{% endif %}">Instruments</a>
+        <a href="{% url 'resources:submissions_hub' %}" class="nav-link {% if request.resolver_match.url_name == 'submissions_hub' %}active{% endif %}">Submissions</a>
+        <a href="{% url 'resources:departments' %}" class="nav-link">Departments</a>
+        <a href="{% url 'core:about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+        <a href="{% url 'accounts:login' %}" class="nav-link">Sign in</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-pill btn-pill-dark btn-sm">Create account</a>
+      </nav>
+      {% endif %}
     </div>
   </header>
   {% endblock %}
 
-  {% block sidebar %}
-  <div class="mobile-overlay" id="mobile-overlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <span class="sidebar-brand">LabVault</span>
-    </div>
-    <nav aria-label="Main navigation">
-      <ul>
-        {% if user.is_authenticated %}
-          <li><a href="{% url 'core:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
-          <li><a href="{% url 'resources:library' %}" class="{% if request.resolver_match.app_name == 'resources' and request.resolver_match.url_name == 'library' %}active{% endif %}">Resource Library</a></li>
-          <li><a href="{% url 'resources:upload' %}" class="{% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Upload Resource</a></li>
-          <li><a href="{% url 'accounts:profile' %}" class="{% if request.resolver_match.app_name == 'accounts' and request.resolver_match.url_name == 'profile' %}active{% endif %}">Profile</a></li>
-          {% if user.is_administrator %}
-            <li><a href="{% url 'admin:index' %}" class="{% if request.resolver_match.app_name == 'admin' %}active{% endif %}">Administration</a></li>
-          {% endif %}
-          <li><a href="{% url 'accounts:logout' %}">Sign out</a></li>
-        {% else %}
-          <li><a href="{% url 'accounts:login' %}">Sign in</a></li>
-          <li><a href="{% url 'accounts:register' %}">Create an account</a></li>
+  {# Unified layout container #}
+  <div class="{% if user.is_authenticated and not hide_sidebar %}app-shell{% else %}guest-layout{% endif %}">
+    {% if user.is_authenticated and not hide_sidebar %}
+    <aside class="app-sidebar" aria-label="Dashboard navigation">
+      <div class="user-menu-pill">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;"></span>
+        <span>{{ user.full_name|truncatechars:22 }}</span>
+      </div>
+      <div class="sidebar-section-title">Navigation</div>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="{% url 'core:dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:library' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
+            <span>Resource Library</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:instruments' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'instruments' %}active{% endif %}">
+            <span>Laboratory Instruments</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:submissions_hub' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'submissions_hub' %}active{% endif %}">
+            <span>Submissions Hub</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:departments' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'departments' %}active{% endif %}">
+            <span>Departments</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:verify' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'verify' %}active{% endif %}">
+            <span>Verify File Integrity</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:upload' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
+            <span>Upload Resource</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'accounts:security_log' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'security_log' %}active{% endif %}">
+            <span>Security Audit Log</span>
+          </a>
+        </li>
+        {% if user.is_administrator %}
+        <li>
+          <a href="{% url 'resources:export_audit_log' %}" class="sidebar-nav-link">
+            <span>Export Audit Log (CSV)</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'resources:export_equipment_report' %}" class="sidebar-nav-link">
+            <span>Export Equipment (CSV)</span>
+          </a>
+        </li>
         {% endif %}
+        <li>
+          <a href="{% url 'core:about' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+            <span>About LabVault</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'accounts:profile' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+            <span>Profile &amp; Settings</span>
+          </a>
+        </li>
+        <li>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="sidebar-nav-link" style="color:var(--error); border: 0; background: none; width: 100%; text-align: left; cursor: pointer;">
+              <span>Sign out</span>
+            </button>
+          </form>
+        </li>
       </ul>
-    </div>
-    <div class="sidebar-footer">
-      LabVault &middot; Academic resource portal
-    </div>
-  </aside>
-  {% endblock %}
+    </aside>
+    {% endif %}
 
-  <main id="main-content" class="page" {% block main_attrs %}{% endblock %}>
-    <div class="page-inner">
+    <main id="main-content" class="{% if user.is_authenticated and not hide_sidebar %}app-main{% else %}guest-main{% endif %}" {% block main_attrs %}{% endblock %}>
       {% block messages %}
       {% if messages %}
         <ul class="flash-messages" aria-live="polite">
@@ -87,24 +166,99 @@
       {% endif %}
       {% endblock %}
 
-      <div class="page-header {% block header_class %}{% endblock %}">
-        {% block page_title %}<h1>{% block title_text %}{% endblock %}</h1>{% endblock %}
-        {% block page_actions %}{% endblock %}
-      </div>
-
       {% block content %}{% endblock %}
-    </div>
-  </main>
+    </main>
+  </div>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <span>&copy; 2026 LabVault. Academic laboratory resource portal.</span>
-      <span class="footer-note">No AI features. Secure by design.</span>
+  <!-- ==========================================================================
+       Modern Dark Institutional Footer (Labrina Style with Watermark & Attribution)
+       ========================================================================== -->
+  <footer class="site-footer-dark" id="site-footer">
+    <!-- Huge Faint Watermark Typography (Image 4 Style) -->
+    <div class="footer-watermark" aria-hidden="true">LABVAULT</div>
+
+    <div class="footer-dark-inner">
+      <div class="footer-dark-grid">
+        <!-- Brand & Security Summary -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-3);">
+            {% include "includes/logo.html" with size="md" %}
+          </div>
+          <p style="font-size: var(--text-xs); color: #9CA3AF; line-height: 1.6; max-width: 320px; margin-bottom: var(--space-4);">
+            Centralized academic laboratory resource management platform. Engineered for deterministic reliability, institutional cybersecurity, and cryptographic asset verification.
+          </p>
+          <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.28); border-radius: var(--radius-full); font-size: 11px; color: #D8B4FE;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--success); display: inline-block;"></span>
+            <span>Deterministic Architecture &bull; Secure by Design</span>
+          </div>
+        </div>
+
+        <!-- Academic Curriculum -->
+        <div>
+          <h4 class="footer-col-title">Academic Catalog</h4>
+          <ul class="footer-dark-links">
+            <li><a href="{% url 'core:about' %}">About LabVault</a></li>
+            <li><a href="{% url 'resources:departments' %}">Department Taxonomy</a></li>
+            <li><a href="{% url 'resources:library' %}">Resource Library</a></li>
+            <li><a href="{% url 'resources:library' %}?category=manual">Laboratory Manuals</a></li>
+            <li><a href="{% url 'resources:library' %}?category=code">Source Code Templates</a></li>
+            <li><a href="{% url 'resources:library' %}?category=datasheet">Experimental Data</a></li>
+          </ul>
+        </div>
+
+        <!-- Security & Cloud Compliance -->
+        <div>
+          <h4 class="footer-col-title">Security &amp; Integrity</h4>
+          <ul class="footer-dark-links">
+            <li><a href="{% url 'resources:verify' %}">Cryptographic Verifier</a></li>
+            <li><a href="{% url 'accounts:security_log' %}">Security Audit Log</a></li>
+            <li><a href="{% url 'core:landing' %}#wireframe-preview">Institutional Terminal</a></li>
+            <li><a href="{% url 'resources:library' %}">SHA-256 Ledger</a></li>
+            <li><span style="font-size: var(--text-xs); color: #6B7280;">Deterministic Storage Engine</span></li>
+          </ul>
+        </div>
+
+        <!-- College Review & Lead Architect Signature -->
+        <div>
+          <h4 class="footer-col-title">Lead Architect &bull; 2026</h4>
+          <div class="footer-architect-card">
+            <div class="footer-architect-avatar">SK</div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #A1A1AA;">Lead Developer &amp; Architect</div>
+              <div style="font-size: var(--text-sm); font-weight: 700; color: #FFFFFF;">Savinay Kumar Soni</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">Django 5.2</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">SQLite / Azure SQL</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">Web Crypto SHA-256</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">Argon2 Hashing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-dark-bottom">
+      <span>&copy; 2026 LabVault - Academic Laboratory Resource Repository.</span>
+      <div style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;">
+        <button type="button" onclick="window.replay3DIntro && window.replay3DIntro()" class="btn btn-ghost btn-sm" style="color: #A1A1AA; font-size: 11px; padding: 3px 12px; border: 1px solid #27272A; border-radius: var(--radius-full); cursor: pointer;" title="Replay the 3D Vault isometric loader intro">
+          Replay 3D Intro
+        </button>
+        <span>Engineered with pride by <strong>Savinay Kumar Soni</strong></span>
+      </div>
     </div>
   </footer>
 
+  <!-- Floating Corner Credit Badge -->
+  <aside class="corner-credit" aria-label="Developer attribution">
+    <span class="corner-credit-dot" aria-hidden="true"></span>
+    <span class="corner-credit-text">Made by <strong>Savinay Kumar Soni</strong></span>
+  </aside>
+
   {% block extra_js %}{% endblock %}
   <script src="{% static 'js/app.js' %}"></script>
+  <script defer src="{% static 'js/vendor/gsap.min.js' %}"></script>
   <script defer src="{% static 'js/gsap-init.js' %}"></script>
 </body>
 </html>

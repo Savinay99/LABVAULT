@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Administrator Overview  -  LabVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-content">
+    <h1 class="page-title">Administrator Overview</h1>
+    <p class="page-description">Platform-wide metrics, security audit trails, and user management</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'admin:index' %}" class="btn btn-secondary">Django Console &rarr;</a>
+  </div>
+</div>
+
+<!-- Platform Stats Grid -->
+<div class="stats-grid" data-animate="fade-up">
+  <div class="stat-card">
+    <span class="stat-label">Total Resources</span>
+    <span class="stat-value">{{ total_resources }}</span>
+    <span class="stat-meta">Active documents</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Registered Users</span>
+    <span class="stat-value">{{ total_users }}</span>
+    <span class="stat-meta">{{ student_users }} students &bull; {{ admin_users }} admins</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Downloads</span>
+    <span class="stat-value">{{ total_downloads }}</span>
+    <span class="stat-meta">Logged file transfers</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Categories</span>
+    <span class="stat-value">{{ category_counts|length }}</span>
+    <span class="stat-meta">Taxonomy groups</span>
+  </div>
+</div>
+
+<!-- Detailed Activity Tables -->
+<div style="display: flex; flex-direction: column; gap: var(--space-6);">
+  <!-- Recently Uploaded Resources -->
+  <section class="card" data-animate="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">Recent Repository Submissions</h2>
+      <a href="{% url 'resources:library' %}" class="btn btn-ghost btn-sm">Catalog &rarr;</a>
+    </div>
+
+    {% if recent_resources %}
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Document Title</th>
+              <th>Category</th>
+              <th>Uploaded By</th>
+              <th>Visibility</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in recent_resources %}
+              <tr>
+                <td>
+                  <a href="{% url 'resources:details' r.pk %}" style="font-weight: var(--font-semibold); color: var(--text);">
+                    {{ r.title }}
+                  </a>
+                </td>
+                <td>{{ r.category.name|default:' - ' }}</td>
+                <td style="font-size: var(--text-xs);">{{ r.uploaded_by.get_full_name|default:r.uploaded_by.email }}</td>
+                <td>
+                  {% if r.visibility == 'public' %}
+                    <span class="badge badge-success">Public</span>
+                  {% else %}
+                    <span class="badge">Private</span>
+                  {% endif %}
+                </td>
+                <td style="color: var(--text-subtle); font-size: var(--text-xs); white-space: nowrap;">
+                  {{ r.created_at|date:"M d, Y H:i" }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: var(--space-6) 0;">
+        <p class="empty-state-desc">No resources uploaded yet.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Download & Access Audit Log -->
+  <section class="card" data-animate="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">Access &amp; Download Audit Logs</h2>
+    </div>
+
+    {% if recent_downloads %}
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Resource Requested</th>
+              <th>Access Timestamp</th>
+              <th>Client IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in recent_downloads %}
+              <tr>
+                <td>{{ a.user.get_full_name|default:a.user.email }}</td>
+                <td>
+                  <a href="{% url 'resources:details' a.resource.pk %}" style="color: var(--primary);">
+                    {{ a.resource.title }}
+                  </a>
+                </td>
+                <td style="color: var(--text-subtle); font-size: var(--text-xs); white-space: nowrap;">
+                  {{ a.accessed_at|date:"M d, Y H:i:s" }}
+                </td>
+                <td style="font-family: var(--font-mono); font-size: var(--text-xs);">
+                  {{ a.ip_address|default:' - ' }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: var(--space-6) 0;">
+        <p class="empty-state-desc">No downloads recorded yet.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Recent User Registrations -->
+  <section class="card" data-animate="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">Recent User Registrations</h2>
+    </div>
+
+    {% if recent_users %}
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Academic Email</th>
+              <th>Role</th>
+              <th>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in recent_users %}
+              <tr>
+                <td style="font-weight: var(--font-semibold);">{{ u.get_full_name|default:u.email }}</td>
+                <td>{{ u.email }}</td>
+                <td>
+                  <span class="badge {% if u.is_administrator %}badge-primary{% else %}badge-secondary{% endif %}">
+                    {{ u.get_role_display }}
+                  </span>
+                </td>
+                <td style="color: var(--text-subtle); font-size: var(--text-xs); white-space: nowrap;">
+                  {{ u.date_joined|date:"M d, Y" }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: var(--space-6) 0;">
+        <p class="empty-state-desc">No users registered.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

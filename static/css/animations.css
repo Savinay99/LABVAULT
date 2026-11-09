@@ -1,4 +1,4 @@
-/* GSAP animation utilities — reduced-motion aware.
+/* GSAP animation utilities  -  reduced-motion aware.
    Animations are purposeful: entrance fades for page content and cards.
    No decorative or gratuitous motion. */
 @media (prefers-reduced-motion: reduce) {

@@ -1,50 +1,407 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}{{ resource.title }}{% endblock %}
-{% block title_text %}{{ resource.title }}{% endblock %}
+{% block title %}{{ resource.title }}  -  Resource Details{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1>{{ resource.title }}</h1>
+<div style="margin-bottom: var(--space-4);">
+  <a href="{% url 'resources:library' %}" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: var(--space-1);">
+    &larr; Back to Library
+  </a>
 </div>
 
-<div class="details-grid">
-  <div class="details-meta">
-    <dl>
-      <dt>Category</dt><dd>{{ resource.category.name|default:'Uncategorized' }}</dd>
-      <dt>Uploaded by</dt><dd>{{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.email }}</dd>
-      <dt>Visibility</dt><dd>{{ resource.get_visibility_display }}</dd>
-      <dt>File</dt><dd>{{ resource.original_filename }}</dd>
-      <dt>Size</dt><dd>{{ resource.file_size_formatted }}</dd>
-      <dt>Type</dt><dd>{{ resource.content_type }}</dd>
-      <dt>Added</dt><dd>{{ resource.created_at }}</dd>
-      <dt>Updated</dt><dd>{{ resource.updated_at }}</dd>
-    </dl>
-    {% if resource.subjects.all %}
-      <div class="subjects">
-        <strong>Subjects:</strong>
-        {% for s in resource.subjects.all %}<span class="subject-tag">{{ s.subject_code }} &mdash; {{ s.subject_name }}</span>{% endfor %}
-      </div>
-    {% endif %}
+<div class="page-header">
+  <div class="page-header-content">
+    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1);">
+      <span class="badge" style="background-color: var(--sage); color: var(--brand-purple); font-weight: var(--font-bold);">
+        {{ resource.category.name|default:'Uncategorized' }}
+      </span>
+      {% if resource.visibility == 'public' %}
+        <span class="badge badge-success">Public</span>
+      {% else %}
+        <span class="badge">Private</span>
+      {% endif %}
+    </div>
+    <h1 class="page-title">{{ resource.title }}</h1>
+    <p class="page-description">
+      Uploaded by <strong>{{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.email }}</strong> on {{ resource.created_at|date:"F d, Y" }}
+    </p>
   </div>
-  <div class="details-actions">
-    <a href="{% url 'resources:download' resource.pk %}" class="btn btn-primary">Download</a>
-    {% if user.is_authenticated and (resource.uploaded_by_id == user.pk or user.is_administrator) %}
-      <a href="{% url 'resources:edit' resource.pk %}" class="btn btn-ghost">Edit</a>
-      <form method="post" action="{% url 'resources:delete' resource.pk %}"
-            data-confirm="Delete this resource? This cannot be undone."
-            style="display:inline;">
+  <div class="page-actions" style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'resources:toggle_bookmark' resource.pk %}" style="display: inline;">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn {% if is_bookmarked %}btn-secondary{% else %}btn-outline{% endif %}" title="Save to bookmarks">
+          {% if is_bookmarked %}
+            <span style="color: #eab308;">&#9733;</span> Bookmarked
+          {% else %}
+            <span>&#9734;</span> Bookmark
+          {% endif %}
+        </button>
       </form>
     {% endif %}
+    <a href="{% url 'resources:download' resource.pk %}" class="btn btn-primary btn-lg">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      <span>Download Resource</span>
+    </a>
   </div>
 </div>
 
-{% if resource.description %}
-  <section class="card">
-    <h2>Description</h2>
-    <p>{{ resource.description }}</p>
-  </section>
-{% endif %}
+<div class="layout-split">
+  <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+    <!-- Description Card -->
+    {% if resource.description %}
+      <section class="card" data-animate="fade-up">
+        <h2 class="card-title" style="margin-bottom: var(--space-3);">Overview &amp; Experiment Objectives</h2>
+        <div style="font-size: var(--text-base); color: var(--text); line-height: var(--leading-relaxed); white-space: pre-wrap;">
+          {{ resource.description }}
+        </div>
+      </section>
+    {% endif %}
+
+    <!-- Associated Subjects -->
+    {% if resource.subjects.all %}
+      <section class="card" data-animate="fade-up">
+        <h2 class="card-title" style="margin-bottom: var(--space-3);">Associated Subjects</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+          {% for s in resource.subjects.all %}
+            <a href="{% url 'resources:library' %}?subject_id={{ s.pk }}" class="badge badge-secondary" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm); text-decoration: none;">
+              <strong>{{ s.subject_code }}</strong>  -  {{ s.subject_name }}
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    <!-- Technical & Cryptographic Integrity Details -->
+    <section class="card" data-animate="fade-up">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-2);">
+        <h2 class="card-title">Cryptographic Integrity &amp; Storage Specs</h2>
+        <span class="badge badge-success">SHA-256 Ledger Verified</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); font-size: var(--text-sm); margin-bottom: var(--space-6);">
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: var(--text-xs); text-transform: uppercase;">Original Filename</span>
+          <span style="font-family: var(--font-mono); word-break: break-all;">{{ resource.original_filename }}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: var(--text-xs); text-transform: uppercase;">File Size</span>
+          <span>{{ resource.file_size_formatted }} ({{ resource.file_size_bytes }} bytes)</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: var(--text-xs); text-transform: uppercase;">MIME Content-Type</span>
+          <span style="font-family: var(--font-mono);">{{ resource.content_type }}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: var(--text-xs); text-transform: uppercase;">Last Modified</span>
+          <span>{{ resource.updated_at|date:"M d, Y H:i" }} UTC</span>
+        </div>
+      </div>
+
+      <!-- SHA-256 Digest Box -->
+      {% if resource.resourcefiles %}
+        <div style="background-color: var(--surface-alt); padding: var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: var(--space-6);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2);">
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: var(--font-bold);">
+              Registered SHA-256 Ledger Hash
+            </span>
+            <button type="button" class="btn btn-ghost btn-sm" id="copy-hash-btn" data-hash="{{ resource.resourcefiles.sha256_checksum }}">
+              Copy Hash
+            </button>
+          </div>
+          <code id="ledger-hash" style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text); word-break: break-all; display: block;">
+            {{ resource.resourcefiles.sha256_checksum }}
+          </code>
+        </div>
+
+        <!-- Instant File Verifier -->
+        <div style="background-color: var(--bg); border: 2px dashed var(--border); border-radius: var(--radius-md); padding: var(--space-4); text-align: center;" id="detail-verifier-zone">
+          <p style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--space-2);">
+            <strong>Verify Downloaded Copy:</strong> Drop your downloaded file here to verify bit-level match against this ledger hash.
+          </p>
+          <input type="file" id="detail-file-input" style="font-size: 11px;">
+          <div id="detail-verify-output" style="margin-top: var(--space-2); font-size: var(--text-xs); font-weight: var(--font-semibold); display: none;"></div>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Student Laboratory Report Submission Card -->
+    {% if user.is_authenticated and user.is_student %}
+    <section class="card" data-animate="fade-up" style="border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); flex-wrap: wrap; gap: var(--space-2);">
+        <div>
+          <h2 class="card-title" style="margin-bottom: 2px;">Laboratory Practical Submission</h2>
+          <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;">
+            Upload your completed experimental report, code, or observations for instructor evaluation.
+          </p>
+        </div>
+        {% if user_submission %}
+          {% if user_submission.status == 'reviewed' %}
+            <span class="badge badge-success">Reviewed (Score: {{ user_submission.score|default:'N/A' }}/100)</span>
+          {% elif user_submission.status == 'resubmission' %}
+            <span class="badge" style="background: #fef3c7; color: #92400e;">Resubmission Requested</span>
+          {% else %}
+            <span class="badge badge-info">Submitted - Awaiting Review</span>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      {% if user_submission %}
+        <div style="background-color: var(--surface-alt); padding: var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: var(--space-4);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); font-size: var(--text-xs); margin-bottom: var(--space-3);">
+            <div>
+              <span style="color: var(--text-muted); display: block;">SUBMISSION STATUS</span>
+              <strong style="text-transform: capitalize;">{{ user_submission.get_status_display }}</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); display: block;">SUBMITTED FILE</span>
+              <a href="{% url 'resources:download_submission' user_submission.pk %}" style="color: var(--primary); font-weight: var(--font-semibold); word-break: break-all;">
+                {{ user_submission.original_filename }}
+              </a>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); display: block;">DATE SUBMITTED</span>
+              <span>{{ user_submission.submitted_at|date:'M d, Y H:i' }}</span>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); display: block;">GRADE / SCORE</span>
+              <strong style="font-size: var(--text-sm); color: {% if user_submission.score and user_submission.score >= 50 %}var(--success){% else %}var(--text){% endif %};">
+                {% if user_submission.score is not None %}{{ user_submission.score }}/100{% else %}Pending Evaluation{% endif %}
+              </strong>
+            </div>
+          </div>
+
+          {% if user_submission.student_notes %}
+            <div style="font-size: var(--text-xs); color: var(--text); border-top: 1px dashed var(--border); padding-top: var(--space-2); margin-top: var(--space-2);">
+              <span style="color: var(--text-muted); font-weight: var(--font-semibold);">Your Notes:</span>
+              <p style="margin: 2px 0 0 0;">{{ user_submission.student_notes }}</p>
+            </div>
+          {% endif %}
+
+          {% if user_submission.instructor_feedback %}
+            <div style="background: var(--bg); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 3px solid var(--primary); margin-top: var(--space-3); font-size: var(--text-xs);">
+              <strong style="color: var(--primary); display: block; margin-bottom: 2px;">Instructor Feedback:</strong>
+              <div style="color: var(--text); line-height: 1.5;">{{ user_submission.instructor_feedback }}</div>
+              {% if user_submission.graded_by %}
+                <span style="color: var(--text-muted); font-size: 11px; display: block; margin-top: 4px;">
+                  Reviewed by {{ user_submission.graded_by.get_full_name|default:user_submission.graded_by.email }} on {{ user_submission.graded_at|date:'M d, Y' }}
+                </span>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'resources:submit_lab_report' resource.pk %}" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: var(--space-3);">
+        {% csrf_token %}
+        <div>
+          <label for="submission-file" style="display: block; font-size: var(--text-xs); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">
+            {% if user_submission %}Upload New / Revised Report File{% else %}Select Report File (.pdf, .py, .c, .cpp, .zip, .txt up to 25MB){% endif %}
+          </label>
+          <input type="file" id="submission-file" name="submission_file" required class="form-input" style="padding: var(--space-2); font-size: var(--text-xs); width: 100%;">
+        </div>
+        <div>
+          <label for="student-notes" style="display: block; font-size: var(--text-xs); font-weight: var(--font-semibold); margin-bottom: var(--space-1);">
+            Optional Student Notes &amp; Observations
+          </label>
+          <textarea id="student-notes" name="student_notes" rows="2" class="form-input" placeholder="e.g., Encountered specific edge case in Step 4; solved using array pointer indexing." style="font-size: var(--text-xs); width: 100%;">{{ user_submission.student_notes|default:'' }}</textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn btn-primary btn-sm">
+            {% if user_submission %}Update Submission{% else %}Submit Lab Practical Report{% endif %}
+          </button>
+        </div>
+      </form>
+    </section>
+    {% endif %}
+
+    <!-- Faculty Submissions Review Card -->
+    {% if user.is_authenticated and not user.is_student %}
+    <section class="card" data-animate="fade-up" style="border: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); flex-wrap: wrap; gap: var(--space-2);">
+        <div>
+          <h2 class="card-title" style="margin-bottom: 2px;">Student Practical Submissions Queue</h2>
+          <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;">
+            Total student submissions logged for this laboratory manual: <strong>{{ all_submissions|length }}</strong>
+          </p>
+        </div>
+        <a href="{% url 'resources:submissions_hub' %}?resource_id={{ resource.pk }}" class="btn btn-secondary btn-sm">
+          Open Submissions Hub &rarr;
+        </a>
+      </div>
+
+      {% if all_submissions %}
+        <div class="table-container">
+          <table class="table" style="font-size: var(--text-xs);">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Submitted At</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sub in all_submissions|slice:':5' %}
+                <tr>
+                  <td>
+                    <strong>{{ sub.student.get_full_name|default:sub.student.email }}</strong>
+                  </td>
+                  <td>{{ sub.submitted_at|date:'M d, H:i' }}</td>
+                  <td>
+                    {% if sub.status == 'reviewed' %}
+                      <span class="badge badge-success">Reviewed</span>
+                    {% elif sub.status == 'resubmission' %}
+                      <span class="badge" style="background: #fef3c7; color: #92400e;">Resubmission</span>
+                    {% else %}
+                      <span class="badge badge-info">Submitted</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if sub.score is not None %}<strong>{{ sub.score }}/100</strong>{% else %}<span style="color: var(--text-muted);">-</span>{% endif %}
+                  </td>
+                  <td style="text-align: right;">
+                    <a href="{% url 'resources:submissions_hub' %}?resource_id={{ resource.pk }}" class="btn btn-ghost btn-sm">
+                      Grade
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="padding: var(--space-4); text-align: center; color: var(--text-muted); font-size: var(--text-xs); background: var(--surface-alt); border-radius: var(--radius-sm);">
+          No student submissions have been recorded for this lab manual yet.
+        </div>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <!-- Academic Citation Formatter -->
+    <section class="card" data-animate="fade-up">
+      <h2 class="card-title" style="margin-bottom: var(--space-3);">Academic Citation</h2>
+      <p style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--space-3);">
+        Use these standardized citations in lab reports, bibliography sections, or research publications.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+        <div style="background-color: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 11px; color: var(--text-subtle);">IEEE STYLE</strong>
+            <button type="button" class="btn btn-ghost btn-sm copy-cite-btn" data-target="cite-ieee">Copy</button>
+          </div>
+          <code id="cite-ieee" style="font-size: 12px; color: var(--text); display: block;">
+            {{ resource.uploaded_by.last_name }}, {{ resource.uploaded_by.first_name|first }}., &quot;{{ resource.title }},&quot; <em>LabVault Academic Repository</em>, {{ resource.created_at|date:"Y" }}.
+          </code>
+        </div>
+
+        <div style="background-color: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 11px; color: var(--text-subtle);">APA STYLE</strong>
+            <button type="button" class="btn btn-ghost btn-sm copy-cite-btn" data-target="cite-apa">Copy</button>
+          </div>
+          <code id="cite-apa" style="font-size: 12px; color: var(--text); display: block;">
+            {{ resource.uploaded_by.last_name }}, {{ resource.uploaded_by.first_name|first }}. ({{ resource.created_at|date:"Y" }}). <em>{{ resource.title }}</em>. LabVault Repository.
+          </code>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Actions Sidebar -->
+  <aside style="display: flex; flex-direction: column; gap: var(--space-6);">
+    <div class="card" style="background-color: var(--surface);">
+      <h2 class="card-title" style="margin-bottom: var(--space-3);">File Actions</h2>
+      <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+        <a href="{% url 'resources:download' resource.pk %}" class="btn btn-primary btn-block">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download File
+        </a>
+
+        {% if user.is_authenticated and can_edit %}
+          <a href="{% url 'resources:edit' resource.pk %}" class="btn btn-secondary btn-block">
+            Edit Metadata
+          </a>
+
+          <div style="margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border);">
+            <form method="post" action="{% url 'resources:delete' resource.pk %}" data-confirm="Are you sure you want to permanently delete '{{ resource.title }}'?">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-destructive btn-block">
+                Delete Resource
+              </button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Security & Access Note -->
+    <div class="card" style="background-color: var(--surface-alt); font-size: var(--text-xs); color: var(--text-muted);">
+      <strong style="color: var(--text); display: block; margin-bottom: var(--space-1);">Access Protocol</strong>
+      This document is served with strictly validated session tokens and sanitized HTTP headers (<code>X-Content-Type-Options: nosniff</code>) to prevent MIME confusion attacks.
+    </div>
+  </aside>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Copy Hash
+  const copyBtn = document.getElementById("copy-hash-btn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", function () {
+      const hash = copyBtn.getAttribute("data-hash");
+      navigator.clipboard.writeText(hash).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy Hash", 2000);
+      });
+    });
+  }
+
+  // Copy Citation
+  document.querySelectorAll(".copy-cite-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const targetId = btn.getAttribute("data-target");
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        navigator.clipboard.writeText(targetEl.textContent.trim()).then(() => {
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = "Copy", 2000);
+        });
+      }
+    });
+  });
+
+  // Client-side hash verification on detail page
+  const fileInput = document.getElementById("detail-file-input");
+  const output = document.getElementById("detail-verify-output");
+  const ledgerHashEl = document.getElementById("ledger-hash");
+
+  if (fileInput && ledgerHashEl) {
+    const expectedHash = ledgerHashEl.textContent.trim();
+    fileInput.addEventListener("change", async function () {
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        output.style.display = "block";
+        output.textContent = "Computing hash...";
+        try {
+          const buffer = await file.arrayBuffer();
+          const digestBuffer = await window.crypto.subtle.digest("SHA-256", buffer);
+          const hashHex = Array.from(new Uint8Array(digestBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+          if (hashHex.toLowerCase() === expectedHash.toLowerCase()) {
+            output.innerHTML = '<span style="color: var(--success);">&#10004; Cryptographic Match: File matches the ledger bit-for-bit.</span>';
+          } else {
+            output.innerHTML = '<span style="color: var(--error);">&#10008; Hash Mismatch! File has been altered or corrupted.</span>';
+          }
+        } catch (err) {
+          output.textContent = "Hash calculation failed: " + err.message;
+        }
+      }
+    });
+  }
+});
+</script>
 {% endblock %}
