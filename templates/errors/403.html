@@ -14,7 +14,7 @@
       <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
         You are signed in with {{ current_role_article }} {{ current_role }} account. This page is for {{ required_role }} accounts. Sign in with an account assigned to the {{ required_role }} role to continue.
       </p>
-      <a href="{{ dashboard_url }}" class="btn btn-primary btn-block btn-lg">
+      <a href="{{ current_dashboard_url }}" class="btn btn-primary btn-block btn-lg">
         Go to my {{ current_role }} dashboard
       </a>
       <form method="post" action="{% url 'accounts:logout' %}" style="margin-top: var(--space-3);">

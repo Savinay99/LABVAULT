@@ -400,6 +400,7 @@ def test_student_faculty_and_administrator_have_separate_dashboards(client, user
     assert b"signed in with a Student account" in admin_denial.content
     assert b"Administrator workspace" in admin_denial.content
     assert b"Switch to the Administrator sign-in" in admin_denial.content
+    assert f'<a href="{reverse("core:dashboard")}" class="btn btn-primary btn-block btn-lg">'.encode() in admin_denial.content
 
     client.force_login(faculty)
     faculty_redirect = client.get(reverse("core:dashboard"), follow=False)
@@ -419,6 +420,7 @@ def test_student_faculty_and_administrator_have_separate_dashboards(client, user
     assert admin_denial.status_code == 403
     assert b"signed in with a Faculty account" in admin_denial.content
     assert b"Administrator workspace" in admin_denial.content
+    assert f'<a href="{reverse("core:faculty_dashboard")}" class="btn btn-primary btn-block btn-lg">'.encode() in admin_denial.content
 
     client.force_login(admin_user)
     admin_redirect = client.get(reverse("core:dashboard"), follow=False)
@@ -438,6 +440,7 @@ def test_student_faculty_and_administrator_have_separate_dashboards(client, user
     assert faculty_denial.status_code == 403
     assert b"signed in with an Administrator account" in faculty_denial.content
     assert b"Faculty workspace" in faculty_denial.content
+    assert f'<a href="{reverse("core:admin_dashboard")}" class="btn btn-primary btn-block btn-lg">'.encode() in faculty_denial.content
 
 
 def test_faculty_submission_queue_only_shows_their_own_resources(client, user, db):

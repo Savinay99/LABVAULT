@@ -25,6 +25,7 @@ def _role_access_denied(request, required_role):
     }
     role_label, dashboard_name = portal[required_role]
     dashboard_url = reverse(dashboard_name)
+    _, current_dashboard_name = portal[request.user.role]
     login_url = f"{reverse('accounts:login')}?{urlencode({'next': dashboard_url})}"
     return render(
         request,
@@ -33,7 +34,7 @@ def _role_access_denied(request, required_role):
             "current_role": request.user.get_role_display(),
             "current_role_article": "an" if request.user.is_administrator else "a",
             "required_role": role_label,
-            "dashboard_url": dashboard_url,
+            "current_dashboard_url": reverse(current_dashboard_name),
             "switch_login_url": login_url,
         },
         status=403,
