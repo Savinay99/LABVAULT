@@ -9,16 +9,18 @@ from .managers import UserManager
 class User(AbstractUser):
     """LabVault user with role-based access control.
 
-    Roles: student (default), administrator.
+    Roles: student (default), faculty, administrator.
     Inherits email, password hashing (pbkdf2 via Django), first_name,
     last_name, is_active, date_joined from AbstractUser.
     """
 
     ROLE_STUDENT = "student"
+    ROLE_FACULTY = "faculty"
     ROLE_ADMIN = "administrator"
 
     ROLE_CHOICES = [
         (ROLE_STUDENT, "Student"),
+        (ROLE_FACULTY, "Faculty"),
         (ROLE_ADMIN, "Administrator"),
     ]
 
@@ -46,6 +48,10 @@ class User(AbstractUser):
     @property
     def is_administrator(self):
         return self.role == self.ROLE_ADMIN
+
+    @property
+    def is_faculty(self):
+        return self.role == self.ROLE_FACULTY
 
     def __str__(self):
         return self.email

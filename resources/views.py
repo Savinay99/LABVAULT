@@ -232,11 +232,14 @@ def details(request, pk):
 
     user_submission = None
     all_submissions = None
+    can_review_submissions = request.user.is_administrator or (
+        request.user.is_faculty and resource.uploaded_by_id == request.user.pk
+    )
     if request.user.is_student:
         user_submission = LabSubmission.objects.filter(
             resource=resource, student=request.user
         ).first()
-    else:
+    elif can_review_submissions:
         all_submissions = (
             LabSubmission.objects.filter(resource=resource)
             .select_related("student")
@@ -252,6 +255,7 @@ def details(request, pk):
             "is_bookmarked": is_bookmarked,
             "user_submission": user_submission,
             "all_submissions": all_submissions,
+            "can_review_submissions": can_review_submissions,
         },
     )
 
@@ -852,7 +856,10 @@ def download_submission(request, pk):
     can_download = (
         request.user == submission.student
         or request.user.is_administrator
-        or request.user == submission.resource.uploaded_by
+        or (
+            request.user.is_faculty
+            and request.user == submission.resource.uploaded_by
+        )
     )
     if not can_download:
         return HttpResponseForbidden("You are not authorized to download this submission.")
@@ -893,8 +900,7 @@ def submissions_hub(request):
                 "status_filter": status_filter,
             },
         )
-    else:
-        # Faculty / Admin view: see submissions for all resources or authored resources
+    elif request.user.is_administrator:
         submissions = LabSubmission.objects.select_related(
             "resource", "student", "reviewed_by"
         ).order_by("-submitted_at")
@@ -915,6 +921,30 @@ def submissions_hub(request):
                 "reviewed_count": reviewed_count,
             },
         )
+    elif request.user.is_faculty:
+        faculty_submissions = LabSubmission.objects.filter(
+            resource__uploaded_by=request.user
+        ).select_related("resource", "student", "reviewed_by").order_by("-submitted_at")
+        submissions = faculty_submissions
+        if status_filter:
+            submissions = submissions.filter(status=status_filter)
+
+        return render(
+            request,
+            "resources/submissions_hub.html",
+            {
+                "submissions": submissions,
+                "is_faculty": True,
+                "status_filter": status_filter,
+                "pending_count": faculty_submissions.filter(
+                    status=LabSubmission.STATUS_SUBMITTED
+                ).count(),
+                "reviewed_count": faculty_submissions.filter(
+                    status=LabSubmission.STATUS_REVIEWED
+                ).count(),
+            },
+        )
+    return HttpResponseForbidden("Your role cannot access the submission hub.")
 
 
 @login_required
@@ -923,7 +953,10 @@ def grade_submission(request, pk):
     submission = get_object_or_404(LabSubmission, pk=pk)
     can_grade = (
         request.user.is_administrator
-        or request.user == submission.resource.uploaded_by
+        or (
+            request.user.is_faculty
+            and request.user == submission.resource.uploaded_by
+        )
     )
     if not can_grade:
         return HttpResponseForbidden("Only instructors or administrators can evaluate lab submissions.")

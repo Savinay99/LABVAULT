@@ -21,6 +21,11 @@
       </div>
       <h1 class="auth-title">Welcome back</h1>
       <p class="auth-subtitle">Sign in to access your laboratory repository and academic records</p>
+      {% if expected_role %}
+        <div class="flash flash-info" role="status" style="margin-top: var(--space-4); text-align: left;">
+          Sign in with your <strong>{{ expected_role }}</strong> account to open that workspace.
+        </div>
+      {% endif %}
     </div>
 
     <!-- Social Authentication Providers (Only if configured) -->

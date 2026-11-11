@@ -1,6 +1,7 @@
 """Tests for storage service: file validation and storage key generation."""
 import io
 import hashlib
+from unittest.mock import MagicMock
 import pytest
 
 from app import create_app
@@ -10,7 +11,7 @@ from app.services.storage_service import (
     generate_storage_key,
     StorageError,
 )
-from resources.storage import compute_sha256
+from resources.storage import AzureBlobStorage, compute_sha256
 
 
 @pytest.fixture
@@ -77,3 +78,18 @@ def test_compute_sha256_leaves_stream_at_start():
     stream = io.BytesIO(b"data")
     _ = compute_sha256(stream)
     assert stream.read() == b"data"
+
+
+def test_azure_blob_storage_open_returns_downloaded_file_stream():
+    backend = AzureBlobStorage.__new__(AzureBlobStorage)
+    backend._available = True
+    backend.container_name = "labvault"
+    blob = MagicMock()
+    blob.download_blob.return_value.readall.return_value = b"student report contents"
+    backend._client = MagicMock()
+    backend._client.return_value.get_container_client.return_value.get_blob_client.return_value = blob
+
+    stream = backend.open("reports/report.pdf")
+
+    assert stream.read() == b"student report contents"
+    blob.download_blob.assert_called_once_with()

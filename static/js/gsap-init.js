@@ -63,19 +63,6 @@
     });
   }
 
-  // Animate corner credit badge entrance
-  var cornerBadge = document.querySelector(".corner-credit");
-  if (cornerBadge) {
-    gsap.from(cornerBadge, {
-      opacity: 0,
-      scale: 0.88,
-      y: 12,
-      duration: 0.5,
-      delay: 0.35,
-      ease: "back.out(1.4)"
-    });
-  }
-
   // Animate Hero Section & Stepped Ribbons (Labrina style micro-animations)
   var heroBadge = document.querySelector(".hero-badge-pill");
   if (heroBadge) {

@@ -1,6 +1,7 @@
 """Resources app storage backends: local protected storage + Azure Blob Storage."""
 
 import hashlib
+from io import BytesIO
 import logging
 import mimetypes
 import os
@@ -214,7 +215,18 @@ class AzureBlobStorage(StorageBackend):
             return False
 
     def open(self, storage_key):
-        raise NotImplementedError("Use download_url for Azure backend.")
+        if not self._available:
+            raise StorageError("Azure Blob Storage is not configured.")
+        from azure.core.exceptions import ResourceNotFoundError
+
+        blob_client = self._client().get_container_client(
+            self.container_name
+        ).get_blob_client(storage_key)
+        try:
+            content = blob_client.download_blob().readall()
+        except ResourceNotFoundError:
+            return None
+        return BytesIO(content)
 
     def exists(self, storage_key):
         if not self._available:

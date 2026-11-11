@@ -1331,53 +1331,9 @@ textarea.form-control {
   color: var(--primary);
 }
 
-/* ---------- Floating Corner Badge ---------- */
-.corner-credit {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: var(--z-dropdown);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  background-color: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 8px 16px;
-  font-size: var(--text-xs);
-  font-family: var(--font-sans);
-  box-shadow: 0 4px 16px rgba(32, 43, 40, 0.1);
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 220ms ease,
-              border-color 220ms ease;
-  backdrop-filter: blur(8px);
-}
-
-.corner-credit:hover {
-  transform: translateY(-3px) scale(1.02);
-  border-color: var(--primary);
-  box-shadow: 0 10px 24px rgba(33, 78, 67, 0.16);
-}
-
-.corner-credit-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--primary);
-  display: inline-block;
-  box-shadow: 0 0 0 2px var(--sage);
-  animation: pulse-dot 2.5s infinite ease-in-out;
-}
-
 @keyframes pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.2); opacity: 0.7; }
-}
-
-.corner-credit strong {
-  color: var(--primary);
-  font-weight: var(--font-bold);
 }
 
 /* ---------- Structural Layout Helpers ---------- */
@@ -1386,6 +1342,231 @@ textarea.form-control {
   grid-template-columns: 2fr 1fr;
   gap: var(--space-6);
   align-items: start;
+}
+
+/* ---------- Dashboard resource discovery cards ---------- */
+.dashboard-recent-resources {
+  min-width: 0;
+}
+
+.dashboard-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.dashboard-section-heading {
+  min-width: 0;
+}
+
+.dashboard-section-heading .card-title {
+  margin: 0;
+}
+
+.dashboard-section-description {
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.dashboard-view-all {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.dashboard-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-resource-card {
+  display: flex;
+  min-width: 0;
+  min-height: 244px;
+  flex-direction: column;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.dashboard-resource-card:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-resource-topline,
+.dashboard-resource-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dashboard-resource-file-icon {
+  display: grid;
+  width: 42px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-focus);
+  border-radius: 9px;
+  background: var(--primary-subtle);
+  color: var(--brand-purple);
+}
+
+.dashboard-resource-file-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.dashboard-resource-file-type {
+  padding: 4px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.06em;
+}
+
+.dashboard-resource-title-group {
+  min-width: 0;
+  margin-top: var(--space-3);
+}
+
+.dashboard-resource-title {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 2.9em;
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.dashboard-resource-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboard-resource-title a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dashboard-resource-title a:focus-visible,
+.dashboard-resource-open:focus-visible,
+.dashboard-view-all:focus-visible {
+  border-radius: 3px;
+  outline: 3px solid var(--primary-focus);
+  outline-offset: 3px;
+}
+
+.dashboard-resource-category {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  margin-top: var(--space-2);
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-resource-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: var(--space-4) 0;
+}
+
+.dashboard-resource-detail {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dashboard-resource-detail dt {
+  color: var(--text-subtle);
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dashboard-resource-detail dd {
+  overflow: hidden;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-resource-card-footer {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.dashboard-resource-open {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 5px;
+  color: var(--primary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dashboard-resource-open:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dashboard-resource-empty {
+  display: flex;
+  min-height: 150px;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+}
+
+.dashboard-resource-empty > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboard-resource-empty .empty-state-title {
+  margin: 0 0 var(--space-1);
+}
+
+.dashboard-resource-empty .empty-state-desc {
+  margin: 0;
 }
 
 .form-row-2 {
@@ -1403,7 +1584,11 @@ textarea.form-control {
 /* ---------- Responsive Breakpoints ---------- */
 @media (max-width: 900px) {
   .layout-split {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layout-split > * {
+    min-width: 0;
   }
 
   .app-shell {
@@ -1412,6 +1597,10 @@ textarea.form-control {
 
   .app-sidebar {
     width: 100%;
+    position: static;
+    top: auto;
+    height: auto;
+    overflow: visible;
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: var(--space-4);
@@ -1424,6 +1613,31 @@ textarea.form-control {
   .sidebar-nav {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  .header-inner {
+    position: relative;
+  }
+
+  .top-nav {
+    display: none;
+  }
+
+  .mobile-nav-toggle {
+    display: flex;
+  }
+
+  .mobile-nav-open .top-nav {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -1488,12 +1702,6 @@ textarea.form-control {
     gap: var(--space-8);
   }
 
-  .corner-credit {
-    bottom: 12px;
-    right: 12px;
-    padding: 6px 12px;
-    font-size: 11px;
-  }
 }
 
 /* ==========================================================================
@@ -2977,6 +3185,36 @@ textarea.form-control {
   color: #52525B;
   margin-top: var(--space-3);
   letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .dashboard-section-header {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .dashboard-resource-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .dashboard-resource-card {
+    min-height: 0;
+  }
+
+  .dashboard-resource-empty {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: var(--space-4);
+  }
+
+  .dashboard-resource-empty > div:nth-child(2) {
+    flex-basis: calc(100% - 60px);
+  }
+
+  .dashboard-resource-empty > .btn {
+    margin-left: 58px;
+  }
 }
 
 

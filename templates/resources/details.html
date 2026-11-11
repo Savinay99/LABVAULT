@@ -138,7 +138,7 @@
         </div>
         {% if user_submission %}
           {% if user_submission.status == 'reviewed' %}
-            <span class="badge badge-success">Reviewed (Score: {{ user_submission.score|default:'N/A' }}/100)</span>
+            <span class="badge badge-success">Reviewed (Score: {{ user_submission.grade|default:'N/A' }}/100)</span>
           {% elif user_submission.status == 'resubmission' %}
             <span class="badge" style="background: #fef3c7; color: #92400e;">Resubmission Requested</span>
           {% else %}
@@ -166,8 +166,8 @@
             </div>
             <div>
               <span style="color: var(--text-muted); display: block;">GRADE / SCORE</span>
-              <strong style="font-size: var(--text-sm); color: {% if user_submission.score and user_submission.score >= 50 %}var(--success){% else %}var(--text){% endif %};">
-                {% if user_submission.score is not None %}{{ user_submission.score }}/100{% else %}Pending Evaluation{% endif %}
+              <strong style="font-size: var(--text-sm); color: {% if user_submission.grade and user_submission.grade >= 50 %}var(--success){% else %}var(--text){% endif %};">
+                {% if user_submission.grade is not None %}{{ user_submission.grade }}/100{% else %}Pending Evaluation{% endif %}
               </strong>
             </div>
           </div>
@@ -179,13 +179,13 @@
             </div>
           {% endif %}
 
-          {% if user_submission.instructor_feedback %}
+          {% if user_submission.faculty_feedback %}
             <div style="background: var(--bg); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 3px solid var(--primary); margin-top: var(--space-3); font-size: var(--text-xs);">
               <strong style="color: var(--primary); display: block; margin-bottom: 2px;">Instructor Feedback:</strong>
-              <div style="color: var(--text); line-height: 1.5;">{{ user_submission.instructor_feedback }}</div>
-              {% if user_submission.graded_by %}
+              <div style="color: var(--text); line-height: 1.5;">{{ user_submission.faculty_feedback }}</div>
+              {% if user_submission.reviewed_by %}
                 <span style="color: var(--text-muted); font-size: 11px; display: block; margin-top: 4px;">
-                  Reviewed by {{ user_submission.graded_by.get_full_name|default:user_submission.graded_by.email }} on {{ user_submission.graded_at|date:'M d, Y' }}
+                  Reviewed by {{ user_submission.reviewed_by.get_full_name|default:user_submission.reviewed_by.email }} on {{ user_submission.reviewed_at|date:'M d, Y' }}
                 </span>
               {% endif %}
             </div>
@@ -217,7 +217,7 @@
     {% endif %}
 
     <!-- Faculty Submissions Review Card -->
-    {% if user.is_authenticated and not user.is_student %}
+    {% if can_review_submissions %}
     <section class="card" data-animate="fade-up" style="border: 1px solid var(--border);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); flex-wrap: wrap; gap: var(--space-2);">
         <div>
@@ -260,7 +260,7 @@
                     {% endif %}
                   </td>
                   <td>
-                    {% if sub.score is not None %}<strong>{{ sub.score }}/100</strong>{% else %}<span style="color: var(--text-muted);">-</span>{% endif %}
+                    {% if sub.grade is not None %}<strong>{{ sub.grade }}/100</strong>{% else %}<span style="color: var(--text-muted);">-</span>{% endif %}
                   </td>
                   <td style="text-align: right;">
                     <a href="{% url 'resources:submissions_hub' %}?resource_id={{ resource.pk }}" class="btn btn-ghost btn-sm">

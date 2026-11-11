@@ -2,6 +2,7 @@
 
 import os
 from datetime import timedelta
+from urllib.parse import urlsplit
 
 from django.conf import settings
 from django.contrib import messages
@@ -42,6 +43,12 @@ def login_view(request):
     """Sign in with email and password."""
     if request.user.is_authenticated:
         return redirect("core:dashboard")
+    dashboard_paths = {
+        reverse("core:dashboard"): "Student",
+        reverse("core:faculty_dashboard"): "Faculty",
+        reverse("core:admin_dashboard"): "Administrator",
+    }
+    expected_role = dashboard_paths.get(urlsplit(_safe_next(request)).path)
     if request.method == "POST":
         form = CustomAuthenticationForm(request, data=request.POST)
         email = (request.POST.get("username") or "").strip().lower()[:254]
@@ -72,6 +79,7 @@ def login_view(request):
         {
             "form": form,
             "next": _safe_next(request),
+            "expected_role": expected_role,
             "oauth_configured": _get_oauth_status(),
         },
     )
@@ -102,7 +110,7 @@ def logout_view(request):
     """Sign out and clear the session."""
     auth_logout(request)
     messages.info(request, "You have been signed out.")
-    return redirect("accounts:login")
+    return redirect(_safe_next(request, default="accounts:login"))
 
 
 def register_view(request):

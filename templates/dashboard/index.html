@@ -1,291 +1,169 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Student Learning Desk{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div class="page-header-content">
-    <h1 class="page-title">Dashboard</h1>
-    <p class="page-description">Welcome back, <strong>{{ user.get_full_name|default:user.email }}</strong> &bull; Access your lab documents and recent institutional uploads</p>
-  </div>
-  <div class="page-actions">
-    <a href="{% url 'resources:library' %}" class="btn btn-secondary">Browse Library</a>
-    <a href="{% url 'resources:upload' %}" class="btn btn-primary">Upload Resource</a>
-  </div>
-</div>
-
-<!-- Stats Grid -->
-<div class="stats-grid" data-animate="fade-up">
-  <div class="stat-card">
-    <span class="stat-label">Total Repository Items</span>
-    <span class="stat-value">{{ total_resources }}</span>
-    <span class="stat-meta">Active academic assets</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Your Uploads</span>
-    <span class="stat-value">{{ user_resources }}</span>
-    <span class="stat-meta">Authored by you</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Active Categories</span>
-    <span class="stat-value">{{ category_counts|length }}</span>
-    <span class="stat-meta">Classification groups</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Access Level</span>
-    <span class="stat-value" style="font-size: var(--text-2xl);">{{ user.get_role_display }}</span>
-    <span class="stat-meta">Authenticated session</span>
-  </div>
-</div>
-
-<div class="layout-split">
-  <!-- Recent Resources Section -->
-  <section class="card">
-    <div class="card-header">
-      <h2 class="card-title">Recently Added Resources</h2>
-      <a href="{% url 'resources:library' %}" class="btn btn-ghost btn-sm">View all &rarr;</a>
+<div class="role-dashboard role-dashboard--student" data-workspace="student">
+  <header class="workspace-hero student-hero">
+    <div class="workspace-hero-copy">
+      <span class="workspace-eyebrow">STUDENT WORKSPACE <span aria-hidden="true">/</span> YOUR CAMPUS</span>
+      <h1>Student Learning Desk</h1>
+      <p>Welcome back, <strong>{{ user.get_full_name|default:user.email }}</strong>. Pick up where you left off.</p>
     </div>
+    <div class="workspace-actions">
+      <a href="{% url 'resources:library' %}" class="workspace-button workspace-button--solid">Explore resources <span aria-hidden="true">↗</span></a>
+      <a href="{% url 'resources:instruments' %}" class="workspace-button workspace-button--outline">Book equipment</a>
+    </div>
+    <div class="student-hero-mark" aria-hidden="true">S</div>
+  </header>
 
-    {% if recent_activity %}
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Document Title</th>
-              <th>Category</th>
-              <th>Contributor</th>
-              <th>Visibility</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in recent_activity %}
-              <tr>
-                <td>
-                  <a href="{% url 'resources:details' r.pk %}" style="font-weight: var(--font-semibold); color: var(--text);">
-                    {{ r.title }}
-                  </a>
-                </td>
-                <td>{{ r.category.name|default:' - ' }}</td>
-                <td style="color: var(--text-muted); font-size: var(--text-xs);">
-                  {{ r.uploaded_by.get_full_name|default:r.uploaded_by.email }}
-                </td>
-                <td>
-                  {% if r.visibility == 'public' %}
-                    <span class="badge badge-success">Public</span>
-                  {% else %}
-                    <span class="badge">Private</span>
-                  {% endif %}
-                </td>
-                <td style="color: var(--text-subtle); font-size: var(--text-xs); white-space: nowrap;">
-                  {{ r.created_at|date:"M d, Y" }}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-          <polyline points="13 2 13 9 20 9"></polyline>
-        </svg>
-        <h3 class="empty-state-title">No resources uploaded yet</h3>
-        <p class="empty-state-desc">Your department repository has no documents listed. Be the first to upload a lab manual or practical experiment file.</p>
-        <a href="{% url 'resources:upload' %}" class="btn btn-primary">Upload First Resource</a>
-      </div>
-    {% endif %}
+  <section class="workspace-metrics student-metrics" aria-label="Your study activity">
+    <article class="workspace-metric">
+      <span class="metric-icon" aria-hidden="true">⌁</span>
+      <span class="metric-label">Active bookings</span>
+      <strong>{{ active_booking_count }}</strong>
+      <span class="metric-note">Equipment requests and reservations</span>
+    </article>
+    <article class="workspace-metric">
+      <span class="metric-icon" aria-hidden="true">◷</span>
+      <span class="metric-label">Awaiting feedback</span>
+      <strong>{{ waiting_submission_count }}</strong>
+      <span class="metric-note">Lab reports still with your instructor</span>
+    </article>
+    <article class="workspace-metric">
+      <span class="metric-icon" aria-hidden="true">☆</span>
+      <span class="metric-label">Saved manuals</span>
+      <strong>{{ saved_resource_count }}</strong>
+      <span class="metric-note">Resources bookmarked for later</span>
+    </article>
   </section>
 
-  <!-- Left Main Column Extension: Bookmarks & Student Submissions -->
-  <div style="display: flex; flex-direction: column; gap: var(--space-6);">
-    {% if pending_submissions_count > 0 %}
-      <section class="card" style="border-left: 4px solid var(--primary); background: #fdf2f8;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-2);">
+  <div class="student-workspace-grid">
+    <div class="student-main-stack">
+      <section class="workspace-panel student-panel" aria-labelledby="student-bookings-title">
+        <div class="workspace-panel-heading">
           <div>
-            <h3 style="font-size: var(--text-sm); font-weight: var(--font-bold); color: var(--brand-purple); margin: 0 0 4px 0;">
-              Pending Student Submissions ({{ pending_submissions_count }})
-            </h3>
-            <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;">
-              Student laboratory practical reports awaiting faculty assessment and grading.
-            </p>
+            <span class="panel-kicker">LAB ACCESS</span>
+            <h2 id="student-bookings-title">My Bookings</h2>
+            <p>Track approval, collection, and return of your equipment.</p>
           </div>
-          <a href="{% url 'resources:submissions_hub' %}" class="btn btn-primary btn-sm">
-            Evaluate Queue &rarr;
-          </a>
+          <a href="{% url 'resources:instruments' %}" class="text-action">Browse instruments <span aria-hidden="true">→</span></a>
         </div>
+        {% if user_bookings %}
+          <div class="student-booking-list">
+            {% for booking in user_bookings %}
+              <article class="student-booking-row">
+                <div class="booking-date-block">
+                  <strong>{{ booking.start_time|date:"d" }}</strong>
+                  <span>{{ booking.start_time|date:"M" }}</span>
+                </div>
+                <div class="booking-row-info">
+                  <strong>{{ booking.instrument.name }}</strong>
+                  <span>{{ booking.start_time|date:"D, M j · H:i" }}–{{ booking.end_time|date:"H:i" }}</span>
+                </div>
+                <div class="booking-row-status">
+                  <span class="status-pill status-pill--{{ booking.status }}">{{ booking.get_status_display }}</span>
+                  {% if booking.issue %}
+                    <span class="booking-due{% if booking.issue.is_overdue %} booking-due--late{% endif %}">{% if booking.issue.is_overdue %}Overdue · {% else %}Return by · {% endif %}{{ booking.issue.due_at|date:"M j, H:i" }}</span>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="workspace-empty">
+            <span class="empty-orbit" aria-hidden="true">⌁</span>
+            <div><strong>Your next lab starts here</strong><p>No equipment bookings yet. Find an instrument and request a time.</p></div>
+            <a href="{% url 'resources:instruments' %}" class="text-action">Find equipment <span aria-hidden="true">→</span></a>
+          </div>
+        {% endif %}
       </section>
-    {% endif %}
 
-    <!-- Starred / Bookmarked Resources -->
-    {% if user_bookmarks %}
-      <section class="card" data-animate="fade-up">
-        <div class="card-header">
-          <h2 class="card-title">Bookmarked Course Manuals</h2>
-          <span class="badge" style="background: #fef9c3; color: #854d0e;">{{ user_bookmarks|length }} Starred</span>
+      <section class="workspace-panel student-panel" aria-labelledby="student-submissions-title">
+        <div class="workspace-panel-heading">
+          <div>
+            <span class="panel-kicker">COURSEWORK</span>
+            <h2 id="student-submissions-title">My Submissions</h2>
+            <p>See where each lab report is in the review process.</p>
+          </div>
+          <a href="{% url 'resources:submissions_hub' %}" class="text-action">All submissions <span aria-hidden="true">→</span></a>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-3);">
-          {% for b in user_bookmarks %}
-            <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); background: var(--surface-alt);">
-              <span class="badge" style="font-size: 10px; margin-bottom: var(--space-1); display: inline-block;">
-                {{ b.resource.category.name|default:'General' }}
-              </span>
-              <a href="{% url 'resources:details' b.resource.pk %}" style="display: block; font-weight: var(--font-semibold); font-size: var(--text-sm); color: var(--text); text-decoration: none; margin-bottom: var(--space-2);">
-                {{ b.resource.title|truncatechars:38 }}
+        {% if user_submissions %}
+          <div class="student-submission-list">
+            {% for submission in user_submissions %}
+              <a class="student-submission-row" href="{% url 'resources:details' submission.resource_id %}">
+                <span class="submission-file-mark" aria-hidden="true">PDF</span>
+                <span class="submission-row-info"><strong>{{ submission.resource.title|truncatechars:48 }}</strong><small>Submitted {{ submission.submitted_at|date:"M j, Y" }}</small></span>
+                <span class="submission-row-result">
+                  <span class="status-pill status-pill--{{ submission.status }}">{{ submission.get_status_display }}</span>
+                  {% if submission.grade is not None %}<strong>{{ submission.grade }}/100</strong>{% else %}<small>Grade pending</small>{% endif %}
+                </span>
               </a>
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs);">
-                <span style="color: var(--text-muted);">{{ b.created_at|date:'M d' }}</span>
-                <a href="{% url 'resources:details' b.resource.pk %}" class="btn btn-ghost btn-sm" style="padding: 2px 8px;">View</a>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="workspace-empty">
+            <span class="empty-orbit" aria-hidden="true">↗</span>
+            <div><strong>No reports submitted</strong><p>Open a course resource to submit your completed lab work.</p></div>
+            <a href="{% url 'resources:library' %}" class="text-action">Find a manual <span aria-hidden="true">→</span></a>
+          </div>
+        {% endif %}
       </section>
-    {% endif %}
+    </div>
 
-    <!-- Student Practical Submissions Track -->
-    {% if user.is_student and user_submissions %}
-      <section class="card" data-animate="fade-up">
-        <div class="card-header">
-          <h2 class="card-title">My Lab Practical Submissions</h2>
-          <a href="{% url 'resources:submissions_hub' %}" class="btn btn-ghost btn-sm">All Submissions &rarr;</a>
+    <aside class="student-side-stack">
+      <section class="workspace-panel saved-panel" aria-labelledby="student-saved-title">
+        <div class="workspace-panel-heading workspace-panel-heading--compact">
+          <div><span class="panel-kicker">YOUR SHORTLIST</span><h2 id="student-saved-title">My Saved Manuals</h2></div>
+          <span class="saved-count">{{ saved_resource_count }}</span>
         </div>
-        <div class="table-container">
-          <table class="table" style="font-size: var(--text-xs);">
-            <thead>
-              <tr>
-                <th>Lab Manual</th>
-                <th>Submitted</th>
-                <th>Status</th>
-                <th>Score</th>
-                <th style="text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sub in user_submissions %}
-                <tr>
-                  <td>
-                    <a href="{% url 'resources:details' sub.resource.pk %}" style="font-weight: var(--font-semibold); color: var(--text);">
-                      {{ sub.resource.title|truncatechars:32 }}
-                    </a>
-                  </td>
-                  <td>{{ sub.submitted_at|date:'M d, Y' }}</td>
-                  <td>
-                    {% if sub.status == 'reviewed' %}
-                      <span class="badge badge-success">Reviewed</span>
-                    {% elif sub.status == 'resubmission' %}
-                      <span class="badge" style="background: #fef3c7; color: #92400e;">Resubmit</span>
-                    {% else %}
-                      <span class="badge badge-info">Submitted</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if sub.score is not None %}<strong>{{ sub.score }}/100</strong>{% else %}<span style="color: var(--text-muted);">Pending</span>{% endif %}
-                  </td>
-                  <td style="text-align: right;">
-                    <a href="{% url 'resources:details' sub.resource.pk %}" class="btn btn-ghost btn-sm">Details</a>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+        {% if user_bookmarks %}
+          <ul class="saved-resource-list">
+            {% for bookmark in user_bookmarks %}
+              <li><a href="{% url 'resources:details' bookmark.resource_id %}"><span class="saved-resource-mark" aria-hidden="true">☆</span><span><strong>{{ bookmark.resource.title|truncatechars:34 }}</strong><small>{{ bookmark.resource.category.name|default:"General" }} · Saved {{ bookmark.created_at|date:"M j" }}</small></span><span aria-hidden="true">↗</span></a></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="panel-empty-copy">Bookmark a manual from the library and it will be waiting here.</p>
+        {% endif %}
+        <a href="{% url 'resources:library' %}" class="panel-bottom-link">Browse the library <span aria-hidden="true">→</span></a>
       </section>
-    {% endif %}
 
-    <!-- Equipment Reservations Track -->
-    {% if user_bookings %}
-      <section class="card" data-animate="fade-up">
-        <div class="card-header">
-          <h2 class="card-title">My Instrument Reservations</h2>
-          <a href="{% url 'resources:instruments' %}" class="btn btn-ghost btn-sm">View Instruments &rarr;</a>
-        </div>
-        <div class="table-container">
-          <table class="table" style="font-size: var(--text-xs);">
-            <thead>
-              <tr>
-                <th>Instrument</th>
-                <th>Time Slot</th>
-                <th>Purpose</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for b in user_bookings %}
-                <tr>
-                  <td><strong>{{ b.instrument.name }}</strong></td>
-                  <td>{{ b.start_time|date:'M d, H:i' }} - {{ b.end_time|date:'H:i' }}</td>
-                  <td>{{ b.purpose|truncatechars:28 }}</td>
-                  <td>
-                    <span class="badge {% if b.status == 'pending' %}badge-warning{% else %}badge-success{% endif %}">{{ b.get_status_display }}</span>
-                    {% if b.issue %}
-                      <div style="margin-top: 4px;">Due {{ b.issue.due_at|date:'M d, H:i' }}{% if b.issue.is_overdue %} - Overdue{% endif %}</div>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+      <section class="workspace-panel student-shortcuts" aria-labelledby="student-shortcuts-title">
+        <span class="panel-kicker">QUICK START</span>
+        <h2 id="student-shortcuts-title">What are you working on?</h2>
+        <a href="{% url 'resources:library' %}" class="shortcut-row"><span class="shortcut-icon" aria-hidden="true">⌕</span><span><strong>Find a lab manual</strong><small>Search by course or topic</small></span><span aria-hidden="true">→</span></a>
+        <a href="{% url 'resources:instruments' %}" class="shortcut-row"><span class="shortcut-icon" aria-hidden="true">⌁</span><span><strong>Reserve equipment</strong><small>Choose an instrument and time</small></span><span aria-hidden="true">→</span></a>
+        <a href="{% url 'resources:verify' %}" class="shortcut-row"><span class="shortcut-icon" aria-hidden="true">✓</span><span><strong>Verify a document</strong><small>Check its integrity record</small></span><span aria-hidden="true">→</span></a>
       </section>
-    {% endif %}
+
+      <section class="student-note-card">
+        <span aria-hidden="true">✦</span>
+        <div><strong>Keep your lab work together</strong><p>Use bookmarks for manuals you need this week.</p></div>
+      </section>
+    </aside>
   </div>
 
-  <!-- Side Column: Categories & Quick Links -->
-  <div style="display: flex; flex-direction: column; gap: var(--space-6);">
-    <section class="card">
-      <div class="card-header">
-        <h2 class="card-title">Categories</h2>
-      </div>
-
-      {% if category_counts %}
-        <div class="table-container">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Classification</th>
-                <th style="text-align: right;">Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for c in category_counts %}
-                <tr>
-                  <td>{{ c.category__name|default:'Uncategorized' }}</td>
-                  <td style="text-align: right; font-weight: var(--font-semibold); color: var(--primary);">{{ c.count }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="empty-state" style="padding: var(--space-6) 0;">
-          <p class="empty-state-desc">No categories defined yet.</p>
-        </div>
-      {% endif %}
-    </section>
-
-    <section class="card" style="background-color: var(--surface-alt);">
-      <h2 class="card-title" style="margin-bottom: var(--space-3);">Quick Actions</h2>
-      <div style="display: flex; flex-direction: column; gap: var(--space-2);">
-        <a href="{% url 'resources:upload' %}" class="btn btn-outline btn-block" style="justify-content: flex-start;">
-          <span>+ Upload New Document</span>
-        </a>
-        <a href="{% url 'resources:library' %}" class="btn btn-ghost btn-block" style="justify-content: flex-start;">
-          <span>&rarr; Browse Resource Catalog</span>
-        </a>
-        <a href="{% url 'resources:submissions_hub' %}" class="btn btn-ghost btn-block" style="justify-content: flex-start;">
-          <span>&rarr; Submissions &amp; Grades Hub</span>
-        </a>
-        <a href="{% url 'resources:instruments' %}" class="btn btn-ghost btn-block" style="justify-content: flex-start;">
-          <span>&rarr; Lab Instruments &amp; Scheduling</span>
-        </a>
-        <a href="{% url 'accounts:settings' %}" class="btn btn-ghost btn-block" style="justify-content: flex-start;">
-          <span>&rarr; Manage Security Settings</span>
-        </a>
-      </div>
-    </section>
-  </div>
+  <section class="workspace-panel student-resources-panel" aria-labelledby="student-resources-title">
+    <div class="workspace-panel-heading">
+      <div><span class="panel-kicker">FRESH FROM THE REPOSITORY</span><h2 id="student-resources-title">Recently Added Resources</h2><p>New manuals and materials available to you.</p></div>
+      <a href="{% url 'resources:library' %}" class="text-action">View library <span aria-hidden="true">→</span></a>
+    </div>
+    {% if recent_activity %}
+      <ul class="student-resource-grid">
+        {% for resource in recent_activity %}
+          <li class="student-resource-card">
+            <div class="resource-card-topline"><span class="resource-type-mark">{% if resource.content_type == 'application/pdf' %}PDF{% else %}FILE{% endif %}</span><span class="resource-visibility">{% if resource.visibility == 'public' %}OPEN{% else %}PRIVATE{% endif %}</span></div>
+            <h3><a href="{% url 'resources:details' resource.pk %}">{{ resource.title|truncatechars:54 }}</a></h3>
+            <p>{{ resource.category.name|default:"General" }} · {{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.email }}</p>
+            <a href="{% url 'resources:details' resource.pk %}" class="resource-card-link">Open resource <span aria-hidden="true">→</span></a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="workspace-empty"><span class="empty-orbit" aria-hidden="true">⌕</span><div><strong>No resources yet</strong><p>New course materials will appear here when they are published.</p></div><a href="{% url 'resources:library' %}" class="text-action">Browse library <span aria-hidden="true">→</span></a></div>
+    {% endif %}
+  </section>
 </div>
 {% endblock %}

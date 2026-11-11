@@ -78,6 +78,8 @@ MIDDLEWARE = [
     # Social auth exception middleware
     "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
+if not DEBUG:
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "labvault_project.urls"
 
@@ -118,6 +120,7 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
 DB_DRIVER = os.environ.get("DB_DRIVER", "ODBC Driver 18 for SQL Server")
 DB_TRUSTED_CONNECTION = _get_bool("DB_TRUSTED_CONNECTION", False)
 DB_ENCRYPT = _get_bool("DB_ENCRYPT", True)
+DB_AUTH_MODE = os.environ.get("DB_AUTH_MODE", "password").strip().lower()
 
 if DB_ENGINE == "mssql":
     DATABASES = {
@@ -135,10 +138,17 @@ if DB_ENGINE == "mssql":
         }
     }
 
+    sql_extra_params = []
     if DB_ENCRYPT:
-        DATABASES["default"]["OPTIONS"][
-            "extra_params"
-        ] = "Encrypt=yes;TrustServerCertificate=no"
+        sql_extra_params.extend(["Encrypt=yes", "TrustServerCertificate=no"])
+    if DB_AUTH_MODE == "managed_identity":
+        sql_extra_params.append("Authentication=ActiveDirectoryMsi")
+        DATABASES["default"].pop("USER")
+        DATABASES["default"].pop("PASSWORD")
+    elif DB_AUTH_MODE != "password":
+        raise ImproperlyConfigured("DB_AUTH_MODE must be 'password' or 'managed_identity'.")
+    if sql_extra_params:
+        DATABASES["default"]["OPTIONS"]["extra_params"] = ";".join(sql_extra_params)
 else:
     DATABASES = {
         "default": {
@@ -179,6 +189,22 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+    },
+}
+if not DEBUG:
+    STORAGES["staticfiles"]["BACKEND"] = (
+        "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    )
+
+# App Service terminates HTTPS at its front-end proxy and forwards this trusted
+# header to the Django worker, allowing secure redirects to detect HTTPS.
+if os.environ.get("WEBSITE_SITE_NAME"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 MEDIA_URL = "/media/"
 _media_root = Path(os.environ.get("MEDIA_ROOT", "media")).expanduser()

@@ -26,6 +26,7 @@ db_test.sqlite3
 # Local file storage
 storage/
 media/
+staticfiles/
 
 # Test & coverage artefacts
 .pytest_cache/
@@ -57,3 +58,4 @@ _backup_before_redesign/
 
 # Large, platform-specific Framer preview application. Keep locally, out of Git.
 Framer/
+.copilot-azure/

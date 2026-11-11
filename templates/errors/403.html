@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}403  -  Access Denied{% endblock %}
+{% block title %}Role access needed — LabVault{% endblock %}
 
 {% block content %}
 <div class="auth-page">
@@ -9,13 +9,33 @@
     <div style="font-family: var(--font-serif); font-size: 4rem; font-weight: bold; color: var(--error); line-height: 1; margin-bottom: var(--space-2);">
       403
     </div>
-    <h1 class="auth-title" style="margin-bottom: var(--space-2);">Access Denied</h1>
-    <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
-      {{ message|default:'You do not have permission to access or modify this confidential academic document.' }}
-    </p>
-    <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="btn btn-primary btn-block btn-lg">
-      Return to Safety
-    </a>
+    {% if required_role %}
+      <h1 class="auth-title" style="margin-bottom: var(--space-2);">This is the {{ required_role }} workspace</h1>
+      <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
+        You are signed in with {{ current_role_article }} {{ current_role }} account. This page is for {{ required_role }} accounts. Sign in with an account assigned to the {{ required_role }} role to continue.
+      </p>
+      <a href="{{ dashboard_url }}" class="btn btn-primary btn-block btn-lg">
+        Go to my {{ current_role }} dashboard
+      </a>
+      <form method="post" action="{% url 'accounts:logout' %}" style="margin-top: var(--space-3);">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ switch_login_url }}">
+        <button type="submit" class="btn btn-outline btn-block btn-lg">
+          Switch to the {{ required_role }} sign-in
+        </button>
+      </form>
+      <p class="auth-subtitle" style="margin-top: var(--space-4); font-size: var(--text-xs);">
+        Your account permissions stay protected. Signing out lets you choose the correct account.
+      </p>
+    {% else %}
+      <h1 class="auth-title" style="margin-bottom: var(--space-2);">Access Denied</h1>
+      <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
+        {{ message|default:'You do not have permission to access or modify this confidential academic document.' }}
+      </p>
+      <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="btn btn-primary btn-block btn-lg">
+        Return to Safety
+      </a>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
