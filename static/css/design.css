@@ -68,23 +68,8 @@ body {
   margin: 0;
 }
 
-/* Self-hosted font placeholders  -  add font files under static/fonts/ and
-   uncomment/adjust these when available.
-@font-face {
-  font-family: "LabVault Display";
-  src: url("/static/fonts/labvault-display.woff2") format("woff2");
-  font-weight: 400 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "LabVault Text";
-  src: url("/static/fonts/labvault-text.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-*/
+/* Self-hosted font placeholders: add .woff2 files under static/fonts/ and
+   define @font-face rules when local font assets are provided. */
 
 /* ---------- Landing page components ---------- */
 .hero {
