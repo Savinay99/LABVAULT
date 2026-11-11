@@ -1,4 +1,4 @@
-# Security — LabVault
+# Security - LabVault
 
 ## Implemented Controls
 
