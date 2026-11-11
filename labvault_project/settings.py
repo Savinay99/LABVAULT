@@ -205,9 +205,9 @@ if not DEBUG:
         "whitenoise.storage.CompressedManifestStaticFilesStorage"
     )
 
-# App Service terminates HTTPS at its front-end proxy and forwards this trusted
-# header to the Django worker, allowing secure redirects to detect HTTPS.
-if os.environ.get("WEBSITE_SITE_NAME"):
+# App Service and Render terminate HTTPS at their front-end proxies and forward
+# this header to the Django worker, allowing secure redirects to detect HTTPS.
+if os.environ.get("WEBSITE_SITE_NAME") or _get_bool("RENDER"):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 MEDIA_URL = "/media/"

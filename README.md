@@ -19,6 +19,7 @@ LabVault is an academic laboratory resource, equipment scheduling, and student r
 - [Project Folder Structure](#project-folder-structure)
 - [Installation and Local Setup](#installation-and-local-setup)
 - [Environment Variable Configuration](#environment-variable-configuration)
+- [Render Docker Deployment](#render-docker-deployment)
 - [Database Setup Instructions](#database-setup-instructions)
 - [Screenshots](#screenshots)
 - [Security Features Implemented](#security-features-implemented)
@@ -370,6 +371,51 @@ All sensitive settings and runtime switches are injected via environment variabl
 | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | `<your-smtp-user>`, `<your-smtp-password>` | SMTP credentials (never commit real values) |
 | `DEFAULT_FROM_EMAIL` | `LabVault <no-reply@labvault.local>` | Sender header for password reset messages |
 | `SOCIAL_AUTH_*` | *(optional / empty)* | Google, Microsoft, and GitHub OAuth2 client keys and secrets |
+
+---
+
+## Render Docker Deployment
+
+LabVault includes a Docker image for Render with Python 3.12, Microsoft's Debian 12 package repository, unixODBC, and Microsoft ODBC Driver 18. `pyodbc` and Gunicorn are installed from `requirements.txt`. The container runs as an unprivileged user. It collects static files when the container starts, then runs the existing Django WSGI application with Gunicorn. It does not run database migrations.
+
+In Render, create a Web Service from this repository and select the Docker runtime. Set the root directory to the repository root and the Dockerfile path to `./Dockerfile`. Leave the Docker Command override empty so Render uses the command from the Dockerfile.
+
+Set these environment variables in the Render service settings:
+
+| Variable | Value |
+|---|---|
+| `DJANGO_SETTINGS_MODULE` | `labvault_project.settings` |
+| `DJANGO_DEBUG` | `False` |
+| `DJANGO_SECRET_KEY` | Generate a strong private value in Render. Do not put it in the repository or Dockerfile. |
+| `ALLOWED_HOSTS` | The service hostname, for example `labvault.onrender.com` |
+| `CSRF_TRUSTED_ORIGINS` | The HTTPS origin, for example `https://labvault.onrender.com` |
+| `SESSION_COOKIE_SECURE` | `True` |
+| `CSRF_COOKIE_SECURE` | `True` |
+| `PORT` | Leave unset so Render supplies it. The container defaults to `10000` for local runs. |
+
+Render sets `RENDER=true` automatically. Django uses Render's forwarded HTTPS protocol header when this value is present, so the production HTTPS redirect can distinguish proxy HTTPS requests from the internal HTTP connection.
+
+Configure the existing database through these Django environment variables in Render:
+
+| Variable | Value |
+|---|---|
+| `DB_ENGINE` | `mssql` |
+| `DB_AUTH_MODE` | `password` for a SQL login |
+| `DB_HOST` | Existing SQL server hostname |
+| `DB_PORT` | `1433` |
+| `DB_NAME` | Existing database name |
+| `DB_USER` | Existing SQL login name |
+| `DB_PASSWORD` | Existing SQL password, stored as a Render secret |
+| `DB_DRIVER` | `ODBC Driver 18 for SQL Server` |
+| `DB_TRUSTED_CONNECTION` | `False` |
+| `DB_ENCRYPT` | `True` |
+| `DB_TRUST_SERVER_CERTIFICATE` | `False` |
+
+Do not place database credentials in the image, Dockerfile, or README.
+
+Static assets use Django's production WhiteNoise storage and are collected by `startup.sh`. Uploaded files use local storage unless Azure Blob Storage or another persistent storage configuration is supplied. A container filesystem is not persistent across replacements, so configure durable storage before accepting uploads in production.
+
+Build locally with `docker build -t labvault .` and run with the required Django and database environment variables supplied at runtime. Do not pass production secrets as Docker build arguments. Database migrations are a separate controlled operation and are not run by the image.
 
 ---
 

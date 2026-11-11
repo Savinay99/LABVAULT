@@ -160,6 +160,36 @@ def test_production_security_flags_default_to_secure():
     assert result.stdout.strip() == "False|True|True|True|True|31536000"
 
 
+def test_render_uses_forwarded_proto_for_https_detection():
+    root = os.path.dirname(os.path.dirname(__file__))
+    env = os.environ.copy()
+    env.update(
+        {
+            "DJANGO_SETTINGS_MODULE": "labvault_project.settings",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_SECRET_KEY": "valid-test-secret-not-for-production",
+            "DB_ENGINE": "sqlite",
+            "RENDER": "true",
+        }
+    )
+    env.pop("WEBSITE_SITE_NAME", None)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from django.conf import settings; print(settings.SECURE_PROXY_SSL_HEADER)",
+        ],
+        cwd=root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "('HTTP_X_FORWARDED_PROTO', 'https')"
+
+
 def test_media_root_can_be_configured_through_environment():
     root = os.path.dirname(os.path.dirname(__file__))
     env = os.environ.copy()
