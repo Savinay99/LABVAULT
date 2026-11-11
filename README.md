@@ -2,7 +2,9 @@
 
 LabVault is an academic laboratory resource, equipment scheduling, and student report submission web application built with Django 5.2. It provides role-separated workspaces for students, faculty members, and laboratory administrators, backed by a Third Normal Form (3NF) relational schema, cryptographic file integrity verification, and configurable local or Microsoft Azure cloud backends.
 
-> **Project status note:** The core Django application runs locally with SQLite (`DB_ENGINE=sqlite`) and local protected file storage. Full Microsoft Azure SQL Database and Azure Blob Storage integration is configured in code (`mssql-django`, `pyodbc`, `azure-storage-blob`) and remains under active environment integration.
+**Live deployment:** [https://labvault-emdg.onrender.com](https://labvault-emdg.onrender.com) | **Source:** [https://github.com/Savinay99/LABVAULT](https://github.com/Savinay99/LABVAULT)
+
+> **Project status:** The application is deployed on Render using Docker with Microsoft ODBC Driver 18 and Azure SQL Database as the production database. Local development uses SQLite (`DB_ENGINE=sqlite`). Azure Blob Storage integration is configured in code and can be enabled via environment variable.
 
 ---
 
@@ -442,7 +444,7 @@ python -m pytest -q
 
 ### Option C: Microsoft SQL Server / Azure SQL Database Target
 
-Live Azure SQL integration is still in progress on the target environment, and the codebase already includes the `mssql-django` + `pyodbc` configuration required when connecting:
+The `mssql-django` + `pyodbc` configuration is active in the production deployment on Render. To apply Django schema migrations to an Azure SQL or SQL Server database:
 
 1. Ensure Microsoft ODBC Driver 18 for SQL Server (or Driver 17, matching `DB_DRIVER`) is installed on your machine.
 2. In your local ignored `.env`, configure `DB_ENGINE=mssql`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_ENCRYPT=True`, and `DB_TRUST_SERVER_CERTIFICATE=False`.
@@ -514,13 +516,14 @@ LabVault was built to demonstrate core software engineering and cloud data compe
 ## Current Development Status and Future Improvements
 
 ### Current Development Status
-- **Active Django Application**: Verified functional locally with SQLite (`DB_ENGINE=sqlite`) across authentication, role-separated dashboards, resource uploads/downloads, instrument catalog and conflict-checked bookings, issue/return flows, maintenance logs, submission grading, ReportLab PDF manual generation, cryptographic hash verification, and CSV/JSON exports.
-- **Automated Test Suite**: Verified locally on `labvault_project.settings_test` (`python -m pytest -q` -> **117 passed, 1 warning**, from the third-party `openid` dependency using deprecated `defusedxml.cElementTree`).
-- **Azure Integration Status**: Django SQL Server settings (`mssql-django`, `pyodbc`, `DB_AUTH_MODE=managed_identity|password`) and `AzureBlobStorage` backend code are in place, while live Azure SQL Database connection rollout, App Service hosting, and Blob Storage provisioning remain in progress.
+- **Live Deployment**: The application is deployed and accessible at [https://labvault-emdg.onrender.com](https://labvault-emdg.onrender.com) on Render, using Docker (Python 3.12, ODBC Driver 18) and Azure SQL Database as the production database.
+- **Active Django Application**: Verified functional across authentication, role-separated dashboards, resource uploads/downloads, instrument catalog and conflict-checked bookings, issue/return flows, maintenance logs, submission grading, ReportLab PDF manual generation, cryptographic hash verification, and CSV/JSON exports.
+- **Automated Test Suite**: Verified on `labvault_project.settings_test` (`python -m pytest -q` -> **117 passed, 1 warning**, from the third-party `openid` dependency using deprecated `defusedxml.cElementTree`).
+- **Azure Integration**: Azure SQL Database is used as the production database via `mssql-django` and `pyodbc` with ODBC Driver 18. Azure Blob Storage backend code (`AzureBlobStorage`) is implemented and can be enabled via `AZURE_STORAGE_CONNECTION_STRING`.
 - **Legacy Compatibility Code Retained**: `app/` (legacy Flask modules still imported by unit tests in `tests/`) and `database/` reference T-SQL scripts are retained without removing working application code; dormant unintegrated prototypes and local-only directories (`Framer/`) are excluded via `.gitignore`.
 
 ### Planned Future Improvements
-- **Complete Azure Cloud Rollout**: Provision Azure App Service and private Azure Blob Storage container, verify Linux ODBC Driver 18 connectivity in runtime, and finalize live Azure SQL Database workflows.
-- **Managed Identity & Key Vault**: Replace environment-injected credentials with Microsoft Entra ID Managed Identity (`DB_AUTH_MODE=managed_identity`) and Azure Key Vault secret references.
+- **Azure Blob Storage**: Enable persistent file uploads in production by configuring a private Azure Blob Storage container and setting `AZURE_STORAGE_CONNECTION_STRING` in Render.
+- **Managed Identity and Key Vault**: Replace environment-injected credentials with Microsoft Entra ID Managed Identity (`DB_AUTH_MODE=managed_identity`) and Azure Key Vault secret references.
 - **Additional Security Hardening**: Add TOTP multi-factor authentication for privileged roles, explicit Content-Security-Policy middleware headers, automated orphan blob cleanup jobs, and production SMTP email alerts.
-- **UI & Maintenance Polish**: Make the cinematic loader overlay dismissible per session, serve `/favicon.ico`, add captured UI screenshots under `docs/screenshots/`, and retire legacy `app/` compatibility tests once migrated fully to Django equivalents.
+- **UI and Maintenance Polish**: Make the cinematic loader overlay dismissible per session, serve `/favicon.ico`, add captured UI screenshots under `docs/screenshots/`, and retire legacy `app/` compatibility tests once migrated fully to Django equivalents.
