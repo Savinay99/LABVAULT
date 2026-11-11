@@ -1,0 +1,31 @@
+/* GSAP animation utilities  -  reduced-motion aware.
+   Animations are purposeful: entrance fades for page content and cards.
+   No decorative or gratuitous motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Fade-up entrance used on cards/sections. */
+[data-animate="fade-up"] {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp var(--transition, 150ms) ease forwards;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Subtle page-load reveal for hero/landing content. */
+[data-animate="fade-in"] {
+  opacity: 0;
+  animation: fadeIn var(--transition, 200ms) ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}

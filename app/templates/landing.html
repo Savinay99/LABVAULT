@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <h1>LabVault</h1>
+    <p class="lead">A secure academic laboratory resource and document management portal for students and educators. Upload, organize, and share lab manuals, experiment documents, practical notes, source code, and project files.</p>
+    <div class="hero-actions">
+      {% if session.user_id %}
+        <a href="{{ url_for('resources.library') }}" class="btn btn-primary">Go to Library</a>
+        <a href="{{ url_for('resources.upload') }}" class="btn btn-ghost">Upload Resource</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Sign in</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-ghost">Create an account</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="features" aria-label="Features">
+  <h2 class="section-title"><span>Built for academic work</span>Features</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h3>Organize Resources</h3>
+      <p>Upload and manage lab manuals, experiment documents, practical notes, source code files, project documents, and academic reference materials.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Search &amp; Filter</h3>
+      <p>Find resources quickly with full-text search, category and subject filters, sorting, and pagination.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Access Control</h3>
+      <p>Role-based authorization keeps private resources private. Administrators moderate content and review audit logs.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Secure Storage</h3>
+      <p>Files are stored outside application directories, served only to authorized users, with type and size validation.</p>
+    </div>
+  </div>
+</section>
+
+<section class="workflow" aria-label="How it works">
+  <h2 class="section-title"><span>Get started in three steps</span>How it works</h2>
+  <div class="workflow-steps">
+    <div class="workflow-step">
+      <span class="step-number">1</span>
+      <h3>Create an account</h3>
+      <p>Register with your academic email and sign in to access your personal resource library.</p>
+    </div>
+    <div class="workflow-step">
+      <span class="step-number">2</span>
+      <h3>Upload resources</h3>
+      <p>Upload lab manuals, experiment documents, notes, and source code with categories, subjects, and visibility controls.</p>
+    </div>
+    <div class="workflow-step">
+      <span class="step-number">3</span>
+      <h3>Access and share</h3>
+      <p>Browse the library, download authorized resources, and manage your uploads from your dashboard.</p>
+    </div>
+  </div>
+</section>
+
+<section class="security-info" aria-label="Security">
+  <h2 class="section-title"><span>Security by design</span>Security</h2>
+  <div class="security-grid">
+    <div class="security-card">
+      <h3>Passwords hashed</h3>
+      <p>Credentials are never stored in plaintext. Industry-standard password hashing protects every account.</p>
+    </div>
+    <div class="security-card">
+      <h3>Session security</h3>
+      <p>HttpOnly, SameSite cookies with session expiration and regeneration after login. CSRF protection on state-changing actions.</p>
+    </div>
+    <div class="security-card">
+      <h3>Safe uploads</h3>
+      <p>File type and size validation, unpredictable storage keys, and authorization-checked downloads prevent malicious files.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

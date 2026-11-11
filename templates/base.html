@@ -1,0 +1,230 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LabVault{% endblock %} - Academic Resource Management Platform</title>
+  <meta name="description" content="Professional, secure academic laboratory resource and document repository.">
+
+  <!-- Typography: Fraunces (Headings) + Inter (Body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Design Tokens loaded first, followed by Shared Components -->
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboards.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}>
+  <!-- 3D Cinematic Loader Overlay with Smooth Transitions -->
+  {% include "includes/loader_3d.html" %}
+
+  {% block skip_link %}
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  {% endblock %}
+
+  {% block header %}
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}" class="brand" aria-label="LabVault Home">
+        {% include "includes/logo.html" with size="md" %}
+      </a>
+
+      {% if user.is_authenticated %}
+      <nav class="top-nav" aria-label="Primary navigation">
+        {% if user.is_administrator %}
+          <span class="role-chip role-chip--admin">Operations Console</span>
+          <a href="{% url 'core:admin_dashboard' %}" class="nav-link">Overview</a>
+          <a href="{% url 'resources:instruments' %}" class="nav-link">Equipment</a>
+          <a href="{% url 'accounts:security_log' %}" class="nav-link">Audit</a>
+        {% elif user.is_faculty %}
+          <span class="role-chip role-chip--faculty">Teaching Workbench</span>
+          <a href="{% url 'core:faculty_dashboard' %}" class="nav-link">Overview</a>
+          <a href="{% url 'resources:submissions_hub' %}" class="nav-link">Review Queue</a>
+          <a href="{% url 'resources:upload' %}" class="nav-link">Publish</a>
+        {% else %}
+          <span class="role-chip role-chip--student">Learning Desk</span>
+          <a href="{% url 'core:dashboard' %}" class="nav-link">Overview</a>
+          <a href="{% url 'resources:library' %}" class="nav-link">Library</a>
+          <a href="{% url 'resources:instruments' %}" class="nav-link">Equipment</a>
+        {% endif %}
+        <form method="post" action="{% url 'accounts:logout' %}" style="display: inline; margin-left: 8px;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline btn-sm">Sign out</button>
+        </form>
+      </nav>
+
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      {% else %}
+      <nav class="top-nav" aria-label="Authentication navigation">
+        <a href="{% url 'core:landing' %}" class="nav-link">Home</a>
+        <a href="{% url 'resources:library' %}" class="nav-link">Library</a>
+        <a href="{% url 'resources:instruments' %}" class="nav-link {% if request.resolver_match.url_name == 'instruments' %}active{% endif %}">Instruments</a>
+        <a href="{% url 'resources:submissions_hub' %}" class="nav-link {% if request.resolver_match.url_name == 'submissions_hub' %}active{% endif %}">Submissions</a>
+        <a href="{% url 'resources:departments' %}" class="nav-link">Departments</a>
+        <a href="{% url 'core:about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+        <a href="{% url 'accounts:login' %}" class="nav-link">Sign in</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-pill btn-pill-dark btn-sm">Create account</a>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  {% endblock %}
+
+  {# Unified layout container #}
+  <div class="{% if user.is_authenticated and not hide_sidebar %}app-shell{% if user.is_administrator %} role-shell--admin" data-role="administrator{% elif user.is_faculty %} role-shell--faculty" data-role="faculty{% else %} role-shell--student" data-role="student{% endif %}{% else %}guest-layout{% endif %}">
+    {% if user.is_authenticated and not hide_sidebar %}
+    <aside class="app-sidebar" aria-label="Dashboard navigation">
+      <div class="workspace-identity">
+        <span class="workspace-monogram" aria-hidden="true">{% if user.is_administrator %}A{% elif user.is_faculty %}F{% else %}S{% endif %}</span>
+        <div>
+          <strong>{% if user.is_administrator %}Operations{% elif user.is_faculty %}Teaching{% else %}Student{% endif %}</strong>
+          <span>{{ user.full_name|truncatechars:22 }}</span>
+        </div>
+      </div>
+      <div class="sidebar-section-title">{% if user.is_administrator %}Platform Control{% elif user.is_faculty %}Teaching Tools{% else %}My Campus{% endif %}</div>
+      <ul class="sidebar-nav role-sidebar-nav">
+        {% if user.is_administrator %}
+          <li><a href="{% url 'core:admin_dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"><span>Operations Overview</span><span aria-hidden="true">01</span></a></li>
+          <li><a href="{% url 'admin:index' %}" class="sidebar-nav-link"><span>Users &amp; Roles</span><span aria-hidden="true">02</span></a></li>
+          <li><a href="{% url 'resources:instruments' %}" class="sidebar-nav-link"><span>Equipment &amp; Bookings</span><span aria-hidden="true">03</span></a></li>
+          <li><a href="{% url 'resources:library' %}" class="sidebar-nav-link"><span>Resource Catalog</span><span aria-hidden="true">04</span></a></li>
+          <li><a href="{% url 'accounts:security_log' %}" class="sidebar-nav-link"><span>Security Audit</span><span aria-hidden="true">05</span></a></li>
+          <li><a href="{% url 'resources:export_equipment_report' %}" class="sidebar-nav-link"><span>Export Equipment</span><span aria-hidden="true">CSV</span></a></li>
+          <li><a href="{% url 'resources:export_audit_log' %}" class="sidebar-nav-link"><span>Export Audit Log</span><span aria-hidden="true">CSV</span></a></li>
+        {% elif user.is_faculty %}
+          <li><a href="{% url 'core:faculty_dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'faculty_dashboard' %}active{% endif %}"><span>Teaching Overview</span><span aria-hidden="true">01</span></a></li>
+          <li><a href="{% url 'resources:submissions_hub' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'submissions_hub' %}active{% endif %}"><span>Review Queue</span><span aria-hidden="true">02</span></a></li>
+          <li><a href="{% url 'resources:upload' %}" class="sidebar-nav-link"><span>Publish Material</span><span aria-hidden="true">03</span></a></li>
+          <li><a href="{% url 'resources:library' %}" class="sidebar-nav-link"><span>Resource Library</span><span aria-hidden="true">04</span></a></li>
+          <li><a href="{% url 'accounts:security_log' %}" class="sidebar-nav-link"><span>Account Activity</span><span aria-hidden="true">05</span></a></li>
+        {% else %}
+          <li><a href="{% url 'core:dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span>My Learning Desk</span><span aria-hidden="true">01</span></a></li>
+          <li><a href="{% url 'resources:library' %}" class="sidebar-nav-link"><span>Resource Library</span><span aria-hidden="true">02</span></a></li>
+          <li><a href="{% url 'resources:instruments' %}" class="sidebar-nav-link"><span>Book Equipment</span><span aria-hidden="true">03</span></a></li>
+          <li><a href="{% url 'resources:submissions_hub' %}" class="sidebar-nav-link"><span>My Submissions</span><span aria-hidden="true">04</span></a></li>
+          <li><a href="{% url 'resources:verify' %}" class="sidebar-nav-link"><span>Verify a File</span><span aria-hidden="true">05</span></a></li>
+        {% endif %}
+        <li><a href="{% url 'accounts:profile' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><span>Profile &amp; Settings</span><span aria-hidden="true">↗</span></a></li>
+        <li>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="sidebar-nav-link role-signout">
+              <span>Sign out</span><span aria-hidden="true">↗</span>
+            </button>
+          </form>
+        </li>
+      </ul>
+    </aside>
+    {% endif %}
+
+  <main id="main-content" class="{% if user.is_authenticated and not hide_sidebar %}app-main{% else %}guest-main{% endif %} {% if user.is_administrator %}app-main--admin{% elif user.is_faculty %}app-main--faculty{% elif user.is_student %}app-main--student{% endif %}" {% block main_attrs %}{% endblock %}>
+      {% block messages %}
+      {% if messages %}
+        <ul class="flash-messages" aria-live="polite">
+          {% for message in messages %}
+            <li class="flash flash-{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% endblock %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       Modern Dark Institutional Footer (Labrina Style with Watermark & Attribution)
+       ========================================================================== -->
+  <footer class="site-footer-dark" id="site-footer">
+    <!-- Huge Faint Watermark Typography (Image 4 Style) -->
+    <div class="footer-watermark" aria-hidden="true">LABVAULT</div>
+
+    <div class="footer-dark-inner">
+      <div class="footer-dark-grid">
+        <!-- Brand & Security Summary -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-3);">
+            {% include "includes/logo.html" with size="md" %}
+          </div>
+          <p style="font-size: var(--text-xs); color: #9CA3AF; line-height: 1.6; max-width: 320px; margin-bottom: var(--space-4);">
+            Centralized academic laboratory resource management platform. Engineered for deterministic reliability, institutional cybersecurity, and cryptographic asset verification.
+          </p>
+          <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.28); border-radius: var(--radius-full); font-size: 11px; color: #D8B4FE;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--success); display: inline-block;"></span>
+            <span>Deterministic Architecture &bull; Secure by Design</span>
+          </div>
+        </div>
+
+        <!-- Academic Curriculum -->
+        <div>
+          <h4 class="footer-col-title">Academic Catalog</h4>
+          <ul class="footer-dark-links">
+            <li><a href="{% url 'core:about' %}">About LabVault</a></li>
+            <li><a href="{% url 'resources:departments' %}">Department Taxonomy</a></li>
+            <li><a href="{% url 'resources:library' %}">Resource Library</a></li>
+            <li><a href="{% url 'resources:library' %}?category=manual">Laboratory Manuals</a></li>
+            <li><a href="{% url 'resources:library' %}?category=code">Source Code Templates</a></li>
+            <li><a href="{% url 'resources:library' %}?category=datasheet">Experimental Data</a></li>
+          </ul>
+        </div>
+
+        <!-- Security & Cloud Compliance -->
+        <div>
+          <h4 class="footer-col-title">Security &amp; Integrity</h4>
+          <ul class="footer-dark-links">
+            <li><a href="{% url 'resources:verify' %}">Cryptographic Verifier</a></li>
+            <li><a href="{% url 'accounts:security_log' %}">Security Audit Log</a></li>
+            <li><a href="{% url 'core:landing' %}#wireframe-preview">Institutional Terminal</a></li>
+            <li><a href="{% url 'resources:library' %}">SHA-256 Ledger</a></li>
+            <li><span style="font-size: var(--text-xs); color: #6B7280;">Deterministic Storage Engine</span></li>
+          </ul>
+        </div>
+
+        <!-- College Review & Lead Architect Signature -->
+        <div>
+          <h4 class="footer-col-title">Lead Architect &bull; 2026</h4>
+          <div class="footer-architect-card">
+            <div class="footer-architect-avatar">SK</div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #A1A1AA;">Lead Developer &amp; Architect</div>
+              <div style="font-size: var(--text-sm); font-weight: 700; color: #FFFFFF;">Savinay Kumar Soni</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">Django 5.2</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">SQLite / Azure SQL</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">Web Crypto SHA-256</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; background: #27272A; color: #D4D4D8; padding: 2px 8px; border-radius: 4px;">Argon2 Hashing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-dark-bottom">
+      <span>&copy; 2026 LabVault - Academic Laboratory Resource Repository.</span>
+      <div style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;">
+        <button type="button" onclick="window.replay3DIntro && window.replay3DIntro()" class="btn btn-ghost btn-sm" style="color: #A1A1AA; font-size: 11px; padding: 3px 12px; border: 1px solid #27272A; border-radius: var(--radius-full); cursor: pointer;" title="Replay the 3D Vault isometric loader intro">
+          Replay 3D Intro
+        </button>
+        <span>Engineered with pride by <strong>Savinay Kumar Soni</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+  <script src="{% static 'js/app.js' %}"></script>
+  <script defer src="{% static 'js/vendor/gsap.min.js' %}"></script>
+  <script defer src="{% static 'js/gsap-init.js' %}"></script>
+</body>
+</html>

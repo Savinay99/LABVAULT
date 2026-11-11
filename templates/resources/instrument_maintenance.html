@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Maintenance &amp; Calibration Log - {{ instrument.asset_id }} - LabVault{% endblock %}
+
+{% block content %}
+<div style="max-width: var(--max-width); margin: 0 auto; padding: var(--space-4) 0 var(--space-12);">
+
+  <div style="margin-bottom: var(--space-4);">
+    <a href="{% url 'resources:instruments' %}" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: var(--space-1);">
+      &larr; Back to Equipment Directory
+    </a>
+  </div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-family: var(--font-mono); font-size: 11px; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; font-weight: 700; color: #374151;">
+          {{ instrument.asset_id }}
+        </span>
+        {% if instrument.status == 'available' %}
+          <span class="badge badge-success">&bull; AVAILABLE</span>
+        {% elif instrument.status == 'in_use' %}
+          <span class="badge badge-warning">&bull; IN USE</span>
+        {% else %}
+          <span class="badge badge-error">&bull; UNDER MAINTENANCE</span>
+        {% endif %}
+      </div>
+      <h1 class="page-title">{{ instrument.name }}</h1>
+      <p class="page-description">
+        {{ instrument.department }} &bull; {{ instrument.location }} &bull; Current condition: <strong>{{ instrument.condition }}</strong>
+      </p>
+    </div>
+    <div class="page-actions">
+      <a href="{% url 'resources:instruments' %}" class="btn btn-outline btn-sm">
+        View All Equipment
+      </a>
+    </div>
+  </div>
+
+  <div class="layout-split">
+    <!-- Left Column: Maintenance & Calibration History -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Calibration &amp; Maintenance History</h2>
+            <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 2px 0 0;">
+              Immutable audit log of all technical inspections, adjustments, and repairs.
+            </p>
+          </div>
+          <span class="badge badge-primary" style="font-size: 10px;">{{ records|length }} LOGGED EVENTS</span>
+        </div>
+
+        {% if records %}
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date Performed</th>
+                  <th>Service Type</th>
+                  <th>Technician</th>
+                  <th>Inspection Status</th>
+                  <th>Next Due</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in records %}
+                  <tr>
+                    <td style="font-family: var(--font-mono); font-size: 11px; white-space: nowrap;">
+                      {{ r.performed_date|date:"Y-m-d" }}
+                    </td>
+                    <td>
+                      <strong>{{ r.get_maintenance_type_display }}</strong>
+                    </td>
+                    <td style="font-size: 11px; color: var(--text-muted);">
+                      {{ r.technician.get_full_name|default:r.technician.email|default:"Staff Technician" }}
+                    </td>
+                    <td>
+                      {% if r.passed_inspection %}
+                        <span class="badge badge-success">&check; PASSED</span>
+                      {% else %}
+                        <span class="badge badge-error">&cross; FAILED / DEFECT</span>
+                      {% endif %}
+                    </td>
+                    <td style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">
+                      {{ r.next_due_date|date:"Y-m-d"|default:"Not scheduled" }}
+                    </td>
+                    <td style="font-size: 11px; color: var(--text-muted); max-width: 200px;">
+                      {{ r.description }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state" style="padding: var(--space-8) 0;">
+            <p class="empty-state-desc">No maintenance records have been logged yet for this apparatus.</p>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- Right Column: Log New Service Form (if technician or staff) -->
+    <div>
+      {% if can_manage %}
+        <section class="card" style="background: #FAFAFB; border-color: var(--border);">
+          <h2 class="card-title" style="margin-bottom: var(--space-3);">Log Service / Calibration</h2>
+          <p style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--space-4);">
+            Technician sign-off updates the equipment status and schedules the next calibration audit.
+          </p>
+
+          <form method="post" action="{% url 'resources:instrument_maintenance' instrument.pk %}">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Service Type:</label>
+              <select name="maintenance_type" class="form-control" style="font-size: 12px;">
+                <option value="calibration">Calibration Check</option>
+                <option value="routine_service">Routine Service</option>
+                <option value="repair">Repair / Component Replacement</option>
+                <option value="safety_inspection">Safety &amp; Compliance Inspection</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Date Performed:</label>
+              <input type="date" name="performed_date" required class="form-control" style="font-size: 12px;" value="{% now 'Y-m-d' %}">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Next Calibration Due Date (Optional):</label>
+              <input type="date" name="next_due_date" class="form-control" style="font-size: 12px;">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Technical Notes / Observations:</label>
+              <textarea name="description" required rows="3" class="form-control" style="font-size: 12px;" placeholder="e.g. NIST reference probe recalibration, replaced zero-offset capacitor..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" name="passed_inspection" id="passed_inspection" checked style="width: 16px; height: 16px;">
+              <label for="passed_inspection" style="font-size: 11px; font-weight: 600; color: var(--text);">Passed QA inspection (Equipment is certified operational)</label>
+            </div>
+
+            <button type="submit" class="btn btn-pill btn-pill-dark btn-sm btn-block">
+              Record Maintenance Sign-off
+            </button>
+          </form>
+        </section>
+      {% else %}
+        <section class="card" style="background: var(--surface-alt);">
+          <h3 class="card-title" style="font-size: var(--text-base); margin-bottom: var(--space-2);">Technician Authorization Required</h3>
+          <p style="font-size: var(--text-xs); color: var(--text-muted); line-height: 1.5; margin: 0;">
+            Only laboratory technicians and department administrators are authorized to submit calibration benchmarks and service sign-offs for this apparatus.
+          </p>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Audit Log</h1>
+  <a href="{{ url_for('admin.index') }}" class="btn btn-ghost">Back to administration</a>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>ID</th></tr>
+  </thead>
+  <tbody>
+    {% for a in logs %}
+      <tr>
+        <td>{{ a.CreatedAt }}</td>
+        <td>{{ a.ActorName or 'System' }}</td>
+        <td>{{ a.Action }}</td>
+        <td>{{ a.EntityType }}</td>
+        <td>{{ a.EntityId }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<nav class="pagination" aria-label="Pagination">
+  {% if page > 1 %}
+    <a href="{{ url_for('admin.audit', page=page-1) }}">Previous</a>
+  {% endif %}
+  <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+  {% if page < total_pages %}
+    <a href="{{ url_for('admin.audit', page=page+1) }}">Next</a>
+  {% endif %}
+</nav>
+{% endblock %}

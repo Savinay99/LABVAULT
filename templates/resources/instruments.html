@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Laboratory Instruments - LabVault{% endblock %}
+
+{% block content %}
+<div style="max-width: var(--max-width); margin: 0 auto; padding: var(--space-4) 0 var(--space-12);">
+
+  <!-- Page Header -->
+  <div style="margin-bottom: var(--space-8);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px;">
+          <span>Academic Operations</span> &bull; <span>Equipment Inventory</span>
+        </div>
+        <h1 style="font-size: clamp(1.8rem, 3.2vw, 2.4rem); font-weight: 700; color: var(--text); margin: 0 0 6px;">
+          Laboratory Equipment &amp; Instruments
+        </h1>
+        <p style="font-size: var(--text-sm); color: var(--text-muted); max-width: 680px; margin: 0;">
+          Browse certified laboratory apparatus, check real-time availability, and reserve equipment for university practicals and research.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <a href="{% url 'resources:library' %}" class="btn btn-pill btn-pill-outline btn-sm">
+          Browse Lab Manuals
+        </a>
+        <a href="{% url 'resources:departments' %}" class="btn btn-pill btn-pill-outline btn-sm">
+          Department Directory
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Department Filters -->
+  <div class="card" style="padding: var(--space-4); margin-bottom: var(--space-6); border-radius: var(--radius-lg);">
+    <form method="get" action="{% url 'resources:instruments' %}" style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;">
+      <div style="flex: 1; min-width: 220px;">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by instrument name, asset ID, or room..." style="font-size: var(--text-sm);">
+      </div>
+
+      <div style="min-width: 180px;">
+        <select name="department" class="form-control" style="font-size: var(--text-sm);" onchange="this.form.submit()">
+          <option value="">All Departments</option>
+          {% for d in departments %}
+            <option value="{{ d }}" {% if selected_dept == d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="min-width: 140px;">
+        <select name="status" class="form-control" style="font-size: var(--text-sm);" onchange="this.form.submit()">
+          <option value="">All Statuses</option>
+          <option value="available" {% if selected_status == "available" %}selected{% endif %}>Available</option>
+          <option value="in_use" {% if selected_status == "in_use" %}selected{% endif %}>In Use</option>
+          <option value="maintenance" {% if selected_status == "maintenance" %}selected{% endif %}>Maintenance</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-pill btn-pill-dark btn-sm">Filter Equipment</button>
+      {% if query or selected_dept or selected_status %}
+        <a href="{% url 'resources:instruments' %}" class="btn btn-pill btn-pill-outline btn-sm">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- User Active Reservations (if authenticated and has bookings) -->
+  {% if user_bookings %}
+  <div class="card" style="padding: var(--space-5); margin-bottom: var(--space-8); border-radius: var(--radius-lg); background: #FAF5FF; border-color: #E9D5FF;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
+      <h3 style="font-size: var(--text-sm); font-weight: 700; color: #581C87; margin: 0;">{% if is_admin %}Instrument Booking Review{% else %}Your Instrument Bookings{% endif %}</h3>
+      <span class="badge badge-primary" style="font-size: 10px;">{{ user_bookings|length }} ACTIVE</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-3);">
+      {% for b in user_bookings %}
+      <div style="background: #FFFFFF; border: 1px solid #E9D5FF; border-radius: var(--radius-md); padding: 10px 14px; font-size: var(--text-xs);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <strong style="color: var(--text);">{{ b.instrument.asset_id }}</strong>
+          <span class="badge {% if b.status == 'pending' %}badge-warning{% elif b.status == 'rejected' %}badge-error{% else %}badge-success{% endif %}" style="font-size: 9px;">{{ b.get_status_display|upper }}</span>
+        </div>
+        <div style="font-weight: 600; color: #4B5563; margin-bottom: 4px;">{{ b.instrument.name|truncatechars:35 }}</div>
+        <div style="color: var(--text-muted); font-family: var(--font-mono); font-size: 10px;">
+          {{ b.start_time|date:"M d, Y H:i" }} &rarr; {{ b.end_time|date:"H:i" }}
+        </div>
+        <div style="color: var(--text-muted); margin-top: 4px; font-style: italic;">
+          Purpose: {{ b.purpose|truncatechars:40 }}
+        </div>
+        {% if is_admin %}
+          <div style="color: var(--text-muted); margin-top: 4px;">Requested by {{ b.user.email }}</div>
+          {% if b.status == 'pending' %}
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              <form method="post" action="{% url 'resources:booking_action' b.pk %}">
+                {% csrf_token %}<input type="hidden" name="action" value="approve">
+                <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+              </form>
+              <form method="post" action="{% url 'resources:booking_action' b.pk %}">
+                {% csrf_token %}<input type="hidden" name="action" value="reject">
+                <button type="submit" class="btn btn-sm btn-outline">Reject</button>
+              </form>
+            </div>
+          {% elif b.status == 'approved' %}
+            <form method="post" action="{% url 'resources:issue_booking' b.pk %}" style="margin-top: 8px;">
+              {% csrf_token %}
+              <label for="due-at-{{ b.pk }}" style="display: block; margin-bottom: 4px;">Due date and time</label>
+              <input id="due-at-{{ b.pk }}" type="datetime-local" name="due_at" required class="form-control" style="font-size: 11px; margin-bottom: 6px;">
+              <button type="submit" class="btn btn-sm btn-primary">Record issue</button>
+            </form>
+          {% elif b.status == 'issued' and b.issue %}
+            <div style="margin-top: 8px;">Due {{ b.issue.due_at|date:"M d, Y H:i" }}{% if b.issue.is_overdue %} - <strong>Overdue</strong>{% endif %}</div>
+            <form method="post" action="{% url 'resources:return_issue' b.issue.pk %}" style="margin-top: 8px;">
+              {% csrf_token %}
+              <label for="return-condition-{{ b.issue.pk }}" style="display: block; margin-bottom: 4px;">Return condition</label>
+              <input id="return-condition-{{ b.issue.pk }}" type="text" name="return_condition" maxlength="500" required class="form-control" style="font-size: 11px; margin-bottom: 6px;">
+              <button type="submit" class="btn btn-sm btn-secondary">Record return</button>
+            </form>
+          {% endif %}
+        {% elif b.status == 'pending' %}
+          <form method="post" action="{% url 'resources:booking_action' b.pk %}" style="margin-top: 8px;">
+            {% csrf_token %}<input type="hidden" name="action" value="cancel">
+            <button type="submit" class="btn btn-sm btn-outline">Cancel request</button>
+          </form>
+        {% elif b.status == 'issued' and b.issue %}
+          <div style="margin-top: 8px;">Due {{ b.issue.due_at|date:"M d, Y H:i" }}{% if b.issue.is_overdue %} - <strong>Overdue</strong>{% endif %}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Equipment Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-5);">
+    {% for inst in instruments %}
+    <div class="card card-interactive" style="border-radius: var(--radius-lg); padding: var(--space-5); display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <!-- Top Tag & Status -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
+          <span style="font-family: var(--font-mono); font-size: 11px; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; font-weight: 700; color: #374151;">
+            {{ inst.asset_id }}
+          </span>
+          {% if inst.status == 'available' %}
+            <span class="badge badge-success">&bull; AVAILABLE</span>
+          {% elif inst.status == 'in_use' %}
+            <span class="badge badge-warning">&bull; IN USE</span>
+          {% elif inst.status == 'retired' %}
+            <span class="badge">&bull; RETIRED</span>
+          {% else %}
+            <span class="badge badge-error">&bull; MAINTENANCE</span>
+          {% endif %}
+        </div>
+
+        <!-- Name & Model -->
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 0 0 6px; line-height: 1.35;">
+          {{ inst.name }}
+        </h3>
+        {% if inst.model_number %}
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+            Model: <code style="font-size: 10px;">{{ inst.model_number }}</code>
+          </div>
+        {% endif %}
+
+        <!-- Location & Category -->
+        <div style="background: #F9FAFB; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: var(--text-xs); line-height: 1.5;">
+          <div><strong>Department:</strong> {{ inst.department }}</div>
+          <div><strong>Location:</strong> {{ inst.location }}</div>
+          <div><strong>Condition:</strong> {{ inst.condition }}</div>
+          {% if inst.last_calibrated %}
+            <div style="color: var(--text-subtle); font-size: 10px; margin-top: 2px;">
+              Calibrated: {{ inst.last_calibrated|date:"M d, Y" }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Button: Open Booking Form -->
+      <div>
+        <a href="{% url 'resources:instrument_maintenance' inst.pk %}" class="btn btn-sm btn-pill btn-pill-outline" style="width: 100%; justify-content: center; margin-bottom: 8px;">
+          Maintenance History
+        </a>
+        {% if user.is_authenticated %}
+          {% if inst.status != 'maintenance' and inst.status != 'retired' %}
+            <button type="button" class="btn btn-sm btn-pill btn-pill-dark" style="width: 100%; justify-content: center;" onclick="toggleBookingForm('book-form-{{ inst.id }}')">
+              📅 Book Equipment Slot
+            </button>
+          {% else %}
+            <button type="button" class="btn btn-sm btn-outline" style="width: 100%; justify-content: center;" disabled>
+              Temporarily Offline
+            </button>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'accounts:login' %}?next={% url 'resources:instruments' %}" class="btn btn-sm btn-pill btn-pill-outline" style="width: 100%; justify-content: center;">
+            Sign in to Reserve
+          </a>
+        {% endif %}
+
+        <!-- Collapsible Inline Booking Form -->
+        {% if user.is_authenticated and inst.status != 'maintenance' and inst.status != 'retired' %}
+        <div id="book-form-{{ inst.id }}" style="display: none; margin-top: 12px; padding: 12px; background: #F9FAFB; border: 1px solid var(--border); border-radius: var(--radius-md);">
+          <form method="post" action="{% url 'resources:book_instrument' inst.id %}">
+            {% csrf_token %}
+            <div style="font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+              Schedule Reservation (Conflict-Protected)
+            </div>
+
+            <div style="margin-bottom: 8px;">
+              <label style="display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">Start Date &amp; Time:</label>
+              <input type="datetime-local" name="start_time" required class="form-control" style="font-size: 11px; padding: 4px 8px;">
+            </div>
+
+            <div style="margin-bottom: 8px;">
+              <label style="display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">End Date &amp; Time:</label>
+              <input type="datetime-local" name="end_time" required class="form-control" style="font-size: 11px; padding: 4px 8px;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <label style="display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">Experiment Purpose:</label>
+              <input type="text" name="purpose" required placeholder="e.g. Course practical work, project observation" class="form-control" style="font-size: 11px; padding: 4px 8px;">
+            </div>
+
+            <div style="display: flex; gap: 6px;">
+              <button type="submit" class="btn btn-sm btn-pill btn-pill-dark" style="flex: 1; font-size: 11px; padding: 4px 10px;">
+                Submit Booking Request
+              </button>
+              <button type="button" class="btn btn-sm btn-outline" style="font-size: 11px; padding: 4px 10px;" onclick="toggleBookingForm('book-form-{{ inst.id }}')">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-12) 0; color: var(--text-muted);">
+      <p style="font-size: var(--text-base);">No instruments found matching your search criteria.</p>
+      <a href="{% url 'resources:instruments' %}" class="btn btn-pill btn-pill-outline btn-sm">Clear Filters</a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleBookingForm(formId) {
+    var formEl = document.getElementById(formId);
+    if (!formEl) return;
+    if (formEl.style.display === 'none' || formEl.style.display === '') {
+      formEl.style.display = 'block';
+      // Pre-fill datetime-local with sensible defaults (tomorrow 10:00 to 12:00)
+      var now = new Date();
+      now.setDate(now.getDate() + 1);
+      now.setHours(10, 0, 0, 0);
+      var startInput = formEl.querySelector('input[name="start_time"]');
+      var endInput = formEl.querySelector('input[name="end_time"]');
+      if (startInput && !startInput.value) {
+        var startIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        startInput.value = startIso;
+      }
+      if (endInput && !endInput.value) {
+        now.setHours(12, 0, 0, 0);
+        var endIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        endInput.value = endIso;
+      }
+    } else {
+      formEl.style.display = 'none';
+    }
+  }
+</script>
+{% endblock %}
+

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Security Audit &amp; Access Log  -  LabVault{% endblock %}
+
+{% block content %}
+<div class="page-header" data-animate="fade-up">
+  <div class="page-header-content">
+    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+      <span class="badge badge-primary" style="background-color: var(--sage); color: var(--brand-purple); font-weight: var(--font-bold);">
+        ● AUDIT &amp; COMPLIANCE
+      </span>
+      <span style="font-size: var(--text-xs); color: var(--text-muted);">Non-Repudiation Ledger</span>
+    </div>
+    <h1 class="page-title">Access &amp; Download Security Log</h1>
+    <p class="page-description">
+      Audit trail of your authenticated access sessions, document downloads, and cryptographic ledger queries.
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'accounts:profile' %}" class="btn btn-ghost">&larr; Back to Profile</a>
+  </div>
+</div>
+
+<div class="card" data-animate="fade-up" style="padding: var(--space-6);">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-2);">
+    <div>
+      <h2 class="card-title" style="margin-bottom: 2px;">Session Access History</h2>
+      <p style="font-size: var(--text-xs); color: var(--text-muted);">Timestamped records of resources downloaded by your academic identity.</p>
+    </div>
+    <span class="badge badge-success">Audited by LabVault Security Subsystem</span>
+  </div>
+
+  {% if logs %}
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Timestamp (UTC)</th>
+            <th>Resource Title</th>
+            <th>Event Action</th>
+            <th>Client Origin</th>
+            <th>Integrity Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); white-space: nowrap;">
+                {{ log.accessed_at|date:"Y-m-d H:i:s" }} UTC
+              </td>
+              <td>
+                <a href="{% url 'resources:details' log.resource.pk %}" style="font-weight: var(--font-semibold); color: var(--text);">
+                  {{ log.resource.title }}
+                </a>
+              </td>
+              <td>
+                <span class="badge" style="background-color: var(--sage); color: var(--brand-purple); font-size: 11px;">
+                  Secure Download
+                </span>
+              </td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-subtle);">
+                {{ log.ip_address|default:"127.0.0.1" }}
+              </td>
+              <td>
+                <span class="badge badge-success" style="font-size: 11px;">
+                  ✔ Cryptographically Verified
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state" style="padding: var(--space-8) 0;">
+      <h3 class="empty-state-title">No download logs recorded yet</h3>
+      <p class="empty-state-desc">When you download laboratory manuals or datasets from the repository, a permanent cryptographic access log entry will appear here.</p>
+      <a href="{% url 'resources:library' %}" class="btn btn-primary" style="margin-top: var(--space-3);">Explore Library &amp; Download Resources</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

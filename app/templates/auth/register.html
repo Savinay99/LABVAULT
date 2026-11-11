@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Create an account</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field">
+        <label for="full_name">Full name</label>
+        <input type="text" id="full_name" name="full_name" required minlength="2" maxlength="100" autocomplete="name" value="{{ request.form.full_name if request.form else '' }}">
+      </div>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" required maxlength="254" autocomplete="email" value="{{ request.form.email if request.form else '' }}">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required minlength="8" maxlength="128" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="confirm_password">Confirm password</label>
+        <input type="password" id="confirm_password" name="confirm_password" required minlength="8" autocomplete="new-password">
+      </div>
+      <div class="field actions">
+        <button type="submit" class="btn btn-primary btn-block">Create account</button>
+      </div>
+      <p class="auth-footer">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+    </form>
+  </div>
+</div>
+{% endblock %}

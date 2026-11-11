@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About LabVault  -  Institutional Purpose & Multi-Persona Architecture{% endblock %}
+
+{% block content %}
+<div class="page-header" data-animate="fade-up">
+  <div class="page-header-content">
+    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+      <span class="badge badge-primary" style="background-color: #EDE9FE; color: var(--brand-purple); font-weight: 700;">
+        INSTITUTIONAL GOVERNANCE
+      </span>
+      <span style="font-size: var(--text-xs); color: var(--text-muted);">&bull; University Academic Architecture</span>
+    </div>
+    <h1 class="page-title">About LabVault</h1>
+    <p class="page-description">
+      Centralized, cryptographically verified academic laboratory repository designed for deterministic engineering education, faculty workflow management, and accreditation compliance.
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'resources:library' %}" class="btn btn-pill btn-pill-dark">Explore Library</a>
+    <a href="{% url 'resources:verify' %}" class="btn btn-pill btn-pill-outline">Verify File Hash</a>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     Origin & Mission Section
+     ========================================================================== -->
+<div class="card" data-animate="fade-up" style="padding: var(--space-8); margin-bottom: var(--space-8); border-radius: var(--radius-xl);">
+  <div style="max-width: 820px;">
+    <h2 style="font-size: var(--text-2xl); color: var(--text); margin-bottom: var(--space-3);">
+      Solving Institutional Laboratory Knowledge Fragmentation
+    </h2>
+    <p style="font-size: var(--text-base); color: var(--text-muted); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+      Across university engineering and science faculties, laboratory manuals, experimental observation sheets, code templates, and safety guidelines often exist in fragmented paper binders, informal shared drives, or stale departmental file mirrors.
+    </p>
+    <p style="font-size: var(--text-base); color: var(--text-muted); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+      <strong>LabVault</strong> was engineered as an authoritative, cryptographically verified digital asset vault. By computing deterministic <strong>SHA-256 digests</strong> for every approved document and validating uploads against strict MIME whitelists, LabVault eliminates version drift, prevents bit-rot, and provides permanent traceability between academic course codes, practical experiments, and student submissions.
+    </p>
+    <div style="display: flex; gap: var(--space-6); flex-wrap: wrap; margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--border);">
+      <div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--brand-purple); font-family: var(--font-sans);">{{ total_resources|default:"22" }}</div>
+        <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase;">Verified Manuals</div>
+      </div>
+      <div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--brand-pink); font-family: var(--font-sans);">{{ total_subjects|default:"16" }}</div>
+        <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase;">Curriculum Subjects</div>
+      </div>
+      <div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--brand-coral); font-family: var(--font-sans);">100%</div>
+        <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase;">Deterministic SHA-256</div>
+      </div>
+      <div>
+        <div style="font-size: 2rem; font-weight: 700; color: #10B981; font-family: var(--font-sans);">100% Deterministic</div>
+        <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase;">Faculty-Approved Master Copies</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     How LabVault Helps Everyone: Multi-Stakeholder Impact
+     ========================================================================== -->
+<div style="margin-bottom: var(--space-10);">
+  <div style="text-align: center; margin-bottom: var(--space-8);">
+    <h2 style="font-size: var(--text-2xl); color: var(--text); margin-bottom: var(--space-2);">
+      How LabVault Empowers Every Academic Stakeholder
+    </h2>
+    <p style="color: var(--text-muted); font-size: var(--text-sm); max-width: 640px; margin: 0 auto;">
+      Engineered to serve the distinct operational and pedagogical needs of students, educators, lab technicians, and institutional evaluators.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-6);">
+    <!-- Stakeholder 1: Students -->
+    <div class="card card-interactive" style="border-radius: var(--radius-lg); padding: var(--space-6);">
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #EDE9FE; color: var(--brand-purple); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+      </div>
+      <h3 style="font-size: var(--text-lg); color: var(--text); margin-bottom: var(--space-2);">For Engineering Students</h3>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5;">
+        <li><strong style="color: var(--text);">&bull; Official Syllabus Alignment:</strong> Access syllabus-synchronized lab manuals with complete theory, circuit diagrams, and sample observation tables.</li>
+        <li><strong style="color: var(--text);">&bull; Automated Academic Citations:</strong> Generate 1-click IEEE and APA citations ready for lab report submissions and bibliographies.</li>
+        <li><strong style="color: var(--text);">&bull; Client-Side Hash Verification:</strong> Verify downloaded PDFs locally with Web Crypto SHA-256 to ensure no corruption or tampering.</li>
+        <li><strong style="color: var(--text);">&bull; Viva-Voce Preparation:</strong> Integrated pre-lab and post-lab question banks help students prepare for practical examinations.</li>
+      </ul>
+    </div>
+
+    <!-- Stakeholder 2: Faculty & Instructors -->
+    <div class="card card-interactive" style="border-radius: var(--radius-lg); padding: var(--space-6);">
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #FCE7F3; color: var(--brand-pink); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      </div>
+      <h3 style="font-size: var(--text-lg); color: var(--text); margin-bottom: var(--space-2);">For Professors &amp; Instructors</h3>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5;">
+        <li><strong style="color: var(--text);">&bull; Master Syllabus Control:</strong> Single authoritative repository prevents students from using outdated or conflicting handout versions.</li>
+        <li><strong style="color: var(--text);">&bull; Role-Based Privacy Boundaries:</strong> Publish public student experiment guides while keeping grading rubrics and solution keys restricted.</li>
+        <li><strong style="color: var(--text);">&bull; Automatic Deduplication:</strong> SHA-256 content addressing prevents redundant server storage of identical handouts.</li>
+        <li><strong style="color: var(--text);">&bull; Non-Repudiation Logs:</strong> Audit trails record exactly which student accounts downloaded experiment files and when.</li>
+      </ul>
+    </div>
+
+    <!-- Stakeholder 3: Lab Technicians -->
+    <div class="card card-interactive" style="border-radius: var(--radius-lg); padding: var(--space-6);">
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #FFE4E6; color: var(--brand-coral); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+      </div>
+      <h3 style="font-size: var(--text-lg); color: var(--text); margin-bottom: var(--space-2);">For Lab Technicians &amp; Staff</h3>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5;">
+        <li><strong style="color: var(--text);">&bull; Apparatus &amp; Tooling Specs:</strong> Standardized equipment lists ensure all test benches have identical meters, chips, and calibration tools.</li>
+        <li><strong style="color: var(--text);">&bull; Laboratory Safety Protocols:</strong> Embedded chemical (MSDS), electrical (high-voltage isolation), and mechanical safety protocols.</li>
+        <li><strong style="color: var(--text);">&bull; Standard Operating Procedures:</strong> Clear setup checklists ensure experiment runs are repeatable across multiple laboratory shifts.</li>
+      </ul>
+    </div>
+
+    <!-- Stakeholder 4: Accreditation & Deans -->
+    <div class="card card-interactive" style="border-radius: var(--radius-lg); padding: var(--space-6);">
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #ECFDF5; color: #059669; display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      </div>
+      <h3 style="font-size: var(--text-lg); color: var(--text); margin-bottom: var(--space-2);">For Deans &amp; Accreditation Evaluators</h3>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5;">
+        <li><strong style="color: var(--text);">&bull; ABET / NBA Compliance:</strong> Full traceability between Course Outcomes (COs) and Laboratory Manuals for accreditation reviews.</li>
+        <li><strong style="color: var(--text);">&bull; Cryptographic Audit Ledger:</strong> Tamper-evident ledger tracks every upload and download with client IP and timestamps.</li>
+        <li><strong style="color: var(--text);">&bull; Faculty Peer-Reviewed:</strong> Guarantees academic rigor through human faculty peer review and authenticated course coordinator sign-off.</li>
+        <li><strong style="color: var(--text);">&bull; Institutional Continuity:</strong> Preserves departmental laboratory memory even when instructional staff transitions.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     Technical Architecture & Security Principles
+     ========================================================================== -->
+<div class="card" style="background-color: var(--surface); padding: var(--space-8); border-radius: var(--radius-xl); margin-bottom: var(--space-10);">
+  <h2 style="font-size: var(--text-xl); color: var(--text); margin-bottom: var(--space-4);">
+    Architectural &amp; Cryptographic Foundations
+  </h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-6); font-size: var(--text-sm);">
+    <div>
+      <h4 style="font-weight: 700; color: var(--text); margin-bottom: 4px;">Deterministic SHA-256</h4>
+      <p style="color: var(--text-muted); line-height: 1.5;">
+        Every byte uploaded is passed through a streaming SHA-256 hashing engine. File paths are keyed deterministically, ensuring that corrupted or altered files are immediately flagged.
+      </p>
+    </div>
+    <div>
+      <h4 style="font-weight: 700; color: var(--text); margin-bottom: 4px;">Strict MIME Whitelisting</h4>
+      <p style="color: var(--text-muted); line-height: 1.5;">
+        Uploads are inspected via magic byte analysis against a strict whitelist (PDF, TXT, CSV, JSON, PNG, JPEG). Executable binaries (.exe, .sh, .bat) are blocked at the perimeter.
+      </p>
+    </div>
+    <div>
+      <h4 style="font-weight: 700; color: var(--text); margin-bottom: 4px;">Argon2 Password Security</h4>
+      <p style="color: var(--text-muted); line-height: 1.5;">
+        Authentication relies on memory-hard Argon2 password hashing alongside optional OAuth 2.0 social pipelines (Google, Microsoft, GitHub) with CSRF protection on all forms.
+      </p>
+    </div>
+    <div>
+      <h4 style="font-weight: 700; color: var(--text); margin-bottom: 4px;">Client-Side Web Crypto API</h4>
+      <p style="color: var(--text-muted); line-height: 1.5;">
+        Students and researchers can drop downloaded manuals directly into the browser to compute hardware-accelerated SHA-256 hashes locally without sending data over the network.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Lead Developer Attribution Card -->
+<div class="card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(236, 72, 153, 0.04) 100%); border: 1.5px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+  <div style="display: flex; align-items: center; gap: var(--space-4);">
+    <div style="width: 52px; height: 52px; border-radius: var(--radius-md); background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%); color: #FFFFFF; font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; justify-content: center;">
+      SK
+    </div>
+    <div>
+      <div style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600;">System Architect &amp; Lead Engineer</div>
+      <div style="font-size: var(--text-lg); font-weight: 700; color: var(--text);">Savinay Kumar Soni</div>
+      <div style="font-size: var(--text-xs); color: var(--text-muted);">College Review 2026 &bull; Production Architecture</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: var(--space-3);">
+    <a href="{% url 'resources:departments' %}" class="btn btn-pill btn-pill-outline">View Departments</a>
+    <a href="{% url 'resources:library' %}" class="btn btn-pill btn-pill-dark">Access Verified Vault</a>
+  </div>
+</div>
+{% endblock %}
+

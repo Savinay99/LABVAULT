@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Student Learning Desk{% endblock %}
+
+{% block content %}
+<div class="role-dashboard role-dashboard--student" data-workspace="student">
+  <header class="workspace-hero student-hero">
+    <div class="workspace-hero-copy">
+      <span class="workspace-eyebrow">STUDENT WORKSPACE <span aria-hidden="true">/</span> YOUR CAMPUS</span>
+      <h1>Student Learning Desk</h1>
+      <p>Welcome back, <strong>{{ user.get_full_name|default:user.email }}</strong>. Pick up where you left off.</p>
+    </div>
+    <div class="workspace-actions">
+      <a href="{% url 'resources:library' %}" class="workspace-button workspace-button--solid">Explore resources <span aria-hidden="true">↗</span></a>
+      <a href="{% url 'resources:instruments' %}" class="workspace-button workspace-button--outline">Book equipment</a>
+    </div>
+    <div class="student-hero-mark" aria-hidden="true">S</div>
+  </header>
+
+  <section class="workspace-metrics student-metrics" aria-label="Your study activity">
+    <article class="workspace-metric">
+      <span class="metric-icon" aria-hidden="true">⌁</span>
+      <span class="metric-label">Active bookings</span>
+      <strong>{{ active_booking_count }}</strong>
+      <span class="metric-note">Equipment requests and reservations</span>
+    </article>
+    <article class="workspace-metric">
+      <span class="metric-icon" aria-hidden="true">◷</span>
+      <span class="metric-label">Awaiting feedback</span>
+      <strong>{{ waiting_submission_count }}</strong>
+      <span class="metric-note">Lab reports still with your instructor</span>
+    </article>
+    <article class="workspace-metric">
+      <span class="metric-icon" aria-hidden="true">☆</span>
+      <span class="metric-label">Saved manuals</span>
+      <strong>{{ saved_resource_count }}</strong>
+      <span class="metric-note">Resources bookmarked for later</span>
+    </article>
+  </section>
+
+  <div class="student-workspace-grid">
+    <div class="student-main-stack">
+      <section class="workspace-panel student-panel" aria-labelledby="student-bookings-title">
+        <div class="workspace-panel-heading">
+          <div>
+            <span class="panel-kicker">LAB ACCESS</span>
+            <h2 id="student-bookings-title">My Bookings</h2>
+            <p>Track approval, collection, and return of your equipment.</p>
+          </div>
+          <a href="{% url 'resources:instruments' %}" class="text-action">Browse instruments <span aria-hidden="true">→</span></a>
+        </div>
+        {% if user_bookings %}
+          <div class="student-booking-list">
+            {% for booking in user_bookings %}
+              <article class="student-booking-row">
+                <div class="booking-date-block">
+                  <strong>{{ booking.start_time|date:"d" }}</strong>
+                  <span>{{ booking.start_time|date:"M" }}</span>
+                </div>
+                <div class="booking-row-info">
+                  <strong>{{ booking.instrument.name }}</strong>
+                  <span>{{ booking.start_time|date:"D, M j · H:i" }}–{{ booking.end_time|date:"H:i" }}</span>
+                </div>
+                <div class="booking-row-status">
+                  <span class="status-pill status-pill--{{ booking.status }}">{{ booking.get_status_display }}</span>
+                  {% if booking.issue %}
+                    <span class="booking-due{% if booking.issue.is_overdue %} booking-due--late{% endif %}">{% if booking.issue.is_overdue %}Overdue · {% else %}Return by · {% endif %}{{ booking.issue.due_at|date:"M j, H:i" }}</span>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="workspace-empty">
+            <span class="empty-orbit" aria-hidden="true">⌁</span>
+            <div><strong>Your next lab starts here</strong><p>No equipment bookings yet. Find an instrument and request a time.</p></div>
+            <a href="{% url 'resources:instruments' %}" class="text-action">Find equipment <span aria-hidden="true">→</span></a>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="workspace-panel student-panel" aria-labelledby="student-submissions-title">
+        <div class="workspace-panel-heading">
+          <div>
+            <span class="panel-kicker">COURSEWORK</span>
+            <h2 id="student-submissions-title">My Submissions</h2>
+            <p>See where each lab report is in the review process.</p>
+          </div>
+          <a href="{% url 'resources:submissions_hub' %}" class="text-action">All submissions <span aria-hidden="true">→</span></a>
+        </div>
+        {% if user_submissions %}
+          <div class="student-submission-list">
+            {% for submission in user_submissions %}
+              <a class="student-submission-row" href="{% url 'resources:details' submission.resource_id %}">
+                <span class="submission-file-mark" aria-hidden="true">PDF</span>
+                <span class="submission-row-info"><strong>{{ submission.resource.title|truncatechars:48 }}</strong><small>Submitted {{ submission.submitted_at|date:"M j, Y" }}</small></span>
+                <span class="submission-row-result">
+                  <span class="status-pill status-pill--{{ submission.status }}">{{ submission.get_status_display }}</span>
+                  {% if submission.grade is not None %}<strong>{{ submission.grade }}/100</strong>{% else %}<small>Grade pending</small>{% endif %}
+                </span>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="workspace-empty">
+            <span class="empty-orbit" aria-hidden="true">↗</span>
+            <div><strong>No reports submitted</strong><p>Open a course resource to submit your completed lab work.</p></div>
+            <a href="{% url 'resources:library' %}" class="text-action">Find a manual <span aria-hidden="true">→</span></a>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <aside class="student-side-stack">
+      <section class="workspace-panel saved-panel" aria-labelledby="student-saved-title">
+        <div class="workspace-panel-heading workspace-panel-heading--compact">
+          <div><span class="panel-kicker">YOUR SHORTLIST</span><h2 id="student-saved-title">My Saved Manuals</h2></div>
+          <span class="saved-count">{{ saved_resource_count }}</span>
+        </div>
+        {% if user_bookmarks %}
+          <ul class="saved-resource-list">
+            {% for bookmark in user_bookmarks %}
+              <li><a href="{% url 'resources:details' bookmark.resource_id %}"><span class="saved-resource-mark" aria-hidden="true">☆</span><span><strong>{{ bookmark.resource.title|truncatechars:34 }}</strong><small>{{ bookmark.resource.category.name|default:"General" }} · Saved {{ bookmark.created_at|date:"M j" }}</small></span><span aria-hidden="true">↗</span></a></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="panel-empty-copy">Bookmark a manual from the library and it will be waiting here.</p>
+        {% endif %}
+        <a href="{% url 'resources:library' %}" class="panel-bottom-link">Browse the library <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="workspace-panel student-shortcuts" aria-labelledby="student-shortcuts-title">
+        <span class="panel-kicker">QUICK START</span>
+        <h2 id="student-shortcuts-title">What are you working on?</h2>
+        <a href="{% url 'resources:library' %}" class="shortcut-row"><span class="shortcut-icon" aria-hidden="true">⌕</span><span><strong>Find a lab manual</strong><small>Search by course or topic</small></span><span aria-hidden="true">→</span></a>
+        <a href="{% url 'resources:instruments' %}" class="shortcut-row"><span class="shortcut-icon" aria-hidden="true">⌁</span><span><strong>Reserve equipment</strong><small>Choose an instrument and time</small></span><span aria-hidden="true">→</span></a>
+        <a href="{% url 'resources:verify' %}" class="shortcut-row"><span class="shortcut-icon" aria-hidden="true">✓</span><span><strong>Verify a document</strong><small>Check its integrity record</small></span><span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="student-note-card">
+        <span aria-hidden="true">✦</span>
+        <div><strong>Keep your lab work together</strong><p>Use bookmarks for manuals you need this week.</p></div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="workspace-panel student-resources-panel" aria-labelledby="student-resources-title">
+    <div class="workspace-panel-heading">
+      <div><span class="panel-kicker">FRESH FROM THE REPOSITORY</span><h2 id="student-resources-title">Recently Added Resources</h2><p>New manuals and materials available to you.</p></div>
+      <a href="{% url 'resources:library' %}" class="text-action">View library <span aria-hidden="true">→</span></a>
+    </div>
+    {% if recent_activity %}
+      <ul class="student-resource-grid">
+        {% for resource in recent_activity %}
+          <li class="student-resource-card">
+            <div class="resource-card-topline"><span class="resource-type-mark">{% if resource.content_type == 'application/pdf' %}PDF{% else %}FILE{% endif %}</span><span class="resource-visibility">{% if resource.visibility == 'public' %}OPEN{% else %}PRIVATE{% endif %}</span></div>
+            <h3><a href="{% url 'resources:details' resource.pk %}">{{ resource.title|truncatechars:54 }}</a></h3>
+            <p>{{ resource.category.name|default:"General" }} · {{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.email }}</p>
+            <a href="{% url 'resources:details' resource.pk %}" class="resource-card-link">Open resource <span aria-hidden="true">→</span></a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="workspace-empty"><span class="empty-orbit" aria-hidden="true">⌕</span><div><strong>No resources yet</strong><p>New course materials will appear here when they are published.</p></div><a href="{% url 'resources:library' %}" class="text-action">Browse library <span aria-hidden="true">→</span></a></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

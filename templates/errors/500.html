@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}500  -  Server Error{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card" style="text-align: center;" data-animate="fade-up">
+    <div style="font-family: var(--font-serif); font-size: 4rem; font-weight: bold; color: var(--error); line-height: 1; margin-bottom: var(--space-2);">
+      500
+    </div>
+    <h1 class="auth-title" style="margin-bottom: var(--space-2);">Internal Processing Error</h1>
+    <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
+      An unexpected internal server error occurred while handling your request. The incident has been recorded in the platform audit log.
+    </p>
+    <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}" class="btn btn-primary btn-block btn-lg">
+      Return to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

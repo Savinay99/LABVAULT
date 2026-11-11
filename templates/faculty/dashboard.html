@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Teaching Workbench{% endblock %}
+
+{% block content %}
+<div class="role-dashboard role-dashboard--faculty" data-role="faculty">
+  <header class="workspace-hero faculty-hero">
+    <div class="workspace-hero-copy">
+      <span class="workspace-eyebrow">FACULTY WORKSPACE <span aria-hidden="true">/</span> TEACHING &amp; REVIEW</span>
+      <h1>Teaching Workbench</h1>
+      <p>Review student work and keep your course materials in order.</p>
+    </div>
+    <div class="workspace-actions">
+      <a href="{% url 'resources:submissions_hub' %}" class="workspace-button workspace-button--solid">Review submissions <span aria-hidden="true">↗</span></a>
+      <a href="{% url 'resources:upload' %}" class="workspace-button workspace-button--outline">Publish material</a>
+    </div>
+    <div class="faculty-hero-mark" aria-hidden="true">F</div>
+  </header>
+
+  <section class="workspace-metrics faculty-metrics" aria-label="Teaching overview">
+    <article class="workspace-metric"><span class="metric-label">Awaiting your review</span><strong>{{ pending_count }}</strong><span class="metric-note">Submissions for your resources</span><a href="{% url 'resources:submissions_hub' %}" class="metric-action">Open review queue →</a></article>
+    <article class="workspace-metric"><span class="metric-label">Reviewed</span><strong>{{ reviewed_count }}</strong><span class="metric-note">Work you have assessed</span></article>
+    <article class="workspace-metric"><span class="metric-label">Students reached</span><strong>{{ student_count }}</strong><span class="metric-note">Learners submitting to your work</span></article>
+    <article class="workspace-metric"><span class="metric-label">My resources</span><strong>{{ owned_resource_count }}</strong><span class="metric-note">Materials published by you</span></article>
+  </section>
+
+  <div class="faculty-workbench-grid">
+    <section class="workspace-panel faculty-queue-panel" aria-labelledby="faculty-review-queue">
+      <div class="workspace-panel-heading">
+        <div><span class="panel-kicker">PRIORITY WORK</span><h2 id="faculty-review-queue">Review student work</h2><p>Only submissions to resources you own appear in this queue.</p></div>
+        <span class="queue-count">{{ pending_count }} <small>pending</small></span>
+      </div>
+      {% if recent_submissions %}
+        <div class="faculty-review-list">
+          {% for submission in recent_submissions %}
+            <article class="faculty-review-row">
+              <span class="review-avatar" aria-hidden="true">{{ submission.student.first_name|default:submission.student.email|slice:":1"|upper }}</span>
+              <div class="review-row-main">
+                <strong>{{ submission.resource.title|truncatechars:44 }}</strong>
+                <span>{{ submission.student.get_full_name|default:submission.student.email }}</span>
+                <small>Submitted {{ submission.submitted_at|date:"M j, Y" }}</small>
+              </div>
+              <div class="review-row-status">
+                <span class="status-pill status-pill--{{ submission.status }}">{{ submission.get_status_display }}</span>
+                {% if submission.grade is not None %}<strong>{{ submission.grade }}/100</strong>{% else %}<small>Awaiting grade</small>{% endif %}
+              </div>
+              <a href="{% url 'resources:submissions_hub' %}" class="review-open-link" aria-label="Open review queue for {{ submission.resource.title }}">Review <span aria-hidden="true">→</span></a>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="faculty-empty-state"><span class="faculty-empty-icon" aria-hidden="true">✓</span><div><strong>Your review queue is clear</strong><p>Student submissions for your materials will be listed here.</p></div></div>
+      {% endif %}
+      <a href="{% url 'resources:submissions_hub' %}" class="panel-bottom-link">Go to full review queue <span aria-hidden="true">→</span></a>
+    </section>
+
+    <aside class="faculty-resource-column">
+      <section class="workspace-panel faculty-resources-panel" aria-labelledby="faculty-owned-resources">
+        <div class="workspace-panel-heading workspace-panel-heading--compact">
+          <div><span class="panel-kicker">COURSE MATERIALS</span><h2 id="faculty-owned-resources">My Teaching Resources</h2></div>
+          <a href="{% url 'resources:upload' %}" class="icon-action" aria-label="Publish a teaching resource">+</a>
+        </div>
+        {% if recent_resources %}
+          <ul class="faculty-resource-list">
+            {% for resource in recent_resources %}
+              <li><a href="{% url 'resources:details' resource.pk %}"><span class="faculty-resource-icon" aria-hidden="true">▤</span><span><strong>{{ resource.title|truncatechars:38 }}</strong><small>{{ resource.category.name|default:"General" }} · {{ resource.created_at|date:"M j, Y" }}</small></span><span aria-hidden="true">↗</span></a></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="faculty-empty-state faculty-empty-state--small"><span class="faculty-empty-icon" aria-hidden="true">＋</span><div><strong>No materials published</strong><p>Publish a manual or course resource to get started.</p><a href="{% url 'resources:upload' %}" class="text-action">Publish your first resource →</a></div></div>
+        {% endif %}
+        <a href="{% url 'resources:library' %}" class="panel-bottom-link">Open resource library <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="faculty-publish-card">
+        <span class="publish-card-icon" aria-hidden="true">＋</span>
+        <div><span class="panel-kicker">SHARE WITH YOUR CLASS</span><h2>Publish a resource</h2><p>Add a lab manual or learning material for your students.</p></div>
+        <a href="{% url 'resources:upload' %}" class="workspace-button workspace-button--light">Start publishing <span aria-hidden="true">→</span></a>
+      </section>
+    </aside>
+  </div>
+</div>
+{% endblock %}

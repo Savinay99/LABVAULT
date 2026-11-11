@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Account &amp; Security Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-content">
+    <h1 class="page-title">Security &amp; Account Settings</h1>
+    <p class="page-description">Manage password authentication and connected identity providers</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'accounts:profile' %}" class="btn btn-ghost">&larr; Back to Profile</a>
+  </div>
+</div>
+
+<div style="max-width: 760px;">
+  <!-- Connected Single Sign-On Providers -->
+  <section class="card" data-animate="fade-up" style="margin-bottom: var(--space-6);">
+    <h2 class="card-title" style="margin-bottom: var(--space-2);">Connected Identity Providers</h2>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
+      OAuth accounts linked to your academic profile. You can authenticate seamlessly using any connected provider.
+    </p>
+
+    {% if social_accounts %}
+      <div style="display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-4);">
+        {% for sa in social_accounts %}
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background-color: var(--surface-alt);">
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <span class="badge badge-primary">{{ sa.provider|title }}</span>
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted);">UID: {{ sa.uid|truncatechars:28 }}</span>
+            </div>
+            <form method="post" action="{% url 'accounts:disconnect_social' sa.provider %}" data-confirm="Disconnect this account? You will need to sign in with your email and password instead.">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--error);">
+                Disconnect
+              </button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card" style="background-color: var(--surface-alt); padding: var(--space-4); font-size: var(--text-sm); color: var(--text-muted); border-style: dashed; margin-bottom: var(--space-4);">
+        No external OAuth providers are currently linked to this account. You are signing in with institutional email &amp; Argon2 password hashing.
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Password Change Form -->
+  <section class="card" data-animate="fade-up">
+    <h2 class="card-title" style="margin-bottom: var(--space-2);">Update Password</h2>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-6);">
+      Change your password regularly to maintain institutional security. Minimum 8 characters.
+    </p>
+
+    <form method="post" novalidate aria-label="Change password form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="flash flash-error" style="margin-bottom: var(--space-4);" role="alert">
+          {% for error in form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="id_old_password" class="form-label">
+          <span>Current Password</span>
+          <span class="required-indicator" aria-hidden="true">*</span>
+        </label>
+        <div class="password-input-wrapper">
+          <input type="password" name="old_password" id="id_old_password" class="form-input" required autocomplete="current-password" placeholder="••••••••">
+          <button type="button" class="password-toggle-btn" data-target="id_old_password" aria-label="Show password">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+        {% if form.old_password.errors %}
+          <div class="form-error">
+            {% for e in form.old_password.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_new_password1" class="form-label">
+          <span>New Password</span>
+          <span class="required-indicator" aria-hidden="true">*</span>
+        </label>
+        <div class="password-input-wrapper">
+          <input type="password" name="new_password1" id="id_new_password1" class="form-input" required autocomplete="new-password" placeholder="Minimum 8 characters">
+          <button type="button" class="password-toggle-btn" data-target="id_new_password1" aria-label="Show password">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+        <div class="form-hint">At least 8 characters, combining numbers or symbols.</div>
+        {% if form.new_password1.errors %}
+          <div class="form-error">
+            {% for e in form.new_password1.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group" style="margin-bottom: var(--space-6);">
+        <label for="id_new_password2" class="form-label">
+          <span>Confirm New Password</span>
+          <span class="required-indicator" aria-hidden="true">*</span>
+        </label>
+        <div class="password-input-wrapper">
+          <input type="password" name="new_password2" id="id_new_password2" class="form-input" required autocomplete="new-password" placeholder="Re-enter new password">
+          <button type="button" class="password-toggle-btn" data-target="id_new_password2" aria-label="Show password">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+        {% if form.new_password2.errors %}
+          <div class="form-error">
+            {% for e in form.new_password2.errors %}<span>{{ e }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg">
+        Update Password
+      </button>
+    </form>
+  </section>
+</div>
+{% endblock %}

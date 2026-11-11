@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ resource.Title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ resource.Title }}</h1>
+</div>
+
+<div class="details-grid">
+  <div class="details-meta">
+    <dl>
+      <dt>Category</dt><dd>{{ resource.CategoryName or 'Uncategorized' }}</dd>
+      <dt>Uploaded by</dt><dd>{{ resource.UploadedByName or '—' }}</dd>
+      <dt>Visibility</dt><dd>{{ resource.Visibility | capitalize }}</dd>
+      <dt>File</dt><dd>{{ resource.OriginalFileName }}</dd>
+      <dt>Size</dt><dd>{{ resource.FileSizeBytes | filesizeformat }}</dd>
+      <dt>Type</dt><dd>{{ resource.ContentType }}</dd>
+      <dt>Added</dt><dd>{{ resource.CreatedAt }}</dd>
+      <dt>Updated</dt><dd>{{ resource.UpdatedAt }}</dd>
+    </dl>
+    {% if resource.Subjects %}
+      <div class="subjects">
+        <strong>Subjects:</strong>
+        {% for s in resource.Subjects %}<span class="subject-tag">{{ s.SubjectCode }} — {{ s.SubjectName }}</span>{% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="details-actions">
+    <a href="{{ url_for('resources.download', resource_id=resource.ResourceId) }}" class="btn btn-primary">Download</a>
+    {% if session.user_id == resource.UploadedBy or session.role == 'administrator' %}
+      <a href="{{ url_for('resources.edit', resource_id=resource.ResourceId) }}" class="btn btn-ghost">Edit</a>
+      <form method="post" action="{{ url_for('resources.delete', resource_id=resource.ResourceId) }}" data-confirm="Delete this resource? This cannot be undone." style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if resource.Description %}
+  <section class="card">
+    <h2>Description</h2>
+    <p>{{ resource.Description }}</p>
+  </section>
+{% endif %}
+{% endblock %}

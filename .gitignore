@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Virtualenv & JS build caches
+.venv/
+venv/
+**/node_modules/
+**/.next/
+*.tsbuildinfo
+
+# Environment secrets - NEVER commit
+.env
+.env.*
+**/.env
+**/.env.*
+**/.env.local
+!.env.example
+
+# Django local databases and backups
+db.sqlite3
+db_test.sqlite3
+*.sqlite3
+*.sqlite
+*.db
+*.bak
+
+# Logs
+*.log
+
+# Local file storage & collected static files
+storage/
+media/
+staticfiles/
+
+# Test & coverage artefacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Flask / legacy & one-off local artefacts (kept locally, not committed)
+instance/
+.webassets-cache
+scratch/
+
+# Pre-rebuild snapshots
+_backup_before_rebuild/
+_backup_before_redesign/
+
+# Large, platform-specific Framer preview application & tool scratch folders. Keep locally, out of Git.
+Framer/
+.copilot-azure/
+
+# Unused / dormant prototype folders and stack note
+express-backend/
+nextjs-frontend/
+README-STACK.md
+
+# AI prompts, planning notes, and generated report artifacts
+.claude/
+.azure/
+docs/superpowers/
+docs/AUDIT.md
+LABVAULT_AUDIT_REPORT.md
+LABVAULT_CODEX_MASTER_PROMPT.md
+LABVAULT_COMPLETION_REPORT.md
+LABVAULT_PRODUCT_SPECIFICATION.md

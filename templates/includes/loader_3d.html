@@ -1,0 +1,189 @@
+<!-- ==========================================================================
+     LabVault 3D Cinematic Loading Experience & Smooth Perspective Transition
+     ========================================================================== -->
+<div id="labvault-loader" role="dialog" aria-modal="true" aria-label="Loading LabVault">
+  <div class="loader-stage">
+    <!-- 3D Cube Scene with Levitation & Rotating Orbital Rings -->
+    <div class="cube-scene" aria-hidden="true">
+      <div class="orbital-ring ring-alpha"></div>
+      <div class="orbital-ring ring-beta"></div>
+
+      <!-- True CSS 3D Isometric Cryptographic Vault Cube -->
+      <div class="cube-3d" id="interactive-cube" title="Click to interact with 3D Vault">
+        <!-- Front Face: Security Shield -->
+        <div class="cube-face face-front">
+          <svg class="face-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </div>
+
+        <!-- Back Face: SHA-256 Cryptographic Hash -->
+        <div class="cube-face face-back">
+          <svg class="face-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="9" x2="20" y2="9"/>
+            <line x1="4" y1="15" x2="20" y2="15"/>
+            <line x1="10" y1="3" x2="8" y2="21"/>
+            <line x1="16" y1="3" x2="14" y2="21"/>
+          </svg>
+        </div>
+
+        <!-- Left Face: Laboratory Science Flask -->
+        <div class="cube-face face-left">
+          <svg class="face-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/>
+            <line x1="8.5" y1="2" x2="15.5" y2="2"/>
+            <line x1="7" y1="16" x2="17" y2="16"/>
+          </svg>
+        </div>
+
+        <!-- Right Face: Cryptographic Vault Lock -->
+        <div class="cube-face face-right">
+          <svg class="face-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <circle cx="12" cy="16" r="1.5" fill="#FFFFFF"/>
+          </svg>
+        </div>
+
+        <!-- Top Face: Crystalline Micro-Lattice -->
+        <div class="cube-face face-top">
+          <svg class="face-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+        </div>
+
+        <!-- Bottom Face: Central Network Node -->
+        <div class="cube-face face-bottom">
+          <svg class="face-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"/>
+            <line x1="1.05" y1="12" x2="7" y2="12"/>
+            <line x1="17.01" y1="12" x2="22.96" y2="12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Typography Entrance: L · A · B · V · A · U · L · T -->
+    <div class="loader-name-wrap">
+      <div class="loader-3d-name" id="loader-brand-letters">
+        <span class="char-3d char-lab" style="transition-delay: 100ms;">L</span>
+        <span class="char-3d char-lab" style="transition-delay: 180ms;">A</span>
+        <span class="char-3d char-lab" style="transition-delay: 260ms;">B</span>
+        <span class="char-3d char-vault" style="transition-delay: 340ms;">V</span>
+        <span class="char-3d char-vault" style="transition-delay: 420ms;">A</span>
+        <span class="char-3d char-vault" style="transition-delay: 500ms;">U</span>
+        <span class="char-3d char-vault" style="transition-delay: 580ms;">L</span>
+        <span class="char-3d char-vault" style="transition-delay: 660ms;">T</span>
+      </div>
+    </div>
+
+    <!-- Progress Track & Dynamic Cryptographic Status -->
+    <div class="loader-progress-box">
+      <div class="loader-track">
+        <div class="loader-bar-fill" id="loader-progress-bar"></div>
+      </div>
+      <div class="loader-status-msg" id="loader-status-text">INITIALIZING 3D VAULT LATTICE...</div>
+      <div class="loader-skip-hint">Click anywhere or press ESC to skip</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    var loader = document.getElementById("labvault-loader");
+    if (!loader) return;
+
+    var progressBar = document.getElementById("loader-progress-bar");
+    var statusText = document.getElementById("loader-status-text");
+    var letters = document.querySelectorAll("#loader-brand-letters .char-3d");
+
+    // Check prefers-reduced-motion
+    var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      loader.classList.add("loader-hidden");
+      return;
+    }
+
+    var isDismissed = false;
+
+    function dismissLoader() {
+      if (isDismissed) return;
+      isDismissed = true;
+      loader.classList.add("loader-hidden");
+      try {
+        sessionStorage.setItem("lv_intro_seen", "true");
+      } catch (e) {}
+      setTimeout(function () {
+        if (loader && loader.parentNode) {
+          loader.style.display = "none";
+        }
+      }, 700);
+    }
+
+    // Interactive skip handlers
+    loader.addEventListener("click", dismissLoader);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+        dismissLoader();
+      }
+    });
+
+    // Global trigger to replay anytime
+    window.replay3DIntro = function () {
+      isDismissed = false;
+      loader.style.display = "flex";
+      loader.classList.remove("loader-hidden");
+      if (progressBar) progressBar.style.width = "0%";
+      letters.forEach(function (el) { el.classList.remove("revealed"); });
+      startIntroSequence();
+    };
+
+    function startIntroSequence() {
+      // Step 1: Reveal 3D Letters
+      setTimeout(function () {
+        letters.forEach(function (el) {
+          el.classList.add("revealed");
+        });
+      }, 120);
+
+      // Step 2: Progress timeline updates
+      var steps = [
+        { pct: 35, text: "CALIBRATING DETERMINISTIC SHA-256...", delay: 280 },
+        { pct: 70, text: "MOUNTING ACADEMIC LABORATORY VAULT...", delay: 620 },
+        { pct: 100, text: "SYSTEM VERIFIED • ACCESS GRANTED", delay: 1020 }
+      ];
+
+      steps.forEach(function (s) {
+        setTimeout(function () {
+          if (progressBar) progressBar.style.width = s.pct + "%";
+          if (statusText) statusText.textContent = s.text;
+        }, s.delay);
+      });
+
+      // Step 3: Complete & Smooth Exit
+      setTimeout(function () {
+        dismissLoader();
+      }, 1450);
+    }
+
+    // Check if seen in current session
+    var alreadySeen = false;
+    try {
+      alreadySeen = sessionStorage.getItem("lv_intro_seen") === "true";
+    } catch (e) {}
+
+    if (alreadySeen) {
+      // Shorter instant micro-transition on subsequent navigations
+      loader.style.transitionDuration = "250ms";
+      setTimeout(dismissLoader, 180);
+    } else {
+      startIntroSequence();
+    }
+  })();
+</script>
+
