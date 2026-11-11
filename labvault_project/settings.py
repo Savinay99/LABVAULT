@@ -12,10 +12,12 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
-# Load .env automatically when present (local development only).
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Local development uses .env by default. Select an alternate ignored env file
+# (for example .env.azure) explicitly with LABVAULT_ENV_FILE; host-provided
+# environment variables always take precedence.
+load_dotenv(os.environ.get("LABVAULT_ENV_FILE", BASE_DIR / ".env"), override=False)
 
 
 def _get_bool(name, default=False):
@@ -108,18 +110,19 @@ TEMPLATES = [
 WSGI_APPLICATION = "labvault_project.wsgi.application"
 
 
-# Database: SQL Server is the default for development and production.
-# Read all connection details from .env. SQLite is used only in
-# settings_test.py (tests) and never in dev or prod.
+# Database connection details come from environment variables or the selected
+# env file. Local .env stays on SQLite by default; set DB_ENGINE=mssql for
+# Azure SQL. Automated tests force SQLite in settings_test.py.
 DB_ENGINE = os.environ.get("DB_ENGINE", "mssql")
-DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_HOST = os.environ.get("DB_HOST") or os.environ.get("SQL_SERVER", "localhost")
 DB_PORT = os.environ.get("DB_PORT", "1433")
-DB_NAME = os.environ.get("DB_NAME", "LabVault")
-DB_USER = os.environ.get("DB_USER", "")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_NAME = os.environ.get("DB_NAME") or os.environ.get("SQL_DB", "LabVault")
+DB_USER = os.environ.get("DB_USER") or os.environ.get("SQL_USER", "")
+DB_PASSWORD = os.environ.get("DB_PASSWORD") or os.environ.get("SQL_PASSWORD", "")
 DB_DRIVER = os.environ.get("DB_DRIVER", "ODBC Driver 18 for SQL Server")
 DB_TRUSTED_CONNECTION = _get_bool("DB_TRUSTED_CONNECTION", False)
 DB_ENCRYPT = _get_bool("DB_ENCRYPT", True)
+DB_TRUST_SERVER_CERTIFICATE = _get_bool("DB_TRUST_SERVER_CERTIFICATE", False)
 DB_AUTH_MODE = os.environ.get("DB_AUTH_MODE", "password").strip().lower()
 
 if DB_ENGINE == "mssql":
@@ -138,9 +141,10 @@ if DB_ENGINE == "mssql":
         }
     }
 
-    sql_extra_params = []
-    if DB_ENCRYPT:
-        sql_extra_params.extend(["Encrypt=yes", "TrustServerCertificate=no"])
+    sql_extra_params = [
+        f"Encrypt={'yes' if DB_ENCRYPT else 'no'}",
+        f"TrustServerCertificate={'yes' if DB_TRUST_SERVER_CERTIFICATE else 'no'}",
+    ]
     if DB_AUTH_MODE == "managed_identity":
         sql_extra_params.append("Authentication=ActiveDirectoryMsi")
         DATABASES["default"].pop("USER")

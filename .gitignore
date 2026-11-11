@@ -4,26 +4,33 @@ __pycache__/
 *$py.class
 *.pyc
 
-# Virtualenv
+# Virtualenv & JS build caches
 .venv/
 venv/
 **/node_modules/
 **/.next/
 *.tsbuildinfo
 
-# Environment secrets — NEVER commit
+# Environment secrets - NEVER commit
 .env
 .env.*
+**/.env
+**/.env.*
 **/.env.local
+!.env.example
 
-# Django local databases
+# Django local databases and backups
 db.sqlite3
 db_test.sqlite3
+*.sqlite3
+*.sqlite
+*.db
+*.bak
 
 # Logs
 *.log
 
-# Local file storage
+# Local file storage & collected static files
 storage/
 media/
 staticfiles/
@@ -46,16 +53,30 @@ htmlcov/
 Thumbs.db
 desktop.ini
 
-# Flask / legacy artefacts (leftover folders – kept for reference, not committed)
+# Flask / legacy & one-off local artefacts (kept locally, not committed)
 instance/
 .webassets-cache
-# One-off local authoring scripts; not application source
 scratch/
 
 # Pre-rebuild snapshots
 _backup_before_rebuild/
 _backup_before_redesign/
 
-# Large, platform-specific Framer preview application. Keep locally, out of Git.
+# Large, platform-specific Framer preview application & tool scratch folders. Keep locally, out of Git.
 Framer/
 .copilot-azure/
+
+# Unused / dormant prototype folders and stack note
+express-backend/
+nextjs-frontend/
+README-STACK.md
+
+# AI prompts, planning notes, and generated report artifacts
+.claude/
+.azure/
+docs/superpowers/
+docs/AUDIT.md
+LABVAULT_AUDIT_REPORT.md
+LABVAULT_CODEX_MASTER_PROMPT.md
+LABVAULT_COMPLETION_REPORT.md
+LABVAULT_PRODUCT_SPECIFICATION.md
