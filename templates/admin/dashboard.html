@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Operations Console{% endblock %}
+
+{% block content %}
+<div class="role-dashboard role-dashboard--admin" data-role="administrator">
+  <header class="workspace-hero admin-hero">
+    <div class="workspace-hero-copy">
+      <span class="workspace-eyebrow">LABVAULT <span aria-hidden="true">/</span> INSTITUTIONAL OPERATIONS</span>
+      <h1>Operations Console</h1>
+      <p>Platform activity, access records, and resource oversight in one view.</p>
+    </div>
+    <div class="workspace-actions">
+      <a href="{% url 'admin:index' %}" class="workspace-button workspace-button--admin">Open Django Console <span aria-hidden="true">↗</span></a>
+      <a href="{% url 'resources:instruments' %}" class="workspace-button workspace-button--outline">Manage equipment</a>
+    </div>
+    <div class="admin-hero-mark" aria-hidden="true">LV<span>•</span></div>
+  </header>
+
+  <section class="workspace-metrics admin-metrics" aria-label="Platform snapshot">
+    <h2 class="sr-only">Platform Snapshot</h2>
+    <article class="workspace-metric"><span class="metric-label">Repository items</span><strong>{{ total_resources }}</strong><span class="metric-note">Documents in the catalog</span></article>
+    <article class="workspace-metric"><span class="metric-label">Registered users</span><strong>{{ total_users }}</strong><span class="metric-note">{{ student_users }} students · {{ faculty_users }} faculty · {{ admin_users }} admins</span></article>
+    <article class="workspace-metric"><span class="metric-label">Access events</span><strong>{{ total_downloads }}</strong><span class="metric-note">Recorded resource downloads</span></article>
+    <article class="workspace-metric"><span class="metric-label">Taxonomy groups</span><strong>{{ category_counts|length }}</strong><span class="metric-note">Active resource categories</span></article>
+  </section>
+
+  <section class="admin-action-strip" aria-label="Administrator actions">
+    <a href="{% url 'admin:index' %}" class="admin-action-card"><span class="admin-action-number">01</span><span class="admin-action-copy"><strong>Users &amp; roles</strong><small>Review accounts and access</small></span><span aria-hidden="true">↗</span></a>
+    <a href="{% url 'resources:instruments' %}" class="admin-action-card"><span class="admin-action-number">02</span><span class="admin-action-copy"><strong>Equipment &amp; bookings</strong><small>Open the instrument register</small></span><span aria-hidden="true">↗</span></a>
+    <a href="{% url 'resources:export_equipment_report' %}" class="admin-action-card"><span class="admin-action-number">03</span><span class="admin-action-copy"><strong>Equipment report</strong><small>Export current inventory</small></span><span aria-hidden="true">↓</span></a>
+    <a href="{% url 'resources:export_audit_log' %}" class="admin-action-card"><span class="admin-action-number">04</span><span class="admin-action-copy"><strong>Audit export</strong><small>Download access records</small></span><span aria-hidden="true">↓</span></a>
+  </section>
+
+  <div class="admin-console-grid">
+    <section class="workspace-panel admin-panel admin-panel--wide" aria-labelledby="admin-activity-title">
+      <div class="workspace-panel-heading">
+        <div><span class="panel-kicker">SECURITY &amp; INTEGRITY</span><h2 id="admin-activity-title">Recent Access Activity</h2><p>Latest recorded downloads across the repository.</p></div>
+        <a href="{% url 'accounts:security_log' %}" class="text-action">Open audit log <span aria-hidden="true">→</span></a>
+      </div>
+      {% if recent_downloads %}
+        <div class="table-container admin-table-wrap">
+          <table class="table admin-table">
+            <thead><tr><th>Account</th><th>Resource</th><th>Accessed</th><th>Client IP</th></tr></thead>
+            <tbody>
+              {% for access in recent_downloads %}
+                <tr>
+                  <td><strong>{{ access.user.get_full_name|default:access.user.email }}</strong><small>{{ access.user.email }}</small></td>
+                  <td><a href="{% url 'resources:details' access.resource.pk %}">{{ access.resource.title|truncatechars:44 }}</a></td>
+                  <td>{{ access.accessed_at|date:"M j, Y · H:i" }}</td>
+                  <td><code>{{ access.ip_address|default:"—" }}</code></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="admin-empty-state"><span aria-hidden="true">⌁</span><div><strong>No access events recorded</strong><p>Repository downloads will appear here as they occur.</p></div></div>
+      {% endif %}
+    </section>
+
+    <section class="workspace-panel admin-panel" aria-labelledby="admin-resources-title">
+      <div class="workspace-panel-heading workspace-panel-heading--compact">
+        <div><span class="panel-kicker">REPOSITORY</span><h2 id="admin-resources-title">Recent Resources</h2></div>
+        <a href="{% url 'resources:library' %}" class="text-action">Catalog →</a>
+      </div>
+      {% if recent_resources %}
+        <ul class="admin-activity-list">
+          {% for resource in recent_resources %}
+            <li><a href="{% url 'resources:details' resource.pk %}"><span class="activity-marker" aria-hidden="true"></span><span><strong>{{ resource.title|truncatechars:45 }}</strong><small>{{ resource.category.name|default:"General" }} · {{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.email }}</small></span><span class="visibility-tag">{{ resource.visibility }}</span></a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="admin-empty-state"><span aria-hidden="true">▤</span><div><strong>Catalog is empty</strong><p>New resources will be listed here.</p></div></div>
+      {% endif %}
+    </section>
+
+    <section class="workspace-panel admin-panel" aria-labelledby="admin-users-title">
+      <div class="workspace-panel-heading workspace-panel-heading--compact">
+        <div><span class="panel-kicker">ACCESS MANAGEMENT</span><h2 id="admin-users-title">New Accounts</h2></div>
+        <a href="{% url 'admin:index' %}" class="text-action">Manage users →</a>
+      </div>
+      {% if recent_users %}
+        <ul class="admin-activity-list admin-user-list">
+          {% for account in recent_users %}
+            <li><div class="admin-user-row"><span class="admin-user-avatar" aria-hidden="true">{{ account.first_name|default:account.email|slice:":1"|upper }}</span><span><strong>{{ account.get_full_name|default:account.email }}</strong><small>{{ account.email }}</small></span><span class="role-tag{% if account.is_administrator %} role-tag--admin{% elif account.is_faculty %} role-tag--faculty{% endif %}">{{ account.get_role_display }}</span></div></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="admin-empty-state"><span aria-hidden="true">◎</span><div><strong>No accounts yet</strong><p>New registrations will be listed here.</p></div></div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

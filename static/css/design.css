@@ -1,0 +1,169 @@
+/* LabVault  -  Design tokens. Light theme only. No AI-themed visuals. */
+/* Display font: intended to be self-hosted under static/fonts/. Falls back
+   to a system serif until font files are added. */
+/* Text font: intended to be self-hosted under static/fonts/. Falls back to
+   the system sans-serif stack until font files are added. */
+
+:root {
+  /* Colors */
+  --color-bg: #fbf8f4;            /* warm off-white background */
+  --color-surface: #ffffff;
+  --color-ink: #2d2420;           /* deep ink */
+  --color-text: #4a4038;
+  --color-muted: #8a7d73;
+  --color-border: #e7dfd6;
+  --color-accent: #b06a3c;        /* restrained warm accent */
+  --color-accent-hover: #9a5a2f;
+  --color-accent-soft: #f3e6d4;
+  --color-success: #2f7d52;
+  --color-danger: #a43223;
+  --color-public-badge: #3a7d44;
+  --color-private-badge: #7a6f65;
+
+  /* Typography */
+  --font-display: "LabVault Display", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  --font-text: "LabVault Text", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+
+  /* Spacing */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+
+  /* Radius & shadows */
+  --radius: 8px;
+  --radius-full: 9999px;
+  --shadow: 0 1px 3px rgba(45, 36, 32, 0.07), 0 1px 2px rgba(45, 36, 32, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(45, 36, 32, 0.09), 0 2px 4px -1px rgba(45, 36, 32, 0.05);
+
+  /* Layout */
+  --max-width: 1100px;
+  --header-height: 56px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --ease-standard: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html { line-height: 1.5; }
+body {
+  font-family: var(--font-text);
+  color: var(--color-text);
+  background: var(--color-bg);
+  margin: 0;
+}
+
+/* Self-hosted font placeholders  -  add font files under static/fonts/ and
+   uncomment/adjust these when available.
+@font-face {
+  font-family: "LabVault Display";
+  src: url("/static/fonts/labvault-display.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LabVault Text";
+  src: url("/static/fonts/labvault-text.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/* ---------- Landing page components ---------- */
+.hero {
+  background: var(--color-ink);
+  color: #fff;
+  padding: 64px 20px;
+}
+.hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  align-items: center;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .hero-inner {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+.hero-graphic {
+  flex: 1 1 300px;
+  max-width: 640px;
+  width: 100%;
+}
+.hero-graphic svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 6px rgba(45, 36, 32, 0.15));
+}
+.hero-copy {
+  flex: 1 1 260px;
+}
+.hero h1 {
+  margin: 0 0 16px 0;
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+.hero .lead {
+  margin: 0 0 24px 0;
+  font-size: 19px;
+  color: #d9d0c6;
+  line-height: 1.55;
+}
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero-actions .btn {
+  padding: 10px 24px;
+  font-size: 15px;
+}
+.hero-actions .btn-ghost {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+.hero-actions .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Animate SVG entrance (respects reduced motion via design.css globals) */
+.hero-graphic svg {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: heroFadeUp var(--duration-normal) var(--ease-standard) forwards;
+}
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}

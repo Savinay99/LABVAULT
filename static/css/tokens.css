@@ -1,0 +1,159 @@
+/* ==========================================================================
+   LabVault Design Tokens
+   Authoritative design token architecture.
+   Strict Palette: #F3F5F2, #FFFFFF, #214E43, #183B34, #DCE7DF, #E8EAE4,
+                   #202B28, #65736C, #D8DED8, #C58B55
+   ========================================================================== */
+
+:root {
+  /* Core Surface & Canvas Colors (Updated from User Palette) */
+  --bg: #F8F9FA;              /* Crisp modern canvas */
+  --surface: #FFFFFF;         /* Pure white cards & containers */
+  --surface-alt: #F3F4F6;     /* Secondary subtle surface */
+  --surface-hover: #E5E7EB;   /* Interactive hover on neutral surfaces */
+  --surface-dark: #111111;    /* Deep charcoal dark surface */
+
+  /* Primary Brand Palette (Labrina / Canto modern style) */
+  --primary: #111111;         /* Sleek charcoal / black pill buttons */
+  --primary-hover: #262626;   /* Dark hover state */
+  --primary-active: #000000;
+  --primary-subtle: #F3E8FF;  /* Soft lavender tint */
+  --primary-focus: rgba(139, 92, 246, 0.25);
+
+  /* Modern Palette Swatches (Directly from User Palette Image) */
+  --brand-purple: #8B5CF6;    /* Vibrant iris / purple */
+  --brand-purple-dark: #7C3AED;
+  --brand-pink: #EC4899;      /* Bright pink */
+  --brand-coral: #F43F5E;     /* Vibrant coral */
+  --brand-brown: #5C4033;     /* Warm dark espresso */
+  --brand-espresso: #261C1A;
+  --brand-gray-light: #E5E7EB;
+  --brand-gray-mid: #9CA3AF;
+  --brand-gray-dark: #18181B;
+  --gradient-brand: linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #F43F5E 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%);
+  --gradient-ribbon-1: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+  --gradient-ribbon-2: linear-gradient(135deg, #A855F7 0%, #EC4899 100%);
+  --gradient-ribbon-3: linear-gradient(135deg, #EC4899 0%, #F43F5E 100%);
+  --gradient-ribbon-4: linear-gradient(135deg, #F43F5E 0%, #FB7185 100%);
+  --gradient-ribbon-5: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+
+  /* Secondary & Neutral Tones */
+  --sage: #EDE9FE;            /* Soft purple tint for badges */
+  --neutral: #E5E7EB;         /* Clean neutral divider */
+  --neutral-dark: #D1D5DB;
+
+  /* Typography Colors */
+  --text: #111827;            /* Deep high-contrast text */
+  --text-muted: #4B5563;      /* Secondary text */
+  --text-subtle: #9CA3AF;     /* Inactive/placeholder text */
+  --text-inverse: #FFFFFF;    /* Text on dark backgrounds */
+
+  /* Structural Borders */
+  --border: #E5E7EB;          /* Clean light border */
+  --border-subtle: #F3F4F6;   /* Subtle divider */
+  --border-focus: #8B5CF6;    /* Active focus border with brand purple */
+
+  /* Warm Accent */
+  --accent: #F43F5E;          /* Coral accent */
+  --accent-hover: #E11D48;
+  --accent-subtle: #FFF1F2;
+  --accent-border: #FECDD3;
+
+  /* Status Colors */
+  --success: #10B981;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+  --success-text: #065F46;
+
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --warning-text: #92400E;
+
+  --error: #EF4444;
+  --error-bg: #FEF2F2;
+  --error-border: #FECACA;
+  --error-text: #991B1B;
+
+  --info: #8B5CF6;
+  --info-bg: #F5F3FF;
+  --info-border: #DDD6FE;
+  --info-text: #5B21B6;
+
+  /* Typography Scale */
+  --font-serif: 'Fraunces', 'Newsreader', Georgia, Cambria, 'Times New Roman', serif;
+  --font-sans: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px  -  standard minimum body */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Spacing Scale (4, 8, 12, 16, 24, 32, 48, 64) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+
+  /* Shadows (restrained, no heavy black or neon glows) */
+  --shadow-sm: 0 1px 2px rgba(32, 43, 40, 0.05);
+  --shadow-md: 0 4px 12px rgba(32, 43, 40, 0.07);
+  --shadow-lg: 0 12px 28px rgba(32, 43, 40, 0.09);
+
+  /* Layout Boundaries */
+  --max-width: 1200px;
+  --header-height: 64px;
+  --sidebar-width: 250px;
+
+  /* Z-indices */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 1000;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

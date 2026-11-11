@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Academic Departments &amp; Curriculum Directory  -  LabVault{% endblock %}
+
+{% block content %}
+<div class="page-header" data-animate="fade-up">
+  <div class="page-header-content">
+    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+      <span class="badge badge-primary" style="background-color: var(--sage); color: var(--brand-purple); font-weight: var(--font-bold);">
+        ● UNIVERSITY CURRICULUM TAXONOMY
+      </span>
+      <span style="font-size: var(--text-xs); color: var(--text-muted);">Institutional Syllabus Index</span>
+    </div>
+    <h1 class="page-title">Departments &amp; Course Disciplines</h1>
+    <p class="page-description">
+      Explore verified laboratory manuals, practical coursework, and experiment guidelines cataloged by academic department and course code.
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'resources:library' %}" class="btn btn-primary">Browse All Resources &rarr;</a>
+  </div>
+</div>
+
+<!-- Departments / Subjects Grid -->
+<div class="resource-grid" data-animate="fade-up" style="margin-bottom: var(--space-12);">
+  {% for s in subjects %}
+    <div class="resource-card" style="min-height: 220px;">
+      <div>
+        <div class="resource-card-header">
+          <div style="display: flex; align-items: center; gap: var(--space-2);">
+            <span class="badge" style="background: var(--gradient-subtle); color: var(--brand-purple); font-weight: var(--font-bold); border: 1px solid var(--border);">
+              {{ s.subject_code }}
+            </span>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">Core Curriculum</span>
+          </div>
+          <span class="badge badge-success">{{ s.resource_count }} Document{{ s.resource_count|pluralize }}</span>
+        </div>
+
+        <h3 class="resource-card-title" style="margin-top: var(--space-2); font-size: var(--text-lg);">
+          <a href="{% url 'resources:library' %}?subject_id={{ s.pk }}">{{ s.subject_name }}</a>
+        </h3>
+
+        <p class="resource-card-desc" style="margin-top: var(--space-2);">
+          Verified institutional practical guidelines, syllabus coursework, lab experiment protocols, and laboratory code submissions for {{ s.subject_code }}.
+        </p>
+      </div>
+
+      <div class="resource-card-actions">
+        <a href="{% url 'resources:library' %}?subject_id={{ s.pk }}" class="btn btn-secondary btn-sm" style="flex: 1;">
+          Explore {{ s.subject_code }} Catalog &rarr;
+        </a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Classifications / Categories Section -->
+<div class="card" data-animate="fade-up" style="padding: var(--space-8); background-color: var(--surface);">
+  <div style="margin-bottom: var(--space-6);">
+    <h2 style="font-size: var(--text-xl); color: var(--text); margin-bottom: var(--space-1);">Repository Classifications</h2>
+    <p style="font-size: var(--text-sm); color: var(--text-muted);">Assets are indexed by institutional document taxonomy.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-4);">
+    {% for c in categories %}
+      <a href="{% url 'resources:library' %}?category_id={{ c.pk }}" style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-4); background-color: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 180ms ease;">
+        <div>
+          <strong style="color: var(--text); font-size: var(--text-sm); display: block;">{{ c.name }}</strong>
+          <span style="font-size: var(--text-xs); color: var(--text-muted);">{{ c.resource_count }} indexed item{{ c.resource_count|pluralize }}</span>
+        </div>
+        <span style="color: var(--brand-purple); font-weight: bold;">&rarr;</span>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ resource.Title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Edit Resource</h1>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flash-messages">
+      {% for category, message in messages %}
+        <li class="flash flash-{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<form method="post" class="upload-form" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+    <label for="title">Title <span class="required">*</span></label>
+    <input type="text" id="title" name="title" required maxlength="200" value="{{ request.form.title if request.form else resource.Title }}">
+  </div>
+  <div class="field">
+    <label for="description">Description</label>
+    <textarea id="description" name="description" maxlength="2000">{{ request.form.description if request.form else resource.Description }}</textarea>
+  </div>
+  <div class="field">
+    <label for="category_id">Category <span class="required">*</span></label>
+    <select id="category_id" name="category_id" required>
+      <option value="">Select a category</option>
+      {% for c in categories %}
+        <option value="{{ c.CategoryId }}" {% if (request.form.category_id if request.form else resource.CategoryId) == c.CategoryId|string %}selected{% endif %}>{{ c.Name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="visibility">Visibility</label>
+    <select id="visibility" name="visibility">
+      <option value="private" {% if (request.form.visibility if request.form else resource.Visibility)=='private' %}selected{% endif %}>Private</option>
+      <option value="public" {% if (request.form.visibility if request.form else resource.Visibility)=='public' %}selected{% endif %}>Public</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="subject_ids">Subjects</label>
+    <select id="subject_ids" name="subject_ids" multiple>
+      {% for s in subjects %}
+        <option value="{{ s.SubjectId }}" {% if (s.SubjectId|string in current_subjects) or (request.form.getlist('subject_ids') and s.SubjectId|string in request.form.getlist('subject_ids')) %}selected{% endif %}>{{ s.SubjectCode }} — {{ s.SubjectName }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field actions">
+    <button type="submit" class="btn btn-primary">Save changes</button>
+    <a href="{{ url_for('resources.details', resource_id=resource.ResourceId) }}" class="btn btn-ghost">Cancel</a>
+  </div>
+</form>
+{% endblock %}

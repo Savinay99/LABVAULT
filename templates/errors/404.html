@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}404  -  Page Not Found{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card" style="text-align: center;" data-animate="fade-up">
+    <div style="font-family: var(--font-serif); font-size: 4rem; font-weight: bold; color: var(--primary); line-height: 1; margin-bottom: var(--space-2);">
+      404
+    </div>
+    <h1 class="auth-title" style="margin-bottom: var(--space-2);">Document Not Found</h1>
+    <p class="auth-subtitle" style="margin-bottom: var(--space-6);">
+      {{ message|default:'The resource, page, or document you requested could not be located in the LabVault repository.' }}
+    </p>
+    <a href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}" class="btn btn-primary btn-block btn-lg">
+      Return to Home
+    </a>
+  </div>
+</div>
+{% endblock %}

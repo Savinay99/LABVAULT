@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Profile</h1>
+</div>
+
+<div class="account-card">
+  <dl>
+    <dt>Full name</dt><dd>{{ user.full_name }}</dd>
+    <dt>Email</dt><dd>{{ user.email }}</dd>
+    <dt>Role</dt><dd>{{ user.role | capitalize }}</dd>
+    <dt>User ID</dt><dd>{{ user.user_id }}</dd>
+  </dl>
+  <a href="{{ url_for('profile.settings') }}" class="btn btn-primary">Change password</a>
+</div>
+{% endblock %}

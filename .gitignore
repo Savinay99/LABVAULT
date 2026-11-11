@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Virtualenv
+.venv/
+venv/
+**/node_modules/
+**/.next/
+*.tsbuildinfo
+
+# Environment secrets — NEVER commit
+.env
+.env.*
+**/.env.local
+
+# Django local databases
+db.sqlite3
+db_test.sqlite3
+
+# Logs
+*.log
+
+# Local file storage
+storage/
+media/
+staticfiles/
+
+# Test & coverage artefacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Flask / legacy artefacts (leftover folders – kept for reference, not committed)
+instance/
+.webassets-cache
+# One-off local authoring scripts; not application source
+scratch/
+
+# Pre-rebuild snapshots
+_backup_before_rebuild/
+_backup_before_redesign/
+
+# Large, platform-specific Framer preview application. Keep locally, out of Git.
+Framer/
+.copilot-azure/

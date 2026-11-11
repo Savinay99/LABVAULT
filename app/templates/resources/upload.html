@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Upload{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Upload Resource</h1>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flash-messages">
+      {% for category, message in messages %}
+        <li class="flash flash-{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<form method="post" enctype="multipart/form-data" class="upload-form" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="field">
+    <label for="title">Title <span class="required">*</span></label>
+    <input type="text" id="title" name="title" required maxlength="200" value="{{ request.form.title if request.form else '' }}">
+  </div>
+  <div class="field">
+    <label for="description">Description</label>
+    <textarea id="description" name="description" maxlength="2000">{{ request.form.description if request.form else '' }}</textarea>
+  </div>
+  <div class="field">
+    <label for="category_id">Category <span class="required">*</span></label>
+    <select id="category_id" name="category_id" required>
+      <option value="">Select a category</option>
+      {% for c in categories %}
+        <option value="{{ c.CategoryId }}" {% if request.form.category_id == c.CategoryId|string %}selected{% endif %}>{{ c.Name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="visibility">Visibility</label>
+    <select id="visibility" name="visibility">
+      <option value="private" {% if request.form.visibility=='private' %}selected{% endif %}>Private (you and administrators)</option>
+      <option value="public" {% if request.form.visibility=='public' %}selected{% endif %}>Public (all users)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="subject_ids">Subjects</label>
+    <select id="subject_ids" name="subject_ids" multiple>
+      {% for s in subjects %}
+        <option value="{{ s.SubjectId }}">{{ s.SubjectCode }} — {{ s.SubjectName }}</option>
+      {% endfor %}
+    </select>
+    <p class="field-hint">Hold Ctrl (or Cmd) to select multiple subjects.</p>
+  </div>
+  <div class="field">
+    <label for="file">File <span class="required">*</span></label>
+    <input type="file" id="file" name="file" required>
+    <p class="field-hint">Max 10 MB. Allowed: PDF, DOCX, XLSX, PPTX, TXT, CSV, ZIP, images, and source files.</p>
+  </div>
+  <div class="field actions">
+    <button type="submit" class="btn btn-primary">Upload resource</button>
+    <a href="{{ url_for('resources.library') }}" class="btn btn-ghost">Cancel</a>
+  </div>
+</form>
+{% endblock %}

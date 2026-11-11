@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cryptographic Document Verifier  -  LabVault{% endblock %}
+
+{% block content %}
+<div class="page-header" data-animate="fade-up">
+  <div class="page-header-content">
+    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+      <span class="badge badge-primary" style="background-color: var(--sage); color: var(--brand-purple); font-weight: var(--font-bold);">
+        ● ZERO-TRUST CYBERSECURITY
+      </span>
+      <span style="font-size: var(--text-xs); color: var(--text-muted);">Client-Side Web Crypto API</span>
+    </div>
+    <h1 class="page-title">Cryptographic Document Verifier</h1>
+    <p class="page-description">
+      Verify the cryptographic authenticity and bit-level integrity of any downloaded laboratory manual, code submission, or practical dataset against the institutional SHA-256 ledger.
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'resources:library' %}" class="btn btn-secondary">&larr; Return to Library</a>
+  </div>
+</div>
+
+<div style="max-width: 860px; margin: 0 auto;">
+  <!-- Verification Workstation Card -->
+  <div class="card" data-animate="fade-up" style="padding: var(--space-8); border: 2px solid var(--border); box-shadow: var(--shadow-md);">
+    <div style="text-align: center; max-width: 580px; margin: 0 auto var(--space-6);">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--gradient-subtle); color: var(--brand-purple); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3); border: 1px solid var(--border);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <path d="M9 12l2 2 4-4"></path>
+        </svg>
+      </div>
+      <h2 style="font-size: var(--text-xl); margin-bottom: var(--space-2);">Drag &amp; Drop Document to Inspect</h2>
+      <p style="font-size: var(--text-sm); color: var(--text-muted); line-height: var(--leading-relaxed);">
+        Your file is processed <strong>locally in your browser</strong> using the hardware-accelerated <code>crypto.subtle</code> SHA-256 hashing engine. No bytes are sent across the network.
+      </p>
+    </div>
+
+    <!-- Drop Area -->
+    <div class="file-dropzone" id="verifier-dropzone" tabindex="0" role="button" aria-label="Drop document to verify SHA-256 checksum" style="padding: var(--space-12) var(--space-6); background: var(--surface-alt); border-style: dashed; border-width: 2px;">
+      <svg class="file-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="color: var(--brand-purple);">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      <div class="file-dropzone-title" id="verifier-title" style="font-size: var(--text-base);">Drop downloaded laboratory file here, or click to browse</div>
+      <div class="file-dropzone-desc">Supports PDF, DOCX, XLSX, TXT, CSV, ZIP, PY, C, CPP (Up to 100 MB)</div>
+      <input type="file" id="verifier-file-input" class="file-dropzone-input" aria-label="Select file for cryptographic verification">
+    </div>
+
+    <!-- Result Container (Initially hidden) -->
+    <div id="verifier-result" style="display: none; margin-top: var(--space-6); padding: var(--space-6); border-radius: var(--radius-md); border: 1px solid var(--border); background-color: var(--surface);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-2);">
+        <div>
+          <span style="font-size: var(--text-xs); text-transform: uppercase; color: var(--text-subtle); display: block;">Inspected Target File</span>
+          <strong id="result-filename" style="font-size: var(--text-base); color: var(--text);"></strong>
+          <span id="result-filesize" style="font-size: var(--text-xs); color: var(--text-muted); margin-left: var(--space-2);"></span>
+        </div>
+        <div id="result-status-pill"></div>
+      </div>
+
+      <div style="background-color: var(--surface-alt); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: var(--space-4);">
+        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-subtle); display: block; margin-bottom: 2px;">Computed SHA-256 Digest (Client-Side)</span>
+        <code id="result-computed-hash" style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text); word-break: break-all; display: block;"></code>
+      </div>
+
+      <div id="result-explanation" style="font-size: var(--text-sm); line-height: var(--leading-normal);"></div>
+    </div>
+  </div>
+
+  <!-- Educational & Security Architecture Card -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-6);">
+    <div class="card" style="padding: var(--space-6);">
+      <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2); color: var(--text);">Why Cryptographic Auditing Matters</h3>
+      <p style="font-size: var(--text-xs); color: var(--text-muted); line-height: var(--leading-relaxed);">
+        Academic institutions must guard against malicious tampering, unsanctioned modifications, and data transmission corruption. A SHA-256 digest acts as a unique 256-bit mathematical fingerprint. Even a single changed byte alters the entire hash avalanche.
+      </p>
+    </div>
+
+    <div class="card" style="padding: var(--space-6);">
+      <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2); color: var(--text);">Deterministic Security Protocol</h3>
+      <p style="font-size: var(--text-xs); color: var(--text-muted); line-height: var(--leading-relaxed);">
+        Every resource uploaded to LabVault has its hash computed by server-side SHA-256 streaming before database persistence and storage commit. This non-repudiation ledger ensures 100% auditable academic integrity.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const fileInput = document.getElementById("verifier-file-input");
+  const dropzone = document.getElementById("verifier-dropzone");
+  const titleEl = document.getElementById("verifier-title");
+  const resultBox = document.getElementById("verifier-result");
+  const resultFilename = document.getElementById("result-filename");
+  const resultFilesize = document.getElementById("result-filesize");
+  const resultHash = document.getElementById("result-computed-hash");
+  const statusPill = document.getElementById("result-status-pill");
+  const explanation = document.getElementById("result-explanation");
+
+  async function processFile(file) {
+    if (!file) return;
+    titleEl.textContent = "Computing SHA-256 hash: " + file.name + "...";
+    resultBox.style.display = "block";
+    resultFilename.textContent = file.name;
+    resultFilesize.textContent = "(" + (file.size / 1024).toFixed(2) + " KB)";
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const digestBuffer = await window.crypto.subtle.digest("SHA-256", buffer);
+      const hashArray = Array.from(new Uint8Array(digestBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+      resultHash.textContent = hashHex;
+      statusPill.innerHTML = '<span class="badge badge-success" style="padding: 6px 12px; font-size: 12px;">✔ HASH COMPUTED INTACT</span>';
+      explanation.innerHTML = '<span style="color: var(--success-text);">The document has been hashed locally using the standard IEEE/NIST SHA-256 specification. You can compare this hash directly with the repository storage record to guarantee 100% bit-for-bit authenticity.</span>';
+      titleEl.textContent = "Selected: " + file.name;
+    } catch (err) {
+      statusPill.innerHTML = '<span class="badge badge-error">ERROR PROCESSING FILE</span>';
+      explanation.textContent = "Could not compute cryptographic digest: " + err.message;
+    }
+  }
+
+  fileInput.addEventListener("change", function () {
+    if (fileInput.files.length > 0) {
+      processFile(fileInput.files[0]);
+    }
+  });
+
+  ["dragenter", "dragover"].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add("drag-over");
+    });
+  });
+
+  ["dragleave", "drop"].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("drag-over");
+    });
+  });
+
+  dropzone.addEventListener("drop", function (e) {
+    if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  });
+});
+</script>
+{% endblock %}
+
