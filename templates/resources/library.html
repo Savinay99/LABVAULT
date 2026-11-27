@@ -16,6 +16,9 @@
     <a href="{% url 'resources:upload' %}" class="btn btn-primary">+ Upload Resource</a>
   </div>
 </div>
+{% if database_fallback %}
+  <div class="flash flash-info" role="status">Showing the reviewed catalogue snapshot because the live database is temporarily unavailable. Uploaded documents will return when the database connection is restored.</div>
+{% endif %}
 
 <!-- Search & Filtering Toolbar -->
 <form method="get" class="filter-toolbar" aria-label="Search and filter resources" id="filter-form">

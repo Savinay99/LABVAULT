@@ -4,14 +4,16 @@ import csv
 import json
 import logging
 import os
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from types import SimpleNamespace
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db import models, transaction
+from django.db import DatabaseError, models, transaction
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -86,8 +88,110 @@ def _user_can_edit_resource(user, resource):
     return resource.uploaded_by_id == user.pk
 
 
-@login_required
-def library(request):
+def _library_from_snapshot(request):
+    """Read the bundled, reviewed catalogue if the configured DB is unavailable."""
+    from pathlib import Path
+
+    data_dir = Path(__file__).resolve().parent / "data"
+    with (data_dir / "cuup_programmes.json").open(encoding="utf-8") as source:
+        programme_rows = json.load(source)
+    with (data_dir / "cuup_curricula.json").open(encoding="utf-8") as source:
+        curriculum_rows = json.load(source).get("subjects", [])
+    with (data_dir / "cuup_catalog_resources.json").open(encoding="utf-8") as source:
+        resource_rows = json.load(source)
+
+    programmes = [SimpleNamespace(pk=i, **row) for i, row in enumerate(programme_rows, 1)]
+    programme_by_key = {row.source_key: row for row in programmes}
+    subjects = []
+    subject_by_key = {}
+    for i, row in enumerate(curriculum_rows, 1):
+        programme = programme_by_key.get(row["programme_source_key"])
+        if programme is None:
+            continue
+        subject = SimpleNamespace(pk=i, programme=programme, **row)
+        subjects.append(subject)
+        subject_by_key[(row["programme_source_key"], row["year_of_study"], row["semester"], row["subject_name"])] = subject
+
+    type_labels = dict(CatalogResource.RESOURCE_TYPE_CHOICES)
+    source_labels = dict(CatalogResource.SOURCE_CLASS_CHOICES)
+    access_labels = dict(CatalogResource.ACCESS_CHOICES)
+    selected_programme_id = _positive_query_int(request.GET.get("programme"))
+    selected_programme = next((p for p in programmes if p.pk == selected_programme_id), None)
+    year = _positive_query_int(request.GET.get("year"))
+    semester = _positive_query_int(request.GET.get("semester"))
+    curriculum_subject_id = _positive_query_int(request.GET.get("curriculum_subject"))
+    school = (request.GET.get("school") or "").strip()
+    resource_type = (request.GET.get("resource_type") or "").strip()
+    source = (request.GET.get("source") or "").strip()
+    search = (request.GET.get("search") or "").strip().casefold()
+
+    scoped_subjects = [s for s in subjects
+        if (not selected_programme or s.programme.pk == selected_programme.pk)
+        and (not year or s.year_of_study == year)
+        and (not semester or s.semester == semester)]
+    approved = [r for r in resource_rows if r.get("review_status") == "approved"
+        and r.get("link_status") == "working" and r.get("is_active", True)]
+    catalog = []
+    for i, row in enumerate(approved, 1):
+        programme = programme_by_key.get(row.get("programme_source_key"))
+        linked = [subject_by_key[tuple(key)] for key in row.get("subjects", []) if tuple(key) in subject_by_key]
+        text = " ".join((row.get("title", ""), row.get("description", ""), row.get("source_organization", ""), programme.official_title if programme else "", *(s.subject_name for s in linked))).casefold()
+        if search and search not in text:
+            continue
+        if selected_programme and not (programme == selected_programme or any(s.programme == selected_programme for s in linked)):
+            continue
+        if school and not (programme and programme.school == school or any(s.programme.school == school for s in linked)):
+            continue
+        if year and not any(s.year_of_study == year for s in linked):
+            continue
+        if semester and not any(s.semester == semester for s in linked):
+            continue
+        if curriculum_subject_id and not any(s.pk == curriculum_subject_id for s in linked):
+            continue
+        if resource_type and row.get("resource_type") != resource_type:
+            continue
+        if source and row.get("source_organization") != source:
+            continue
+        item_values = dict(row)
+        item_values.update({
+            "pk": i,
+            "programme": programme,
+            "curriculum_subjects": SimpleNamespace(all=lambda linked=linked: linked),
+            "get_resource_type_display": lambda value=row.get("resource_type"): type_labels.get(value, value),
+            "get_source_class_display": lambda value=row.get("source_class"): source_labels.get(value, value),
+            "get_access_type_display": lambda value=row.get("access_type"): access_labels.get(value, value),
+            "last_verified_at": datetime.fromisoformat(row["last_verified_at"]) if row.get("last_verified_at") else None,
+        })
+        item = SimpleNamespace(**item_values)
+        catalog.append(item)
+
+    page = Paginator(catalog, 20).get_page(request.GET.get("catalog_page", 1))
+    school_programmes = [p for p in programmes if not selected_programme or p == selected_programme]
+    term_subjects = [s for s in subjects if not selected_programme or s.programme == selected_programme]
+    years = sorted({s.year_of_study for s in term_subjects if s.year_of_study})
+    semesters = sorted({s.semester for s in term_subjects if s.semester and (not year or s.year_of_study == year)})
+    options = [(value, label) for value, label in CatalogResource.RESOURCE_TYPE_CHOICES if any(r.get("resource_type") == value for r in approved)]
+    context = {
+        "resources": [], "total": 0, "page": 1, "page_size": 20, "total_pages": 1,
+        "categories": [], "subjects": [], "catalog_resources": page.object_list,
+        "catalog_total": len(catalog), "catalog_page": page,
+        "catalog_page_query": request.GET.copy().urlencode(), "catalog_programmes": programmes,
+        "catalog_schools": sorted({p.school for p in school_programmes if p.school}),
+        "catalog_years": years, "catalog_semesters": semesters,
+        "catalog_subjects": scoped_subjects, "catalog_resource_types": options,
+        "catalog_sources": sorted({r["source_organization"] for r in approved if r.get("source_organization")}),
+        "programme_id": selected_programme_id, "selected_programme": selected_programme,
+        "curriculum_subject_id": curriculum_subject_id, "school": school,
+        "year_of_study": year, "semester": semester, "resource_type": resource_type,
+        "source_organization": source, "search": search, "category_id": None,
+        "subject_id": None, "sort": "created_at", "direction": "DESC",
+        "academic_profile": None, "curriculum_term_verified": not (selected_programme and year and semester) or any(s.programme == selected_programme and s.year_of_study == year and s.semester == semester for s in subjects),
+        "database_fallback": True,
+    }
+    return render(request, "resources/library.html", context)
+
+
+def _library_database(request):
     """Uploaded documents and approved academic catalogue links."""
     from django.db.models import Q
 
@@ -175,6 +279,10 @@ def library(request):
     ).select_related("programme").prefetch_related(
         "curriculum_subjects__programme"
     )
+    # A Render database may be reachable but still have no catalogue rows.
+    # Use the versioned, reviewed snapshot until its import is completed.
+    if not catalog_queryset.exists():
+        return _library_from_snapshot(request)
 
     if search:
         catalog_queryset = catalog_queryset.filter(
@@ -312,6 +420,15 @@ def library(request):
         ),
     }
     return render(request, "resources/library.html", context)
+
+
+@login_required
+def library(request):
+    try:
+        return _library_database(request)
+    except (DatabaseError, OSError, ValueError) as exc:
+        logger.warning("Library database unavailable; using bundled catalogue (%s).", type(exc).__name__)
+        return _library_from_snapshot(request)
 
 
 @login_required

@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import Client
 from django.urls import reverse
+from unittest.mock import patch
 
 from resources.models import CatalogResource, CurriculumSubject, Programme
 
@@ -186,6 +187,22 @@ def test_library_lists_only_approved_active_catalog_links_for_students():
     assert "Approved resource" in response.content.decode()
     assert "Pending resource" not in response.content.decode()
     assert "Disabled resource" not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_library_uses_reviewed_snapshot_when_database_is_unavailable():
+    student = get_user_model().objects.create_user(
+        username="snapshot-student", email="snapshot@example.test", password="test-password-only"
+    )
+    client = Client()
+    client.force_login(student)
+    with patch("resources.views._library_database", side_effect=__import__("django.db").db.OperationalError("offline")):
+        response = client.get(reverse("resources:library"))
+
+    assert response.status_code == 200
+    assert response.context["database_fallback"] is True
+    assert response.context["catalog_total"] == 83
+    assert "reviewed catalogue snapshot" in response.content.decode()
 
 
 @pytest.mark.django_db
