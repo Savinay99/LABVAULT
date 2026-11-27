@@ -18,111 +18,111 @@
 </div>
 
 <!-- Search & Filtering Toolbar -->
-<form method="get" class="filter-toolbar" aria-label="Search and filter resources" id="filter-form">
-  <div class="filter-group">
-    <div class="filter-input">
-      <input type="search" id="id_search" name="search" class="form-input" value="{{ search }}" placeholder="Search by title, subject or notes…">
-    </div>
-
-    <div>
-      <select id="id_category_id" name="category_id" class="form-select">
-        <option value="">All Categories</option>
-        {% for c in categories %}
-          <option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_subject_id" name="subject_id" class="form-select">
-        <option value="">All Subjects</option>
-        {% for s in subjects %}
-          <option value="{{ s.pk }}" {% if subject_id == s.pk %}selected{% endif %}>{{ s.subject_code }}  -  {{ s.subject_name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_programme" name="programme" class="form-select" aria-label="Programme" data-options-url="{% url 'resources:library_filter_options' %}">
-        <option value="">All Programmes</option>
-        {% for programme in catalog_programmes %}
-          <option value="{{ programme.pk }}" {% if programme_id == programme.pk %}selected{% endif %}>{{ programme.official_title }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_curriculum_subject" name="curriculum_subject" class="form-select" aria-label="Curriculum subject">
-        <option value="">All curriculum subjects</option>
-        {% for item in catalog_subjects %}
-          <option value="{{ item.pk }}" {% if curriculum_subject_id == item.pk %}selected{% endif %}>{% if item.official_code %}{{ item.official_code }} · {% endif %}{{ item.subject_name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_school" name="school" class="form-select" aria-label="School or programme area">
-        <option value="">All Schools / Areas</option>
-        {% for option in catalog_schools %}
-          <option value="{{ option }}" {% if school == option %}selected{% endif %}>{{ option }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_year" name="year" class="form-select" aria-label="Year of study">
-        <option value="">All Years</option>
-        {% for option in catalog_years %}
-          <option value="{{ option }}" {% if year_of_study == option %}selected{% endif %}>Year {{ option }}</option>
-        {% endfor %}
-        {% if year_of_study and year_of_study not in catalog_years %}<option value="{{ year_of_study }}" selected disabled>Year {{ year_of_study }} · not verified</option>{% endif %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_semester" name="semester" class="form-select" aria-label="Semester">
-        <option value="">All Semesters</option>
-        {% for option in catalog_semesters %}
-          <option value="{{ option }}" {% if semester == option %}selected{% endif %}>Semester {{ option }}</option>
-        {% endfor %}
-        {% if semester and semester not in catalog_semesters %}<option value="{{ semester }}" selected disabled>Semester {{ semester }} · not verified</option>{% endif %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_resource_type" name="resource_type" class="form-select" aria-label="Resource type">
-        <option value="">All Resource Types</option>
-        {% for value, label in catalog_resource_types %}
-          <option value="{{ value }}" {% if resource_type == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <select id="id_source" name="source" class="form-select" aria-label="Resource source">
-        <option value="">All Sources</option>
-        {% for option in catalog_sources %}
-          <option value="{{ option }}" {% if source_organization == option %}selected{% endif %}>{{ option }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div style="display: flex; gap: var(--space-2);">
-      <select id="id_sort" name="sort" class="form-select">
-        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Date Added</option>
-        <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
-        <option value="file_size" {% if sort == 'file_size' %}selected{% endif %}>File Size</option>
-      </select>
-      <select id="id_direction" name="direction" class="form-select">
-        <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>&darr; Newest</option>
-        <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>&uarr; Oldest</option>
-      </select>
-    </div>
+<form method="get" class="filter-toolbar library-filter-toolbar" aria-label="Search and filter resources" id="filter-form">
+  <div class="library-filter-search">
+    <label for="id_search">Search the library</label>
+    <input type="search" id="id_search" name="search" class="form-input" value="{{ search }}" placeholder="Search titles, subjects or descriptions…">
   </div>
 
-  <div style="display: flex; gap: var(--space-2);">
+  <fieldset class="library-filter-section">
+    <legend>Uploaded documents</legend>
+    <div class="library-filter-fields">
+      <div class="library-filter-field">
+        <label for="id_category_id">Document category</label>
+        <select id="id_category_id" name="category_id" class="form-select">
+          <option value="">All categories</option>
+          {% for c in categories %}<option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="library-filter-field">
+        <label for="id_subject_id">Uploaded document subject</label>
+        <select id="id_subject_id" name="subject_id" class="form-select">
+          <option value="">All document subjects</option>
+          {% for s in subjects %}<option value="{{ s.pk }}" {% if subject_id == s.pk %}selected{% endif %}>{{ s.subject_code }} · {{ s.subject_name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="library-filter-section">
+    <legend>Academic catalogue</legend>
+    <div class="library-filter-fields">
+      <div class="library-filter-field library-filter-field-wide">
+        <label for="id_programme">Programme</label>
+        <select id="id_programme" name="programme" class="form-select" data-options-url="{% url 'resources:library_filter_options' %}">
+          <option value="">All programmes</option>
+          {% for programme in catalog_programmes %}<option value="{{ programme.pk }}" {% if programme_id == programme.pk %}selected{% endif %}>{{ programme.official_title }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="library-filter-field library-filter-field-wide">
+        <label for="id_curriculum_subject">Curriculum subject</label>
+        <select id="id_curriculum_subject" name="curriculum_subject" class="form-select">
+          <option value="">All curriculum subjects</option>
+          {% for item in catalog_subjects %}<option value="{{ item.pk }}" {% if curriculum_subject_id == item.pk %}selected{% endif %}>{% if item.official_code %}{{ item.official_code }} · {% endif %}{{ item.subject_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="library-filter-field library-filter-field-wide">
+        <label for="id_school">School / area</label>
+        <select id="id_school" name="school" class="form-select">
+          <option value="">All schools / areas</option>
+          {% for option in catalog_schools %}<option value="{{ option }}" {% if school == option %}selected{% endif %}>{{ option }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="library-filter-field">
+        <label for="id_year">Academic year</label>
+        <select id="id_year" name="year" class="form-select">
+          <option value="">All years</option>
+          {% for option in catalog_years %}<option value="{{ option }}" {% if year_of_study == option %}selected{% endif %}>Year {{ option }}</option>{% endfor %}
+          {% if year_of_study and year_of_study not in catalog_years %}<option value="{{ year_of_study }}" selected disabled>Year {{ year_of_study }} · not verified</option>{% endif %}
+        </select>
+      </div>
+      <div class="library-filter-field">
+        <label for="id_semester">Semester</label>
+        <select id="id_semester" name="semester" class="form-select">
+          <option value="">All semesters</option>
+          {% for option in catalog_semesters %}<option value="{{ option }}" {% if semester == option %}selected{% endif %}>Semester {{ option }}</option>{% endfor %}
+          {% if semester and semester not in catalog_semesters %}<option value="{{ semester }}" selected disabled>Semester {{ semester }} · not verified</option>{% endif %}
+        </select>
+      </div>
+      <div class="library-filter-field">
+        <label for="id_resource_type">Resource type</label>
+        <select id="id_resource_type" name="resource_type" class="form-select">
+          <option value="">All resource types</option>
+          {% for value, label in catalog_resource_types %}<option value="{{ value }}" {% if resource_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="library-filter-field library-filter-field-wide">
+        <label for="id_source">Source organization</label>
+        <select id="id_source" name="source" class="form-select">
+          <option value="">All sources</option>
+          {% for option in catalog_sources %}<option value="{{ option }}" {% if source_organization == option %}selected{% endif %}>{{ option }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="library-filter-footer">
+    <div class="library-filter-fields library-sort-fields">
+      <div class="library-filter-field">
+        <label for="id_sort">Sort by</label>
+        <select id="id_sort" name="sort" class="form-select">
+          <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Date added</option>
+          <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+          <option value="file_size" {% if sort == 'file_size' %}selected{% endif %}>File size</option>
+        </select>
+      </div>
+      <div class="library-filter-field">
+        <label for="id_direction">Order</label>
+        <select id="id_direction" name="direction" class="form-select">
+          <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>Newest first</option>
+          <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>Oldest first</option>
+        </select>
+      </div>
+    </div>
+    <div class="library-filter-actions">
     <button type="submit" class="btn btn-primary">Filter</button>
     <a href="{% url 'resources:library' %}" class="btn btn-ghost">Reset</a>
+    </div>
   </div>
 </form>
 

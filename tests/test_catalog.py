@@ -186,6 +186,8 @@ def test_library_lists_only_approved_active_catalog_links_for_students():
     assert "Approved resource" in response.content.decode()
     assert "Pending resource" not in response.content.decode()
     assert "Disabled resource" not in response.content.decode()
+    assert "Uploaded document subject" in response.content.decode()
+    assert "Curriculum subject" in response.content.decode()
 
 
 @pytest.mark.django_db
