@@ -56,6 +56,8 @@ def test_landing_page(client, db):
     assert response.status_code == 200
     body = response.content.decode("utf-8")
     assert "LabVault" in body
+    assert "'/resources/resource/' + exp.id + '/'" in body
+    assert "'/resources/' + exp.id + '/'" not in body
 
 
 def test_landing_page_survives_temporary_database_timeout(client, db):

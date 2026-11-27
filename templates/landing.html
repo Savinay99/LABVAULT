@@ -959,7 +959,7 @@ CREATE INDEX idx_resources_subject ON laboratory_resources USING btree(subject_c
       if (expStack) expStack.textContent = exp.stack;
       if (expCodeLang) expCodeLang.textContent = exp.codeLang;
       if (expCodeContent) expCodeContent.textContent = exp.code;
-      if (expDownloadBtn) expDownloadBtn.href = '/resources/' + exp.id + '/';
+      if (expDownloadBtn) expDownloadBtn.href = '/resources/resource/' + exp.id + '/';
     }
 
     subBtns.forEach(function (btn) {
