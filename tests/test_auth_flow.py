@@ -2,10 +2,12 @@
 
 import pytest
 from django.core import mail
+from django.db import ProgrammingError
 from django.urls import reverse
 from accounts.models import LoginAttempt, User
 from django.test import override_settings
 from django.utils import timezone
+from unittest.mock import PropertyMock, patch
 
 
 @pytest.mark.django_db
@@ -111,6 +113,29 @@ def test_successful_django_login_clears_failed_attempts(client):
     assert response.status_code == 302
     assert "_auth_user_id" in client.session
     assert not LoginAttempt.objects.filter(email=user.email).exists()
+
+
+@pytest.mark.django_db
+def test_login_succeeds_when_academic_profile_table_is_not_migrated(client):
+    user = User.objects.create_user(
+        username="profile-pending@univ.edu",
+        email="profile-pending@univ.edu",
+        password="CorrectPassword123!",
+    )
+    with patch.object(
+        User,
+        "academic_profile",
+        new_callable=PropertyMock,
+        side_effect=ProgrammingError("missing academic profile table"),
+    ):
+        response = client.post(
+            reverse("accounts:login"),
+            {"username": user.email, "password": "CorrectPassword123!"},
+        )
+
+    assert response.status_code == 302
+    assert response.url == reverse("core:dashboard")
+    assert "_auth_user_id" in client.session
 
 
 @pytest.mark.django_db

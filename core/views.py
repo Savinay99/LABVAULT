@@ -133,13 +133,24 @@ def dashboard_view(request):
             | Q(uploaded_by=request.user)
         )
     recent_activity = recent_activity.order_by("-created_at")[:10]
-    recent_catalog_resources = CatalogResource.objects.filter(
-        review_status=CatalogResource.REVIEW_APPROVED,
-        link_status=CatalogResource.LINK_WORKING,
-        is_active=True,
-    ).filter(
-        Q(programme__isnull=True) | Q(programme__is_active=True)
-    ).select_related("programme").order_by("-updated_at", "title")[:6]
+    try:
+        recent_catalog_resources = list(CatalogResource.objects.filter(
+            review_status=CatalogResource.REVIEW_APPROVED,
+            link_status=CatalogResource.LINK_WORKING,
+            is_active=True,
+        ).filter(
+            Q(programme__isnull=True) | Q(programme__is_active=True)
+        ).select_related("programme").order_by("-updated_at", "title")[:6])
+    except DatabaseError as exc:
+        logger.warning(
+            "Dashboard catalogue unavailable (%s).", type(exc).__name__
+        )
+        recent_catalog_resources = []
+
+    try:
+        academic_profile = request.user.academic_profile
+    except (AttributeError, DatabaseError):
+        academic_profile = None
 
     user_bookmarks = ResourceBookmark.objects.filter(user=request.user).select_related("resource__category")[:6]
     user_submissions = LabSubmission.objects.filter(student=request.user).select_related("resource")[:6]
@@ -168,7 +179,7 @@ def dashboard_view(request):
         "active_booking_count": active_booking_count,
         "waiting_submission_count": waiting_submission_count,
         "saved_resource_count": saved_resource_count,
-        "academic_profile": getattr(request.user, "academic_profile", None),
+        "academic_profile": academic_profile,
     }
     return render(request, "dashboard/index.html", context)
 

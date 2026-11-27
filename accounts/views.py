@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -67,12 +67,15 @@ def login_view(request):
             auth_login(request, user)
             messages.success(request, "Signed in successfully.")
             requested_next = request.GET.get("next") or request.POST.get("next")
-            if (
-                user.is_student
-                and not hasattr(user, "academic_profile")
-                and not requested_next
-            ):
-                return redirect("accounts:settings")
+            if user.is_student and not requested_next:
+                try:
+                    user.academic_profile
+                except AttributeError:
+                    return redirect("accounts:settings")
+                except DatabaseError:
+                    # The academic-profile migration may not yet be present in
+                    # production. Do not turn a valid login into a server error.
+                    return redirect("core:dashboard")
             return redirect(_safe_next(request))
         else:
             if email:
@@ -142,9 +145,13 @@ def register_view(request):
 @login_required
 def profile_view(request):
     """View the current user's profile."""
+    try:
+        academic_profile = request.user.academic_profile
+    except (AttributeError, DatabaseError):
+        academic_profile = None
     return render(request, "profile/view.html", {
         "user": request.user,
-        "academic_profile": getattr(request.user, "academic_profile", None),
+        "academic_profile": academic_profile,
     })
 
 
