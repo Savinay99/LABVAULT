@@ -15,6 +15,24 @@
 </div>
 
 <div style="max-width: 760px;">
+  {% if user.is_student %}
+  <section class="card" data-animate="fade-up" style="margin-bottom: var(--space-6);">
+    <h2 class="card-title" style="margin-bottom: var(--space-2);">Academic profile</h2>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4);">Set your current programme and term. The Library will distinguish your enrollment context from curriculum terms that have been publicly verified.</p>
+    <form method="post" novalidate aria-label="Academic profile form">
+      {% csrf_token %}<input type="hidden" name="form_type" value="academic_profile">
+      {% if profile_form.non_field_errors %}<div class="flash flash-error" role="alert">{{ profile_form.non_field_errors }}</div>{% endif %}
+      <div class="form-group"><label class="form-label" for="{{ profile_form.programme.id_for_label }}">Programme</label>{{ profile_form.programme }}{% for error in profile_form.programme.errors %}<span class="form-error">{{ error }}</span>{% endfor %}</div>
+      <div class="profile-grid-2">
+        <div class="form-group"><label class="form-label" for="{{ profile_form.year_of_study.id_for_label }}">Current year</label>{{ profile_form.year_of_study }}{% for error in profile_form.year_of_study.errors %}<span class="form-error">{{ error }}</span>{% endfor %}</div>
+        <div class="form-group"><label class="form-label" for="{{ profile_form.semester.id_for_label }}">Current semester</label>{{ profile_form.semester }}{% for error in profile_form.semester.errors %}<span class="form-error">{{ error }}</span>{% endfor %}</div>
+      </div>
+      {% if academic_profile %}<p class="form-hint">School / area: {{ academic_profile.school|default:"Not listed" }}</p>{% endif %}
+      <button type="submit" class="btn btn-primary">Save academic profile</button>
+    </form>
+  </section>
+  {% endif %}
+
   <!-- Connected Single Sign-On Providers -->
   <section class="card" data-animate="fade-up" style="margin-bottom: var(--space-6);">
     <h2 class="card-title" style="margin-bottom: var(--space-2);">Connected Identity Providers</h2>

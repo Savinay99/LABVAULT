@@ -53,6 +53,7 @@ class User(AbstractUser):
     def is_faculty(self):
         return self.role == self.ROLE_FACULTY
 
+
     def __str__(self):
         return self.email
 

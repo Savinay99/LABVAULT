@@ -22,6 +22,7 @@ venv/
 # Django local databases and backups
 db.sqlite3
 db_test.sqlite3
+.demo-data/
 *.sqlite3
 *.sqlite
 *.db

@@ -1,5 +1,8 @@
 """Resources app models: Category, Subject, Resource, ResourceSubject."""
 
+from hashlib import sha256
+from urllib.parse import urlsplit, urlunsplit
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -518,3 +521,261 @@ class ResourceBookmark(models.Model):
 
     def __str__(self):
         return f"{self.user.email} bookmarked {self.resource.title}"
+
+
+class Programme(models.Model):
+    """An official CU-UP programme in the academic learning catalogue."""
+
+    LEVEL_UNDERGRADUATE = "undergraduate"
+    LEVEL_POSTGRADUATE = "postgraduate"
+    LEVEL_CHOICES = [
+        (LEVEL_UNDERGRADUATE, "Undergraduate"),
+        (LEVEL_POSTGRADUATE, "Postgraduate"),
+    ]
+
+    CURRICULUM_NOT_PUBLICLY_VERIFIED = "not_publicly_verified"
+    CURRICULUM_PARTIALLY_VERIFIED = "partially_verified"
+    CURRICULUM_VERIFIED = "verified"
+    CURRICULUM_STATUS_CHOICES = [
+        (CURRICULUM_NOT_PUBLICLY_VERIFIED, "Not publicly verified"),
+        (CURRICULUM_PARTIALLY_VERIFIED, "Partially verified"),
+        (CURRICULUM_VERIFIED, "Verified"),
+    ]
+
+    source_key = models.CharField(max_length=220, unique=True)
+    official_title = models.CharField(max_length=255)
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES)
+    school = models.CharField(max_length=120, blank=True)
+    official_url = models.URLField(max_length=500)
+    curriculum_url = models.URLField(max_length=500, blank=True)
+    curriculum_status = models.CharField(
+        max_length=32,
+        choices=CURRICULUM_STATUS_CHOICES,
+        default=CURRICULUM_NOT_PUBLICLY_VERIFIED,
+    )
+    curriculum_last_verified_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "AcademicProgrammes"
+        ordering = ["level", "school", "official_title"]
+        indexes = [
+            models.Index(fields=["level", "is_active"], name="IX_AcadProg_LevelActive"),
+            models.Index(fields=["school"], name="IX_AcadProg_School"),
+        ]
+
+    def __str__(self):
+        return self.official_title
+
+
+class CurriculumSubject(models.Model):
+    """A subject copied only from a publicly verified CU-UP curriculum."""
+
+    programme = models.ForeignKey(
+        Programme, on_delete=models.CASCADE, related_name="curriculum_subjects"
+    )
+    official_code = models.CharField(max_length=50, blank=True)
+    subject_name = models.CharField(max_length=255)
+    year_of_study = models.PositiveSmallIntegerField(null=True, blank=True)
+    semester = models.PositiveSmallIntegerField(null=True, blank=True)
+    curriculum_url = models.URLField(max_length=500)
+    sequence = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        db_table = "CurriculumSubjects"
+        ordering = ["programme", "year_of_study", "semester", "sequence", "subject_name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["programme", "year_of_study", "semester", "subject_name"],
+                name="UQ_CurrSub_ProgTermName",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=["programme", "year_of_study", "semester"],
+                name="IX_CurrSub_ProgTerm",
+            ),
+        ]
+
+    def __str__(self):
+        term = f"Year {self.year_of_study or '—'} / Semester {self.semester or '—'}"
+        return f"{self.programme.official_title}: {self.subject_name} ({term})"
+
+
+class StudentAcademicProfile(models.Model):
+    """A student's declared programme and current term, separate from catalogue coverage."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="academic_profile",
+    )
+    programme = models.ForeignKey(
+        Programme, on_delete=models.PROTECT, related_name="student_profiles"
+    )
+    school = models.CharField(max_length=120, blank=True)
+    year_of_study = models.PositiveSmallIntegerField()
+    semester = models.PositiveSmallIntegerField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "StudentAcademicProfiles"
+
+    def save(self, *args, **kwargs):
+        if self.programme_id:
+            self.school = self.programme.school
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.programme.official_title} · Year {self.year_of_study} · Semester {self.semester}"
+
+
+class CatalogResource(models.Model):
+    """A curated external or official link, separate from uploaded Resources."""
+
+    SOURCE_CUUP_OFFICIAL = "cuup_official"
+    SOURCE_EXTERNAL = "external_supplementary"
+    SOURCE_LABVAULT = "labvault_study_guide"
+    SOURCE_CLASS_CHOICES = [
+        (SOURCE_CUUP_OFFICIAL, "Official CU-UP"),
+        (SOURCE_EXTERNAL, "External supplementary"),
+        (SOURCE_LABVAULT, "LabVault Study Guide"),
+    ]
+
+    TYPE_SYLLABUS = "syllabus"
+    TYPE_OVERVIEW = "overview"
+    TYPE_NOTES = "study_guide"
+    TYPE_PRACTICAL = "practical_manual"
+    TYPE_ASSIGNMENT = "assignment"
+    TYPE_TEXTBOOK = "open_textbook"
+    TYPE_COURSE = "online_course"
+    TYPE_VIDEO = "video_lecture"
+    TYPE_PROJECT = "project"
+    TYPE_REVISION = "exam_revision"
+    TYPE_OTHER = "other"
+    RESOURCE_TYPE_CHOICES = [
+        (TYPE_SYLLABUS, "Syllabus / curriculum"),
+        (TYPE_OVERVIEW, "Course overview"),
+        (TYPE_NOTES, "Study guide / notes"),
+        (TYPE_PRACTICAL, "Practical / experiment"),
+        (TYPE_ASSIGNMENT, "Assignment / practice"),
+        (TYPE_TEXTBOOK, "Open textbook"),
+        (TYPE_COURSE, "Online course"),
+        (TYPE_VIDEO, "Video lecture"),
+        (TYPE_PROJECT, "Project / case study"),
+        (TYPE_REVISION, "Exam revision"),
+        (TYPE_OTHER, "Other"),
+    ]
+
+    ACCESS_OPEN = "open"
+    ACCESS_REGISTRATION = "registration"
+    ACCESS_LIBRARY = "library_access"
+    ACCESS_PAID = "paid"
+    ACCESS_UNKNOWN = "unknown"
+    ACCESS_CHOICES = [
+        (ACCESS_OPEN, "Open access"),
+        (ACCESS_REGISTRATION, "Registration required"),
+        (ACCESS_LIBRARY, "Library access"),
+        (ACCESS_PAID, "Paid access"),
+        (ACCESS_UNKNOWN, "Access not verified"),
+    ]
+
+    REVIEW_PENDING = "pending_review"
+    REVIEW_APPROVED = "approved"
+    REVIEW_REJECTED = "rejected"
+    REVIEW_CHOICES = [
+        (REVIEW_PENDING, "Pending review"),
+        (REVIEW_APPROVED, "Approved"),
+        (REVIEW_REJECTED, "Rejected"),
+    ]
+
+    LINK_UNVERIFIED = "unverified"
+    LINK_WORKING = "working"
+    LINK_UNAVAILABLE = "unavailable"
+    LINK_RESTRICTED = "restricted"
+    LINK_STATUS_CHOICES = [
+        (LINK_UNVERIFIED, "Not checked"),
+        (LINK_WORKING, "Working"),
+        (LINK_UNAVAILABLE, "Unavailable"),
+        (LINK_RESTRICTED, "Restricted / access-limited"),
+    ]
+
+    source_key = models.CharField(max_length=220, unique=True)
+    title = models.CharField(max_length=255)
+    canonical_url = models.URLField(max_length=2000)
+    canonical_url_digest = models.CharField(max_length=64, unique=True, editable=False)
+    source_organization = models.CharField(max_length=160)
+    resource_type = models.CharField(max_length=24, choices=RESOURCE_TYPE_CHOICES)
+    source_class = models.CharField(max_length=32, choices=SOURCE_CLASS_CHOICES)
+    programme = models.ForeignKey(
+        Programme,
+        on_delete=models.CASCADE,
+        related_name="catalog_resources",
+        null=True,
+        blank=True,
+    )
+    curriculum_subjects = models.ManyToManyField(
+        CurriculumSubject, related_name="catalog_resources", blank=True
+    )
+    language = models.CharField(max_length=40, blank=True)
+    access_type = models.CharField(
+        max_length=20, choices=ACCESS_CHOICES, default=ACCESS_UNKNOWN
+    )
+    review_status = models.CharField(
+        max_length=20, choices=REVIEW_CHOICES, default=REVIEW_PENDING
+    )
+    link_status = models.CharField(
+        max_length=16, choices=LINK_STATUS_CHOICES, default=LINK_UNVERIFIED
+    )
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "CatalogResources"
+        ordering = ["source_organization", "title"]
+        indexes = [
+            models.Index(
+                fields=["review_status", "is_active", "link_status"],
+                name="IX_CatRes_Visible",
+            ),
+            models.Index(fields=["source_organization"], name="IX_CatRes_SourceOrg"),
+            models.Index(fields=["resource_type"], name="IX_CatRes_Type"),
+        ]
+
+    def save(self, *args, **kwargs):
+        parts = urlsplit(self.canonical_url.strip())
+        scheme = parts.scheme.lower()
+        hostname = (parts.hostname or "").lower()
+        if scheme in {"http", "https"} and hostname:
+            port = parts.port
+            default_port = (scheme == "http" and port == 80) or (
+                scheme == "https" and port == 443
+            )
+            netloc = hostname if not port or default_port else f"{hostname}:{port}"
+            path = parts.path.rstrip("/") or "/"
+            self.canonical_url = urlunsplit(
+                (scheme, netloc, path, parts.query, "")
+            )
+        self.canonical_url_digest = sha256(self.canonical_url.encode("utf-8")).hexdigest()
+        if kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {
+                "canonical_url",
+                "canonical_url_digest",
+            }
+        super().save(*args, **kwargs)
+
+    @property
+    def is_student_visible(self):
+        return (
+            self.review_status == self.REVIEW_APPROVED
+            and self.link_status == self.LINK_WORKING
+            and self.is_active
+            and (self.programme is None or self.programme.is_active)
+        )
+
+    def __str__(self):
+        return self.title
