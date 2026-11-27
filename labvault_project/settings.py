@@ -80,7 +80,7 @@ MIDDLEWARE = [
     # Social auth exception middleware
     "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
-if not DEBUG:
+if not DEBUG or _get_bool("WHITENOISE_SERVE_STATIC", False):
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "labvault_project.urls"

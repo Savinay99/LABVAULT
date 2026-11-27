@@ -104,9 +104,10 @@
         {% elif user.is_faculty %}
           <li><a href="{% url 'core:faculty_dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'faculty_dashboard' %}active{% endif %}"><span>Teaching Overview</span><span aria-hidden="true">01</span></a></li>
           <li><a href="{% url 'resources:submissions_hub' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'submissions_hub' %}active{% endif %}"><span>Review Queue</span><span aria-hidden="true">02</span></a></li>
-          <li><a href="{% url 'resources:upload' %}" class="sidebar-nav-link"><span>Publish Material</span><span aria-hidden="true">03</span></a></li>
-          <li><a href="{% url 'resources:library' %}" class="sidebar-nav-link"><span>Resource Library</span><span aria-hidden="true">04</span></a></li>
-          <li><a href="{% url 'accounts:security_log' %}" class="sidebar-nav-link"><span>Account Activity</span><span aria-hidden="true">05</span></a></li>
+          <li><a href="{% url 'resources:instruments' %}" class="sidebar-nav-link"><span>Equipment &amp; Requests</span><span aria-hidden="true">03</span></a></li>
+          <li><a href="{% url 'resources:upload' %}" class="sidebar-nav-link"><span>Publish Material</span><span aria-hidden="true">04</span></a></li>
+          <li><a href="{% url 'resources:library' %}" class="sidebar-nav-link"><span>Resource Library</span><span aria-hidden="true">05</span></a></li>
+          <li><a href="{% url 'accounts:security_log' %}" class="sidebar-nav-link"><span>Account Activity</span><span aria-hidden="true">06</span></a></li>
         {% else %}
           <li><a href="{% url 'core:dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span>My Learning Desk</span><span aria-hidden="true">01</span></a></li>
           <li><a href="{% url 'resources:library' %}" class="sidebar-nav-link"><span>Resource Library</span><span aria-hidden="true">02</span></a></li>

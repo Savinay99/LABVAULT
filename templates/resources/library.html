@@ -8,7 +8,8 @@
   <div class="page-header-content">
     <h1 class="page-title">Resource Library</h1>
     <p class="page-description">
-      {% if total %}{{ total }} verified laboratory document{{ total|pluralize }} indexed{% else %}No resources available in repository{% endif %}
+      {% if total %}{{ total }} uploaded document{{ total|pluralize }}{% else %}Academic resources and uploaded laboratory documents{% endif %}
+      {% if catalog_total %} · {{ catalog_total }} approved catalogue link{{ catalog_total|pluralize }}{% endif %}
     </p>
   </div>
   <div class="page-actions">
@@ -41,6 +42,71 @@
       </select>
     </div>
 
+    <div>
+      <select id="id_programme" name="programme" class="form-select" aria-label="Programme" data-options-url="{% url 'resources:library_filter_options' %}">
+        <option value="">All Programmes</option>
+        {% for programme in catalog_programmes %}
+          <option value="{{ programme.pk }}" {% if programme_id == programme.pk %}selected{% endif %}>{{ programme.official_title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_curriculum_subject" name="curriculum_subject" class="form-select" aria-label="Curriculum subject">
+        <option value="">All curriculum subjects</option>
+        {% for item in catalog_subjects %}
+          <option value="{{ item.pk }}" {% if curriculum_subject_id == item.pk %}selected{% endif %}>{% if item.official_code %}{{ item.official_code }} · {% endif %}{{ item.subject_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_school" name="school" class="form-select" aria-label="School or programme area">
+        <option value="">All Schools / Areas</option>
+        {% for option in catalog_schools %}
+          <option value="{{ option }}" {% if school == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_year" name="year" class="form-select" aria-label="Year of study">
+        <option value="">All Years</option>
+        {% for option in catalog_years %}
+          <option value="{{ option }}" {% if year_of_study == option %}selected{% endif %}>Year {{ option }}</option>
+        {% endfor %}
+        {% if year_of_study and year_of_study not in catalog_years %}<option value="{{ year_of_study }}" selected disabled>Year {{ year_of_study }} · not verified</option>{% endif %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_semester" name="semester" class="form-select" aria-label="Semester">
+        <option value="">All Semesters</option>
+        {% for option in catalog_semesters %}
+          <option value="{{ option }}" {% if semester == option %}selected{% endif %}>Semester {{ option }}</option>
+        {% endfor %}
+        {% if semester and semester not in catalog_semesters %}<option value="{{ semester }}" selected disabled>Semester {{ semester }} · not verified</option>{% endif %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_resource_type" name="resource_type" class="form-select" aria-label="Resource type">
+        <option value="">All Resource Types</option>
+        {% for value, label in catalog_resource_types %}
+          <option value="{{ value }}" {% if resource_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <select id="id_source" name="source" class="form-select" aria-label="Resource source">
+        <option value="">All Sources</option>
+        {% for option in catalog_sources %}
+          <option value="{{ option }}" {% if source_organization == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
     <div style="display: flex; gap: var(--space-2);">
       <select id="id_sort" name="sort" class="form-select">
         <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Date Added</option>
@@ -59,6 +125,85 @@
     <a href="{% url 'resources:library' %}" class="btn btn-ghost">Reset</a>
   </div>
 </form>
+
+{% if academic_profile %}
+  <p class="form-hint" style="margin-top: var(--space-3);">Current profile: <strong>{{ academic_profile.programme.official_title }}</strong> · Year {{ academic_profile.year_of_study }} · Semester {{ academic_profile.semester }}. The dropdowns list curriculum terms only when they exist in the verified catalogue.</p>
+{% endif %}
+{% if not curriculum_term_verified %}
+  <div class="flash flash-info" role="status">
+    No verified curriculum rows are available for {{ selected_programme.official_title }} · Year {{ year_of_study }} · Semester {{ semester }}. Use the Year and Semester filters to browse terms that are present in the verified curriculum data.
+    {% if selected_programme.official_url %}<a href="{{ selected_programme.official_url }}" target="_blank" rel="noopener noreferrer">Open the official programme page</a>{% endif %}
+    <a href="{% url 'resources:library' %}?programme={{ programme_id }}&amp;year=&amp;semester=">Browse verified terms</a>
+  </div>
+{% endif %}
+
+<section class="catalog-section" aria-labelledby="catalog-heading" style="margin: var(--space-8) 0;">
+  <div class="section-header" style="margin-bottom: var(--space-4);">
+    <div>
+      <h2 id="catalog-heading">CU-UP Academic Catalogue</h2>
+      <p class="text-muted">Official programme information and approved external learning links. External resources are supplementary and are not CU-UP course material.</p>
+    </div>
+  </div>
+
+  {% if catalog_resources %}
+    <div class="resource-grid">
+      {% for item in catalog_resources %}
+        <article class="resource-card">
+          <div>
+            <div class="resource-card-header">
+              <h3 class="resource-card-title">
+                <a href="{{ item.canonical_url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+              </h3>
+              <span class="badge badge-primary">{{ item.get_resource_type_display }}</span>
+            </div>
+            <div class="resource-card-meta">
+              <span class="badge">{{ item.get_source_class_display }}</span>
+              <span>{{ item.source_organization }}</span>
+              {% if item.language %}<span>{{ item.language }}</span>{% endif %}
+              <span>{{ item.get_access_type_display }}</span>
+            </div>
+            {% if item.description %}<p class="resource-card-desc">{{ item.description }}</p>{% endif %}
+
+            {% if item.programme %}
+              <p><a href="{{ item.programme.official_url }}" target="_blank" rel="noopener noreferrer">{{ item.programme.official_title }}</a></p>
+            {% endif %}
+            {% with linked_subjects=item.curriculum_subjects.all %}
+              {% if linked_subjects %}
+                <ul class="catalog-subject-list">
+                  {% for subject in linked_subjects %}
+                    <li>
+                      {{ subject.subject_name }} — {{ subject.programme.official_title }}
+                      {% if subject.year_of_study %}, Year {{ subject.year_of_study }}{% endif %}
+                      {% if subject.semester %}, Semester {{ subject.semester }}{% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            {% if item.last_verified_at %}<small class="text-muted">Link checked {{ item.last_verified_at|date:"M j, Y" }}</small>{% endif %}
+          </div>
+          <div class="resource-card-actions">
+            <a class="btn btn-secondary btn-sm" href="{{ item.canonical_url }}" target="_blank" rel="noopener noreferrer">Open source</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if catalog_page.has_other_pages %}
+      <nav class="pagination" aria-label="Academic catalogue pages">
+        {% if catalog_page.has_previous %}
+          <a class="pagination-item" href="?{% if catalog_page_query %}{{ catalog_page_query }}&amp;{% endif %}catalog_page={{ catalog_page.previous_page_number }}">&larr; Prev</a>
+        {% else %}<span class="pagination-item disabled">&larr; Prev</span>{% endif %}
+        <span class="pagination-item active">Page {{ catalog_page.number }} of {{ catalog_page.paginator.num_pages }}</span>
+        {% if catalog_page.has_next %}
+          <a class="pagination-item" href="?{% if catalog_page_query %}{{ catalog_page_query }}&amp;{% endif %}catalog_page={{ catalog_page.next_page_number }}">Next &rarr;</a>
+        {% else %}<span class="pagination-item disabled">Next &rarr;</span>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p class="empty-state-desc">No approved catalogue links match these filters. Clear a filter or check back after staff review.</p>
+  {% endif %}
+</section>
 
 {% if resources %}
   <div style="margin-bottom: var(--space-4); font-size: var(--text-xs); color: var(--text-muted);">
@@ -111,10 +256,10 @@
           <a href="{% url 'resources:details' r.pk %}" class="btn btn-secondary btn-sm" style="flex: 1;">
             View Details
           </a>
-          <a href="{% url 'resources:download' r.pk %}" class="btn btn-outline btn-sm" aria-label="Download {{ r.title }}">
+          {% if r.download_available %}<a href="{% url 'resources:download' r.pk %}" class="btn btn-outline btn-sm" aria-label="Download {{ r.title }}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>Download</span>
-          </a>
+          </a>{% else %}<span class="text-muted" role="status">File missing from this local demo; staff can re-upload it.</span>{% endif %}
         </div>
       </div>
     {% endfor %}
@@ -158,4 +303,8 @@
     </div>
   </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/library-filters.js' %}" defer></script>
 {% endblock %}

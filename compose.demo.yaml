@@ -1,0 +1,28 @@
+# Local practical demo only. This deliberately uses a separate copy of db.sqlite3.
+services:
+  labvault-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: labvault:practical-demo
+    container_name: labvault-practical-demo
+    ports:
+      - "127.0.0.1:8000:10000"
+    environment:
+      DB_ENGINE: sqlite
+      DJANGO_DEBUG: "True"
+      # Gunicorn does not serve static files itself. This local-only switch
+      # enables WhiteNoise without enabling production HTTPS cookie settings.
+      WHITENOISE_SERVE_STATIC: "True"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set a temporary key in this PowerShell session}
+      SECURE_SSL_REDIRECT: "False"
+      SESSION_COOKIE_SECURE: "False"
+      CSRF_COOKIE_SECURE: "False"
+      ALLOWED_HOSTS: "127.0.0.1,localhost,testserver"
+    volumes:
+      - type: bind
+        source: ./.demo-data/db.sqlite3
+        target: /app/db.sqlite3
+      - type: bind
+        source: ./media
+        target: /app/media

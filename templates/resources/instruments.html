@@ -17,7 +17,7 @@
           Laboratory Equipment &amp; Instruments
         </h1>
         <p style="font-size: var(--text-sm); color: var(--text-muted); max-width: 680px; margin: 0;">
-          Browse certified laboratory apparatus, check real-time availability, and reserve equipment for university practicals and research.
+          Browse laboratory instruments by department and location, submit booking requests, and follow staff approval and issue status.
         </p>
       </div>
 
@@ -31,6 +31,17 @@
       </div>
     </div>
   </div>
+
+  <section aria-label="Laboratory areas in inventory" style="margin: 0 0 var(--space-5);">
+    <div class="text-muted" style="font-size: var(--text-xs); margin-bottom: var(--space-2);">Laboratory areas represented in this inventory · {{ department_count }}</div>
+    <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+      {% for d in departments %}
+        <a class="btn btn-pill btn-pill-outline btn-sm" href="?department={{ d|urlencode }}">{{ d }}</a>
+      {% empty %}
+        <span class="text-muted">No laboratory areas have been added yet.</span>
+      {% endfor %}
+    </div>
+  </section>
 
   <!-- Search & Department Filters -->
   <div class="card" style="padding: var(--space-4); margin-bottom: var(--space-6); border-radius: var(--radius-lg);">
@@ -68,8 +79,8 @@
   {% if user_bookings %}
   <div class="card" style="padding: var(--space-5); margin-bottom: var(--space-8); border-radius: var(--radius-lg); background: #FAF5FF; border-color: #E9D5FF;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
-      <h3 style="font-size: var(--text-sm); font-weight: 700; color: #581C87; margin: 0;">{% if is_admin %}Instrument Booking Review{% else %}Your Instrument Bookings{% endif %}</h3>
-      <span class="badge badge-primary" style="font-size: 10px;">{{ user_bookings|length }} ACTIVE</span>
+      <h3 style="font-size: var(--text-sm); font-weight: 700; color: #581C87; margin: 0;">{% if can_manage_equipment %}Instrument Booking Review{% else %}Your Instrument Bookings{% endif %}</h3>
+      <span class="badge badge-primary" style="font-size: 10px;">{{ active_booking_count }} ACTIVE</span>
     </div>
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-3);">
       {% for b in user_bookings %}
@@ -85,7 +96,7 @@
         <div style="color: var(--text-muted); margin-top: 4px; font-style: italic;">
           Purpose: {{ b.purpose|truncatechars:40 }}
         </div>
-        {% if is_admin %}
+        {% if can_manage_equipment %}
           <div style="color: var(--text-muted); margin-top: 4px;">Requested by {{ b.user.email }}</div>
           {% if b.status == 'pending' %}
             <div style="display: flex; gap: 6px; margin-top: 8px;">

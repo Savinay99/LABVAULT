@@ -51,6 +51,18 @@
     </div>
   </div>
 
+  {% if user.is_student %}
+  <div class="card" style="margin-bottom: var(--space-6);">
+    <h2 class="card-title">Academic context</h2>
+    {% if academic_profile %}
+      <p>{{ academic_profile.programme.official_title }} · {{ academic_profile.school|default:"School not listed" }} · Year {{ academic_profile.year_of_study }} · Semester {{ academic_profile.semester }}</p>
+    {% else %}
+      <p>No academic programme is set yet.</p>
+    {% endif %}
+    <a href="{% url 'accounts:settings' %}" class="btn btn-secondary">Edit academic profile</a>
+  </div>
+  {% endif %}
+
   <div class="card" style="background-color: var(--surface-alt);">
     <h3 class="card-title" style="margin-bottom: var(--space-2);">Security &amp; Account Actions</h3>
     <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4);">

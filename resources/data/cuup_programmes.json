@@ -1,0 +1,832 @@
+[
+  {
+    "official_title": "MBA",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba"
+  },
+  {
+    "official_title": "MBA (Applied Finance) with PwC",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-applied-finance",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-applied-finance",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-applied-finance"
+  },
+  {
+    "official_title": "MBA (FinTech) with NAL Academy",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-fintech",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-fintech",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-fintech"
+  },
+  {
+    "official_title": "MBA (Strategic HR)",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-strategic-hr",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-strategic-hr",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-strategic-hr"
+  },
+  {
+    "official_title": "MBA (Digital Marketing)",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-digital-marketing",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-digital-marketing",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-digital-marketing"
+  },
+  {
+    "official_title": "MBA (Data Science and Artificial Intelligence) with SAS",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-data-science-and-artificial-intelligence",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-data-science-and-artificial-intelligence",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-data-science-and-artificial-intelligence"
+  },
+  {
+    "official_title": "MBA (Business Analytics) with IBM",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-business-analytics",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-business-analytics",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-business-analytics"
+  },
+  {
+    "official_title": "MCA",
+    "level": "postgraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/mca",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/mca",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingmca"
+  },
+  {
+    "official_title": "MCA (AI & ML) with SAS",
+    "level": "postgraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/mca-ai-ml",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/mca-ai-ml",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingmca-ai-ml"
+  },
+  {
+    "official_title": "M.Sc (Data Science)",
+    "level": "postgraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/msc-data-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/msc-data-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesmsc-data-science"
+  },
+  {
+    "official_title": "M.Tech (CSE -AI & ML) with SAS",
+    "level": "postgraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/mtech-ai-ml-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/mtech-ai-ml-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringmtech-ai-ml-engineering"
+  },
+  {
+    "official_title": "MCA (Data Science)",
+    "level": "postgraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/mca-data-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/mca-data-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingmca-data-science"
+  },
+  {
+    "official_title": "M.Tech (CSE - Data Science)",
+    "level": "postgraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/mtech-cse-data-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/mtech-cse-data-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringmtech-cse-data-science"
+  },
+  {
+    "official_title": "LL.M. in Criminal Law",
+    "level": "postgraduate",
+    "school": "School of Legal Studies",
+    "official_url": "https://www.culko.in/legal-studies/llm-in-criminal-law",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/legal-studies/llm-in-criminal-law",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:legal-studiesllm-in-criminal-law"
+  },
+  {
+    "official_title": "M.Sc (Biotechnology)",
+    "level": "postgraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/biotechnology/msc-biotechnology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/biotechnology/msc-biotechnology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:biotechnologymsc-biotechnology"
+  },
+  {
+    "official_title": "MBA (Global Business Management) with Grant Thornton",
+    "level": "postgraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/mba-global-business-management",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/mba-global-business-management",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessmba-global-business-management"
+  },
+  {
+    "official_title": "LL.M. in Corporate and Business Law",
+    "level": "postgraduate",
+    "school": "School of Legal Studies",
+    "official_url": "https://www.culko.in/legal-studies/llm-in-corporate-and-business-law",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/legal-studies/llm-in-corporate-and-business-law",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:legal-studiesllm-in-corporate-and-business-law"
+  },
+  {
+    "official_title": "LL.M. in Constitutional Law",
+    "level": "postgraduate",
+    "school": "School of Legal Studies",
+    "official_url": "https://www.culko.in/legal-studies/llm-in-constitutional-law",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/legal-studies/llm-in-constitutional-law",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:legal-studiesllm-in-constitutional-law"
+  },
+  {
+    "official_title": "MCA (Cloud Computing & DevOps)",
+    "level": "postgraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/mca-cloud-computing-and-dev-ops",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/mca-cloud-computing-and-dev-ops",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingmca-cloud-computing-and-dev-ops"
+  },
+  {
+    "official_title": "M.Sc. Forensic Science",
+    "level": "postgraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/msc-forensic-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/msc-forensic-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesmsc-forensic-science"
+  },
+  {
+    "official_title": "BBA (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/bba",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/bba",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessbba"
+  },
+  {
+    "official_title": "BBA (Business Analytics) (Hons.) - Deloitte",
+    "level": "undergraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/bba-business-analytics",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/bba-business-analytics",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessbba-business-analytics"
+  },
+  {
+    "official_title": "BBA (Digital Marketing) (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/bba-digital-marketing",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/bba-digital-marketing",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessbba-digital-marketing"
+  },
+  {
+    "official_title": "BBA (Branding and Advertising) (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/bba-branding-advertising",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/bba-branding-advertising",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessbba-branding-advertising"
+  },
+  {
+    "official_title": "BBA (FinTech) (Hons.) + ACCA with Grant Thornton",
+    "level": "undergraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/bba-fintech",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/bba-fintech",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessbba-fintech"
+  },
+  {
+    "official_title": "Bachelor of Commerce (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Commerce",
+    "official_url": "https://www.culko.in/commerce/bachelor-of-commerce-hons",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/commerce/bachelor-of-commerce-hons",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:commercebachelor-of-commerce-hons"
+  },
+  {
+    "official_title": "B.Com (Hons.) + ACCA with Grant Thornton",
+    "level": "undergraduate",
+    "school": "School of Commerce",
+    "official_url": "https://www.culko.in/commerce/bcom-acca",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/commerce/bcom-acca",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:commercebcom-acca"
+  },
+  {
+    "official_title": "BCA (Data Science) with SAS",
+    "level": "undergraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/bca-ds",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/bca-ds",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingbca-ds"
+  },
+  {
+    "official_title": "BCA (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/bca",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/bca",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingbca"
+  },
+  {
+    "official_title": "B.Sc Data Science",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/bsc-data-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/bsc-data-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesbsc-data-science"
+  },
+  {
+    "official_title": "B.Tech (Biotechnology)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/biotechnology/btech-biotechnology-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/biotechnology/btech-biotechnology-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:biotechnologybtech-biotechnology-engineering"
+  },
+  {
+    "official_title": "B.Tech (Civil Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-civil-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-civil-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-civil-engineering"
+  },
+  {
+    "official_title": "B.Tech (CSE)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-cse-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-cse-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-cse-engineering"
+  },
+  {
+    "official_title": "B.Tech (CSE-AI & ML) with Microsoft",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-ai-ml-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-ai-ml-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-ai-ml-engineering"
+  },
+  {
+    "official_title": "B.Tech (CSE - Data Science) with Google",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/b-tech-cse-data-science-with-google",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/b-tech-cse-data-science-with-google",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringb-tech-cse-data-science-with-google"
+  },
+  {
+    "official_title": "B.Tech (CSE - Cyber Security) with Quick Heal",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-cse-cyber-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-cse-cyber-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-cse-cyber-engineering"
+  },
+  {
+    "official_title": "B.Tech (CSE - Cloud Computing) with Google",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-cse-cloud-computing-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-cse-cloud-computing-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-cse-cloud-computing-engineering"
+  },
+  {
+    "official_title": "B.Tech (Electronics and Communication Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-electronics-communication-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-electronics-communication-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-electronics-communication-engineering"
+  },
+  {
+    "official_title": "B.Tech (Electrical Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-electrical-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-electrical-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-electrical-engineering"
+  },
+  {
+    "official_title": "B.Tech (Information Technology)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-information-technology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-information-technology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-information-technology"
+  },
+  {
+    "official_title": "B.Tech (Mechanical Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-mechanical-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-mechanical-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-mechanical-engineering"
+  },
+  {
+    "official_title": "LL.B.",
+    "level": "undergraduate",
+    "school": "School of Legal Studies",
+    "official_url": "https://www.culko.in/legal-studies/llb",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/legal-studies/llb",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:legal-studiesllb"
+  },
+  {
+    "official_title": "B.A. LL.B. (Hons.) Integrated Program",
+    "level": "undergraduate",
+    "school": "School of Legal Studies",
+    "official_url": "https://www.culko.in/legal-studies/ba-llb-integrated",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/legal-studies/ba-llb-integrated",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:legal-studiesba-llb-integrated"
+  },
+  {
+    "official_title": "BBA LL.B. (Hons.) Integrated",
+    "level": "undergraduate",
+    "school": "School of Legal Studies",
+    "official_url": "https://www.culko.in/legal-studies/bba-llb",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/legal-studies/bba-llb",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:legal-studiesbba-llb"
+  },
+  {
+    "official_title": "BA (Journalism and Mass Communication) (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Media Studies",
+    "official_url": "https://www.culko.in/journalism-and-mass-communication/ba-journalism-mass-communication",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/journalism-and-mass-communication/ba-journalism-mass-communication",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:journalism-and-mass-communicationba-journalism-mass-communication"
+  },
+  {
+    "official_title": "B.Sc (Biotechnology) (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/biotechnology/bsc-biotechnology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/biotechnology/bsc-biotechnology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:biotechnologybsc-biotechnology"
+  },
+  {
+    "official_title": "B.Sc (Forensic Science) (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/bsc-forensic-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/bsc-forensic-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesbsc-forensic-science"
+  },
+  {
+    "official_title": "B.Pharm",
+    "level": "undergraduate",
+    "school": "School of Pharmacy",
+    "official_url": "https://www.culko.in/pharmacy/b-pharmacy",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/pharmacy/b-pharmacy",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:pharmacyb-pharmacy"
+  },
+  {
+    "official_title": "BCA (Hons.) AI & ML",
+    "level": "undergraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/bca-aiml",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/bca-aiml",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingbca-aiml"
+  },
+  {
+    "official_title": "B.Tech (Aerospace Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-aerospace-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-aerospace-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-aerospace-engineering"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Biotechnology)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-biotechnology-engineering",
+    "curriculum_status": "not_publicly_verified",
+    "curriculum_url": "",
+    "curriculum_last_verified_date": "",
+    "source_key": "cuup:engineeringbtech-lateral-entry-biotechnology-engineering"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Civil Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-civil-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-civil-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-civil-engineering"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Computer Science & Engineering)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-cse",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-cse",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-cse"
+  },
+  {
+    "official_title": "B.Tech CSE Lateral Entry (AI & ML)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-aiml",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-aiml",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-cse-aiml"
+  },
+  {
+    "official_title": "B.Tech CSE Lateral Entry (Data Science)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-data-science",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-data-science",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-cse-data-science"
+  },
+  {
+    "official_title": "B.Tech CSE Lateral Entry (Cyber Security)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-cyber-security",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-cyber-security",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-cse-cyber-security"
+  },
+  {
+    "official_title": "B.Tech CSE Lateral Entry (Cloud Computing)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-cloud-computing",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-cse-cloud-computing",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-cse-cloud-computing"
+  },
+  {
+    "official_title": "B.Tech CSE (IoT & AI)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/programs/computer-science/btech-cse-iot-ai",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/programs/computer-science/btech-cse-iot-ai",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:programscomputer-sciencebtech-cse-iot-ai"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Electronics & Communication Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-electronics-communication-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-electronics-communication-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-electronics-communication-engineering"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Electrical Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-electrical-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-electrical-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-electrical-engineering"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Information Technology)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-information-technology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-information-technology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-information-technology"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Mechanical Technology)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-mechanical-engineering",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-lateral-entry-mechanical-engineering",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-lateral-entry-mechanical-engineering"
+  },
+  {
+    "official_title": "B.Tech (Robotics & Automation)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-robotics-automation",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-robotics-automation",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-robotics-automation"
+  },
+  {
+    "official_title": "B.Des (Fashion & Design)",
+    "level": "undergraduate",
+    "school": "School of Design",
+    "official_url": "https://www.culko.in/design/bachelor-of-fashion-design",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/design/bachelor-of-fashion-design",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:designbachelor-of-fashion-design"
+  },
+  {
+    "official_title": "B.Des (Interior Design)",
+    "level": "undergraduate",
+    "school": "School of Design",
+    "official_url": "https://www.culko.in/design/bachelor-of-interior-design",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/design/bachelor-of-interior-design",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:designbachelor-of-interior-design"
+  },
+  {
+    "official_title": "B.Sc (Hons.) (Microbiology)",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/bsc-microbiology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/bsc-microbiology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesbsc-microbiology"
+  },
+  {
+    "official_title": "B.Pharm (Lateral Entry)",
+    "level": "undergraduate",
+    "school": "School of Pharmacy",
+    "official_url": "https://www.culko.in/pharmacy/b-pharmacy-lateral-entry",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/pharmacy/b-pharmacy-lateral-entry",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:pharmacyb-pharmacy-lateral-entry"
+  },
+  {
+    "official_title": "B.Sc. Hospitality & Hotel Management",
+    "level": "undergraduate",
+    "school": "School of Hospitality",
+    "official_url": "https://www.culko.in/hotel-management-and-tourism/bsc-hotel-and-hospitality-management",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/hotel-management-and-tourism/bsc-hotel-and-hospitality-management",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:hotel-management-and-tourismbsc-hotel-and-hospitality-management"
+  },
+  {
+    "official_title": "B.Sc (Airlines & Airport Management)",
+    "level": "undergraduate",
+    "school": "School of Travel & Tourism",
+    "official_url": "https://www.culko.in/hotel-management-and-tourism/bsc-airline-and-airport-management",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/hotel-management-and-tourism/bsc-airline-and-airport-management",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:hotel-management-and-tourismbsc-airline-and-airport-management"
+  },
+  {
+    "official_title": "B.A. (Liberal Art) (Hons.)",
+    "level": "undergraduate",
+    "school": "School of Liberal Arts & Behavioural Sciences",
+    "official_url": "https://www.culko.in/liberal-arts/ba-liberal-arts",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/liberal-arts/ba-liberal-arts",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:liberal-artsba-liberal-arts"
+  },
+  {
+    "official_title": "B.A. (Psychology) (Hons)",
+    "level": "undergraduate",
+    "school": "School of Liberal Arts & Behavioural Sciences",
+    "official_url": "https://www.culko.in/liberal-arts/ba-psychology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/liberal-arts/ba-psychology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:liberal-artsba-psychology"
+  },
+  {
+    "official_title": "B.Sc (Hons.) (Animation, VFX & Gaming)",
+    "level": "undergraduate",
+    "school": "School of Media Studies",
+    "official_url": "https://www.culko.in/computing/bsc-animation-vfx-gaming",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/bsc-animation-vfx-gaming",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingbsc-animation-vfx-gaming"
+  },
+  {
+    "official_title": "B.Arch",
+    "level": "undergraduate",
+    "school": "School of Architecture and Planning",
+    "official_url": "https://www.culko.in/architecture-and-planning/bachelor-of-architecture",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/architecture-and-planning/bachelor-of-architecture",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:architecture-and-planningbachelor-of-architecture"
+  },
+  {
+    "official_title": "B.Tech Lateral Entry (Aerospace Engineering)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-lateral-entry-aerospace-engineering",
+    "curriculum_status": "not_publicly_verified",
+    "curriculum_url": "",
+    "curriculum_last_verified_date": "",
+    "source_key": "cuup:engineeringbtech-lateral-entry-aerospace-engineering"
+  },
+  {
+    "official_title": "BBA (Data Science & Artificial Intelligence)",
+    "level": "undergraduate",
+    "school": "School of Business",
+    "official_url": "https://www.culko.in/business/bba-ds-ai",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/business/bba-ds-ai",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:businessbba-ds-ai"
+  },
+  {
+    "official_title": "BCA (Cyber Security)",
+    "level": "undergraduate",
+    "school": "School of Computing",
+    "official_url": "https://www.culko.in/computing/bca-cyber-security",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/computing/bca-cyber-security",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:computingbca-cyber-security"
+  },
+  {
+    "official_title": "B.Sc. (Hons.) Physics",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/bsc-physics",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/bsc-physics",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesbsc-physics"
+  },
+  {
+    "official_title": "B.Sc. (Hons.) Chemistry",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/bsc-chemistry",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/bsc-chemistry",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesbsc-chemistry"
+  },
+  {
+    "official_title": "B.Sc. (Hons.) (Mathematics - specialization in Computer Science & Statistics)",
+    "level": "undergraduate",
+    "school": "School of Basic and Applied Sciences",
+    "official_url": "https://www.culko.in/sciences/bsc-mathematics-computer-science-and-statistics",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/sciences/bsc-mathematics-computer-science-and-statistics",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:sciencesbsc-mathematics-computer-science-and-statistics"
+  },
+  {
+    "official_title": "B.Com. (Hons.) Applied Finance & Analytics",
+    "level": "undergraduate",
+    "school": "School of Commerce",
+    "official_url": "https://www.culko.in/commerce/bcom-hons-applied-finance-and-analytics",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/commerce/bcom-hons-applied-finance-and-analytics",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:commercebcom-hons-applied-finance-and-analytics"
+  },
+  {
+    "official_title": "B.Tech (CSE - Quantum Computing)",
+    "level": "undergraduate",
+    "school": "School of Computer Science Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-cse-quantum-computing",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-cse-quantum-computing",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-cse-quantum-computing"
+  },
+  {
+    "official_title": "B.Tech (Food Technology)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-food-technology",
+    "curriculum_status": "partially_verified",
+    "curriculum_url": "https://www.culko.in/engineering/btech-food-technology",
+    "curriculum_last_verified_date": "2026-11-27",
+    "source_key": "cuup:engineeringbtech-food-technology"
+  },
+  {
+    "official_title": "B.Tech Robotics & Automation Engineering (Lateral Entry)",
+    "level": "undergraduate",
+    "school": "School of Engineering",
+    "official_url": "https://www.culko.in/engineering/btech-robotics-and-automation-engineering-lateral-entry",
+    "curriculum_status": "not_publicly_verified",
+    "curriculum_url": "",
+    "curriculum_last_verified_date": "",
+    "source_key": "cuup:engineeringbtech-robotics-and-automation-engineering-lateral-entry"
+  }
+]

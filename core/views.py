@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from resources.models import (
     AccessLog,
+    CatalogResource,
     InstrumentBooking,
     LabSubmission,
     Resource,
@@ -113,6 +114,13 @@ def dashboard_view(request):
             | Q(uploaded_by=request.user)
         )
     recent_activity = recent_activity.order_by("-created_at")[:10]
+    recent_catalog_resources = CatalogResource.objects.filter(
+        review_status=CatalogResource.REVIEW_APPROVED,
+        link_status=CatalogResource.LINK_WORKING,
+        is_active=True,
+    ).filter(
+        Q(programme__isnull=True) | Q(programme__is_active=True)
+    ).select_related("programme").order_by("-updated_at", "title")[:6]
 
     user_bookmarks = ResourceBookmark.objects.filter(user=request.user).select_related("resource__category")[:6]
     user_submissions = LabSubmission.objects.filter(student=request.user).select_related("resource")[:6]
@@ -133,6 +141,7 @@ def dashboard_view(request):
         "user_resources": user_resources,
         "category_counts": category_counts,
         "recent_activity": recent_activity,
+        "recent_catalog_resources": recent_catalog_resources,
         "is_admin": request.user.is_administrator,
         "user_bookmarks": user_bookmarks,
         "user_submissions": user_submissions,
@@ -140,6 +149,7 @@ def dashboard_view(request):
         "active_booking_count": active_booking_count,
         "waiting_submission_count": waiting_submission_count,
         "saved_resource_count": saved_resource_count,
+        "academic_profile": getattr(request.user, "academic_profile", None),
     }
     return render(request, "dashboard/index.html", context)
 
@@ -154,6 +164,11 @@ def faculty_dashboard(request):
     submissions = LabSubmission.objects.filter(
         resource__uploaded_by=request.user
     ).select_related("resource", "student")
+    pending_bookings = (
+        InstrumentBooking.objects.filter(status=InstrumentBooking.STATUS_PENDING)
+        .select_related("instrument", "user")
+        .order_by("start_time")[:25]
+    )
     context = {
         "owned_resource_count": owned_resources.count(),
         "pending_count": submissions.filter(
@@ -167,6 +182,10 @@ def faculty_dashboard(request):
             "-created_at"
         )[:6],
         "recent_submissions": submissions.order_by("-submitted_at")[:8],
+        "pending_bookings": pending_bookings,
+        "pending_booking_count": InstrumentBooking.objects.filter(
+            status=InstrumentBooking.STATUS_PENDING
+        ).count(),
     }
     return render(request, "faculty/dashboard.html", context)
 
