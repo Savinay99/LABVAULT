@@ -9,6 +9,7 @@ import io
 import hashlib
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import OperationalError
 from django.test import Client
 from django.urls import reverse
 
@@ -55,6 +56,18 @@ def test_landing_page(client, db):
     assert response.status_code == 200
     body = response.content.decode("utf-8")
     assert "LabVault" in body
+
+
+def test_landing_page_survives_temporary_database_timeout(client, db):
+    with patch(
+        "core.views.Resource.objects.count",
+        side_effect=OperationalError("database login timeout"),
+    ):
+        response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.context["database_available"] is False
+    assert "repository database is temporarily unavailable" in response.content.decode().lower()
 
 
 def test_register_page(client):

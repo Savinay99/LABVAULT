@@ -4,6 +4,11 @@
 {% block title %}LabVault  -  Centralized, Verified Academic Laboratory Repository{% endblock %}
 
 {% block content %}
+{% if not database_available %}
+  <div class="flash flash-info" role="status">
+    The repository database is temporarily unavailable. The public page is still available; please try data pages again shortly.
+  </div>
+{% endif %}
 <!-- ==========================================================================
      Hero Section with Labrina Stepped Ribbons & Clear Editorial Text
      ========================================================================== -->

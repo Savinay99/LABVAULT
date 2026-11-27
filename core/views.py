@@ -1,6 +1,9 @@
 """Core app: landing page and dashboard."""
 
+import logging
+
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
 from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -14,6 +17,8 @@ from resources.models import (
     Subject,
 )
 from accounts.models import User
+
+logger = logging.getLogger(__name__)
 
 
 def _role_access_denied(request, required_role):
@@ -52,20 +57,33 @@ def _admin_required(view_func):
 
 def landing(request):
     """Public landing page with live repository statistics, multi-persona workspaces, and verified assets."""
-    total_resources = Resource.objects.count()
-    total_subjects = Subject.objects.count()
-    total_downloads = AccessLog.objects.count()
-    recent_resources = (
-        Resource.objects.filter(visibility=Resource.VISIBILITY_PUBLIC)
-        .select_related("category", "uploaded_by")
-        .prefetch_related("subjects")
-        .order_by("-id")[:6]
-    )
-    recent_logs = (
-        AccessLog.objects.filter(resource__visibility=Resource.VISIBILITY_PUBLIC)
-        .select_related("resource")
-        .order_by("-accessed_at")[:6]
-    )
+    database_available = True
+    try:
+        total_resources = Resource.objects.count()
+        total_subjects = Subject.objects.count()
+        total_downloads = AccessLog.objects.count()
+        recent_resources = list(
+            Resource.objects.filter(visibility=Resource.VISIBILITY_PUBLIC)
+            .select_related("category", "uploaded_by")
+            .prefetch_related("subjects")
+            .order_by("-id")[:6]
+        )
+        recent_logs = list(
+            AccessLog.objects.filter(resource__visibility=Resource.VISIBILITY_PUBLIC)
+            .select_related("resource")
+            .order_by("-accessed_at")[:6]
+        )
+    except DatabaseError as exc:
+        # Keep the public entry page available during a transient SQL outage.
+        # Log only the exception type; driver messages can contain connection details.
+        logger.warning(
+            "Landing page repository data unavailable (%s).",
+            type(exc).__name__,
+        )
+        database_available = False
+        total_resources = total_subjects = total_downloads = 0
+        recent_resources = []
+        recent_logs = []
 
     context = {
         "total_resources": total_resources,
@@ -73,6 +91,7 @@ def landing(request):
         "total_downloads": total_downloads,
         "recent_resources": recent_resources,
         "recent_logs": recent_logs,
+        "database_available": database_available,
     }
     return render(request, "landing.html", context)
 
