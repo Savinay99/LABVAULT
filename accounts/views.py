@@ -66,6 +66,13 @@ def login_view(request):
             LoginAttempt.objects.filter(email=email).delete()
             auth_login(request, user)
             messages.success(request, "Signed in successfully.")
+            requested_next = request.GET.get("next") or request.POST.get("next")
+            if (
+                user.is_student
+                and not hasattr(user, "academic_profile")
+                and not requested_next
+            ):
+                return redirect("accounts:settings")
             return redirect(_safe_next(request))
         else:
             if email:
@@ -135,25 +142,42 @@ def register_view(request):
 @login_required
 def profile_view(request):
     """View the current user's profile."""
-    return render(request, "profile/view.html", {"user": request.user})
+    return render(request, "profile/view.html", {
+        "user": request.user,
+        "academic_profile": getattr(request.user, "academic_profile", None),
+    })
 
 
 @login_required
 def settings_view(request):
     """Change the current user's password and manage connected social accounts."""
     social_accounts = UserSocialAuth.objects.filter(user=request.user)
-    if request.method == "POST":
+    from resources.forms import StudentAcademicProfileForm
+    from resources.models import StudentAcademicProfile
+
+    profile = StudentAcademicProfile.objects.filter(user=request.user).first()
+    profile_form = StudentAcademicProfileForm(instance=profile)
+    form = PasswordChangeForm(request.user)
+    if request.method == "POST" and request.POST.get("form_type") == "academic_profile":
+        profile_form = StudentAcademicProfileForm(request.POST, instance=profile)
+        if profile_form.is_valid():
+            academic_profile = profile_form.save(commit=False)
+            academic_profile.user = request.user
+            academic_profile.save()
+            messages.success(request, "Academic profile saved.")
+            return redirect("accounts:profile")
+    elif request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Password changed successfully.")
             return redirect("accounts:profile")
-    else:
-        form = PasswordChangeForm(request.user)
     return render(request, "profile/settings.html", {
         "form": form,
         "user": request.user,
         "social_accounts": social_accounts,
+        "profile_form": profile_form,
+        "academic_profile": profile,
     })
 
 

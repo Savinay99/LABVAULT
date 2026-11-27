@@ -8,6 +8,7 @@ app_name = "resources"
 
 urlpatterns = [
     path("library/", views.library, name="library"),
+    path("library/filter-options/", views.library_filter_options, name="library_filter_options"),
     path("departments/", views.departments_directory, name="departments"),
     path("instruments/", views.instruments_list, name="instruments"),
     path("instruments/<int:pk>/book/", views.book_instrument, name="book_instrument"),

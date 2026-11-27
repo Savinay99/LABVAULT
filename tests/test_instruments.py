@@ -22,7 +22,6 @@ def student(db):
         username="student.test@univ.edu",
         first_name="Jane",
         last_name="Doe",
-        password="ValidPassword123",
         role=User.ROLE_STUDENT,
     )
 
@@ -34,7 +33,17 @@ def faculty(db):
         username="faculty.test@univ.edu",
         first_name="Dr.",
         last_name="Smith",
-        password="ValidPassword123",
+        role=User.ROLE_FACULTY,
+    )
+
+
+@pytest.fixture
+def admin(db):
+    return User.objects.create_user(
+        email="admin.test@univ.edu",
+        username="admin.test@univ.edu",
+        first_name="Lab",
+        last_name="Administrator",
         role=User.ROLE_ADMIN,
     )
 
@@ -136,7 +145,7 @@ def test_student_cannot_approve_booking(client, db, student, faculty, oscillosco
 
 
 def test_admin_can_approve_issue_and_return_instrument(
-    client, db, student, faculty, oscilloscope
+    client, db, student, admin, oscilloscope
 ):
     now = timezone.now()
     booking = InstrumentBooking.objects.create(
@@ -147,7 +156,7 @@ def test_admin_can_approve_issue_and_return_instrument(
         purpose="Lab practical",
         status=InstrumentBooking.STATUS_PENDING,
     )
-    client.force_login(faculty)
+    client.force_login(admin)
     review_page = client.get(reverse("resources:instruments"))
     assert "Approve" in review_page.content.decode()
 
@@ -172,7 +181,7 @@ def test_admin_can_approve_issue_and_return_instrument(
     issue = InstrumentIssue.objects.get(booking=booking)
     assert booking.status == InstrumentBooking.STATUS_ISSUED
     assert oscilloscope.status == Instrument.STATUS_IN_USE
-    assert issue.issued_by == faculty
+    assert issue.issued_by == admin
 
     response = client.post(
         reverse("resources:return_issue", args=[issue.pk]),
@@ -184,8 +193,39 @@ def test_admin_can_approve_issue_and_return_instrument(
     issue.refresh_from_db()
     assert booking.status == InstrumentBooking.STATUS_COMPLETED
     assert oscilloscope.status == Instrument.STATUS_AVAILABLE
-    assert issue.returned_by == faculty
+    assert issue.returned_by == admin
     assert issue.return_condition == "Returned clean and calibrated."
+
+
+def test_faculty_dashboard_shows_and_approves_student_booking(
+    client, db, student, faculty, oscilloscope
+):
+    booking = InstrumentBooking.objects.create(
+        instrument=oscilloscope,
+        user=student,
+        start_time=timezone.now() + datetime.timedelta(days=1),
+        end_time=timezone.now() + datetime.timedelta(days=1, hours=2),
+        purpose="Demo approval flow",
+        status=InstrumentBooking.STATUS_PENDING,
+    )
+
+    client.force_login(faculty)
+    page = client.get(reverse("core:faculty_dashboard"))
+    assert page.status_code == 200
+    assert "Demo approval flow" in page.content.decode()
+    assert "Approve" in page.content.decode()
+
+    response = client.post(
+        reverse("resources:booking_action", args=[booking.pk]),
+        {"action": "approve"},
+    )
+    assert response.status_code == 302
+    booking.refresh_from_db()
+    assert booking.status == InstrumentBooking.STATUS_APPROVED
+
+    client.force_login(student)
+    student_page = client.get(reverse("resources:instruments"))
+    assert "APPROVED" in student_page.content.decode()
 
 
 def test_book_instrument_interval_overlap_conflict(client, db, student, faculty, oscilloscope):

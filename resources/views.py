@@ -10,8 +10,9 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db import models, transaction
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -23,6 +24,8 @@ from .models import (
     AccessLog,
     AuditLog,
     Category,
+    CatalogResource,
+    CurriculumSubject,
     Instrument,
     InstrumentBooking,
     InstrumentIssue,
@@ -33,8 +36,10 @@ from .models import (
     ResourceBookmark,
     ResourceFiles,
     Subject,
+    Programme,
 )
 from .storage import (
+    LocalProtectedStorage,
     StorageError,
     compute_sha256,
     detect_mime,
@@ -83,7 +88,7 @@ def _user_can_edit_resource(user, resource):
 
 @login_required
 def library(request):
-    """Resource library with search, filter, sort, pagination."""
+    """Uploaded documents and approved academic catalogue links."""
     from django.db.models import Q
 
     user = request.user
@@ -92,6 +97,30 @@ def library(request):
     search = request.GET.get("search", "") or None
     category_id = _positive_query_int(request.GET.get("category_id"))
     subject_id = _positive_query_int(request.GET.get("subject_id"))
+    academic_profile = getattr(user, "academic_profile", None)
+    programme_default = academic_profile.programme_id if academic_profile else None
+    year_default = academic_profile.year_of_study if academic_profile else None
+    semester_default = academic_profile.semester if academic_profile else None
+    programme_id = _positive_query_int(
+        request.GET.get("programme"),
+        programme_default if "programme" not in request.GET else None,
+    )
+    year_of_study = _positive_query_int(
+        request.GET.get("year"),
+        year_default if "year" not in request.GET else None,
+    )
+    semester = _positive_query_int(
+        request.GET.get("semester"),
+        semester_default if "semester" not in request.GET else None,
+    )
+    curriculum_subject_id = _positive_query_int(request.GET.get("curriculum_subject"))
+    school = (
+        (request.GET.get("school") or "").strip()
+        if "school" in request.GET
+        else (academic_profile.school if academic_profile else "")
+    )
+    resource_type = (request.GET.get("resource_type") or "").strip()
+    source_organization = (request.GET.get("source") or "").strip()
     sort = request.GET.get("sort", "created_at")
     direction = request.GET.get("direction", "DESC")
 
@@ -114,15 +143,131 @@ def library(request):
         queryset = queryset.filter(category_id=category_id)
     if subject_id:
         queryset = queryset.filter(subjects__id=subject_id)
+    # Uploaded documents have no programme/term foreign key. Never imply that
+    # an unlinked upload matches an academic catalogue filter.
+    if programme_id or year_of_study or semester or curriculum_subject_id:
+        queryset = queryset.none()
 
     queryset = queryset.distinct()
     total = queryset.count()
     offset = (page - 1) * page_size
     items = list(queryset.order_by(order_by)[offset:offset + page_size])
+    storage_backend = get_storage_backend()
+    if isinstance(storage_backend, LocalProtectedStorage):
+        for item in items:
+            item.download_available = storage_backend.exists(item.storage_key)
+    else:
+        for item in items:
+            item.download_available = True
 
     total_pages = max(1, -(-total // page_size)) if total else 1
     categories = Category.objects.all()
     subjects = Subject.objects.all()
+
+    # Curated catalogue links are separate from uploaded Resource records.
+    # Only active links approved by staff and verified as working are public.
+    catalog_queryset = CatalogResource.objects.filter(
+        review_status=CatalogResource.REVIEW_APPROVED,
+        link_status=CatalogResource.LINK_WORKING,
+        is_active=True,
+    ).filter(
+        Q(programme__isnull=True) | Q(programme__is_active=True)
+    ).select_related("programme").prefetch_related(
+        "curriculum_subjects__programme"
+    )
+
+    if search:
+        catalog_queryset = catalog_queryset.filter(
+            Q(title__icontains=search)
+            | Q(description__icontains=search)
+            | Q(source_organization__icontains=search)
+            | Q(programme__official_title__icontains=search)
+            | Q(curriculum_subjects__subject_name__icontains=search)
+            | Q(curriculum_subjects__programme__official_title__icontains=search)
+        )
+    if programme_id:
+        catalog_queryset = catalog_queryset.filter(
+            Q(programme_id=programme_id)
+            | Q(curriculum_subjects__programme_id=programme_id)
+        )
+    if school:
+        catalog_queryset = catalog_queryset.filter(
+            Q(programme__school=school)
+            | Q(curriculum_subjects__programme__school=school)
+        )
+    if year_of_study:
+        catalog_queryset = catalog_queryset.filter(
+            curriculum_subjects__year_of_study=year_of_study
+        )
+    if semester:
+        catalog_queryset = catalog_queryset.filter(
+            curriculum_subjects__semester=semester
+        )
+    if curriculum_subject_id:
+        catalog_queryset = catalog_queryset.filter(
+            curriculum_subjects__id=curriculum_subject_id
+        )
+    catalogue_options_queryset = catalog_queryset
+    if resource_type in dict(CatalogResource.RESOURCE_TYPE_CHOICES):
+        catalog_queryset = catalog_queryset.filter(resource_type=resource_type)
+    if source_organization:
+        catalog_queryset = catalog_queryset.filter(
+            source_organization=source_organization
+        )
+
+    catalog_queryset = catalog_queryset.distinct().order_by("source_organization", "title")
+    catalog_total = catalog_queryset.count()
+    catalog_page = Paginator(catalog_queryset, 20).get_page(
+        request.GET.get("catalog_page", 1)
+    )
+    catalog_programmes = Programme.objects.filter(is_active=True)
+    school_programmes = catalog_programmes
+    if programme_id:
+        school_programmes = school_programmes.filter(pk=programme_id)
+    catalog_schools = (
+        school_programmes.exclude(school="")
+        .order_by("school")
+        .values_list("school", flat=True)
+        .distinct()
+    )
+    curriculum_scope = CurriculumSubject.objects.filter(programme__is_active=True)
+    if programme_id:
+        curriculum_scope = curriculum_scope.filter(programme_id=programme_id)
+    catalog_years = (
+        curriculum_scope
+        .exclude(year_of_study__isnull=True)
+        .order_by("year_of_study")
+        .values_list("year_of_study", flat=True)
+        .distinct()
+    )
+    semester_scope = curriculum_scope
+    if year_of_study:
+        semester_scope = semester_scope.filter(year_of_study=year_of_study)
+    catalog_semesters = (
+        semester_scope
+        .exclude(semester__isnull=True)
+        .order_by("semester")
+        .values_list("semester", flat=True)
+        .distinct()
+    )
+    catalog_subjects = CurriculumSubject.objects.filter(programme__is_active=True)
+    if programme_id:
+        catalog_subjects = catalog_subjects.filter(programme_id=programme_id)
+    if year_of_study:
+        catalog_subjects = catalog_subjects.filter(year_of_study=year_of_study)
+    if semester:
+        catalog_subjects = catalog_subjects.filter(semester=semester)
+    catalog_subjects = catalog_subjects.order_by("sequence", "subject_name")
+    catalog_resource_types = [
+        (value, label)
+        for value, label in CatalogResource.RESOURCE_TYPE_CHOICES
+        if catalogue_options_queryset.filter(resource_type=value).exists()
+    ]
+    catalog_sources = catalogue_options_queryset.order_by(
+        "source_organization"
+    ).values_list("source_organization", flat=True).distinct()
+    catalog_page_params = request.GET.copy()
+    catalog_page_params.pop("catalog_page", None)
 
     context = {
         "resources": items,
@@ -132,13 +277,105 @@ def library(request):
         "total_pages": total_pages,
         "categories": categories,
         "subjects": subjects,
+        "catalog_resources": catalog_page.object_list,
+        "catalog_total": catalog_total,
+        "catalog_page": catalog_page,
+        "catalog_page_query": catalog_page_params.urlencode(),
+        "catalog_programmes": catalog_programmes,
+        "catalog_schools": catalog_schools,
+        "catalog_years": catalog_years,
+        "catalog_semesters": catalog_semesters,
+        "catalog_subjects": catalog_subjects,
+        "catalog_resource_types": catalog_resource_types,
+        "catalog_sources": catalog_sources,
+        "programme_id": programme_id,
+        "selected_programme": Programme.objects.filter(pk=programme_id).first() if programme_id else None,
+        "curriculum_subject_id": curriculum_subject_id,
+        "school": school,
+        "year_of_study": year_of_study,
+        "semester": semester,
+        "resource_type": resource_type,
+        "source_organization": source_organization,
         "search": search or "",
         "category_id": int(category_id) if category_id else None,
         "subject_id": int(subject_id) if subject_id else None,
         "sort": sort,
         "direction": direction,
+        "academic_profile": academic_profile,
+        "curriculum_term_verified": (
+            not (programme_id and year_of_study and semester)
+            or CurriculumSubject.objects.filter(
+                programme_id=programme_id,
+                year_of_study=year_of_study,
+                semester=semester,
+            ).exists()
+        ),
     }
     return render(request, "resources/library.html", context)
+
+
+@login_required
+def library_filter_options(request):
+    """Return dependent Library options from verified curriculum/catalogue rows."""
+    from django.db.models import Q
+
+    programme_id = _positive_query_int(request.GET.get("programme"))
+    year = _positive_query_int(request.GET.get("year"))
+    semester = _positive_query_int(request.GET.get("semester"))
+    programmes = Programme.objects.filter(is_active=True)
+    curriculum = CurriculumSubject.objects.filter(programme__is_active=True)
+    resources = CatalogResource.objects.filter(
+        review_status=CatalogResource.REVIEW_APPROVED,
+        link_status=CatalogResource.LINK_WORKING,
+        is_active=True,
+    ).filter(Q(programme__isnull=True) | Q(programme__is_active=True))
+    if programme_id:
+        programmes = programmes.filter(pk=programme_id)
+        curriculum = curriculum.filter(programme_id=programme_id)
+        resources = resources.filter(
+            Q(programme_id=programme_id)
+            | Q(curriculum_subjects__programme_id=programme_id)
+            | Q(programme__isnull=True, curriculum_subjects__isnull=True)
+        )
+    school_values = list(
+        programmes.exclude(school="").order_by("school")
+        .values_list("school", flat=True).distinct()
+    )
+    if year:
+        curriculum = curriculum.filter(year_of_study=year)
+        resources = resources.filter(curriculum_subjects__year_of_study=year)
+    years = CurriculumSubject.objects.filter(programme__is_active=True)
+    if programme_id:
+        years = years.filter(programme_id=programme_id)
+    years = list(years.exclude(year_of_study__isnull=True).order_by(
+        "year_of_study"
+    ).values_list("year_of_study", flat=True).distinct())
+    semester_scope = curriculum
+    semesters = list(semester_scope.exclude(semester__isnull=True).order_by(
+        "semester"
+    ).values_list("semester", flat=True).distinct())
+    if semester:
+        curriculum = curriculum.filter(semester=semester)
+        resources = resources.filter(curriculum_subjects__semester=semester)
+    subjects = list(curriculum.order_by("sequence", "subject_name").values(
+        "id", "subject_name", "official_code"
+    ).distinct())
+    resource_types = [
+        {"value": value, "label": label}
+        for value, label in CatalogResource.RESOURCE_TYPE_CHOICES
+        if resources.filter(resource_type=value).exists()
+    ]
+    sources = list(resources.order_by("source_organization").values_list(
+        "source_organization", flat=True
+    ).distinct())
+    return JsonResponse({
+        "schools": school_values,
+        "years": years,
+        "semesters": semesters,
+        "subjects": subjects,
+        "resource_types": resource_types,
+        "sources": sources,
+    })
 
 
 @login_required
@@ -438,13 +675,20 @@ def instruments_list(request):
             | models.Q(category__icontains=q)
         )
 
-    departments = Instrument.objects.filter(is_active=True).values_list(
-        "department", flat=True
-    ).distinct()
+    # Existing inventory rows may contain accidental surrounding whitespace;
+    # normalize before rendering so the department filter has no duplicates.
+    departments = sorted({
+        value.strip()
+        for value in Instrument.objects.filter(is_active=True).values_list(
+            "department", flat=True
+        )
+        if value and value.strip()
+    }, key=str.casefold)
     user_bookings = None
+    active_booking_count = 0
     if request.user.is_authenticated:
         bookings = InstrumentBooking.objects.select_related("instrument", "user", "issue")
-        if request.user.is_administrator:
+        if request.user.is_administrator or request.user.is_faculty:
             user_bookings = bookings.exclude(
                 status__in=[
                     InstrumentBooking.STATUS_CANCELLED,
@@ -452,8 +696,16 @@ def instruments_list(request):
                     InstrumentBooking.STATUS_COMPLETED,
                 ]
             ).order_by("start_time")[:25]
+            active_booking_count = len(user_bookings)
         else:
             user_bookings = bookings.filter(user=request.user).order_by("-start_time")[:5]
+            active_booking_count = bookings.filter(user=request.user).exclude(
+                status__in=[
+                    InstrumentBooking.STATUS_CANCELLED,
+                    InstrumentBooking.STATUS_REJECTED,
+                    InstrumentBooking.STATUS_COMPLETED,
+                ]
+            ).count()
 
     return render(
         request,
@@ -461,11 +713,14 @@ def instruments_list(request):
         {
             "instruments": qs,
             "departments": departments,
+            "department_count": len(departments),
             "selected_dept": dept,
             "selected_status": status,
             "query": q,
             "user_bookings": user_bookings,
+            "active_booking_count": active_booking_count,
             "is_admin": request.user.is_authenticated and request.user.is_administrator,
+            "can_manage_equipment": request.user.is_authenticated and (request.user.is_administrator or request.user.is_faculty),
         },
     )
 
@@ -584,8 +839,8 @@ def booking_action(request, pk):
             return redirect("resources:instruments")
         next_status = InstrumentBooking.STATUS_CANCELLED
     else:
-        if not request.user.is_administrator:
-            return HttpResponseForbidden("Only administrators can review bookings.")
+        if not (request.user.is_administrator or request.user.is_faculty):
+            return HttpResponseForbidden("Only faculty or administrators can review bookings.")
         next_status_by_action = {
             "approve": InstrumentBooking.STATUS_APPROVED,
             "reject": InstrumentBooking.STATUS_REJECTED,
@@ -656,8 +911,8 @@ def booking_action(request, pk):
 @require_POST
 def issue_booking(request, pk):
     """Record issue of an approved instrument to its student."""
-    if not request.user.is_administrator:
-        return HttpResponseForbidden("Only administrators can issue equipment.")
+    if not (request.user.is_administrator or request.user.is_faculty):
+        return HttpResponseForbidden("Only faculty or administrators can issue equipment.")
     booking = get_object_or_404(InstrumentBooking, pk=pk)
     from django.utils.dateparse import parse_datetime
 
@@ -705,8 +960,8 @@ def issue_booking(request, pk):
 @require_POST
 def return_issue(request, pk):
     """Record return condition and close an active instrument issue."""
-    if not request.user.is_administrator:
-        return HttpResponseForbidden("Only administrators can record equipment returns.")
+    if not (request.user.is_administrator or request.user.is_faculty):
+        return HttpResponseForbidden("Only faculty or administrators can record equipment returns.")
     return_condition = request.POST.get("return_condition", "").strip()
     if not return_condition or len(return_condition) > 500:
         messages.error(request, "Enter a return condition note (up to 500 characters).")

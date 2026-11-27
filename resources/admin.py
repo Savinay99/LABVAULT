@@ -6,6 +6,8 @@ from .models import (
     AccessLog,
     AuditLog,
     Category,
+    CatalogResource,
+    CurriculumSubject,
     Instrument,
     InstrumentBooking,
     InstrumentIssue,
@@ -14,6 +16,8 @@ from .models import (
     ResourceFiles,
     ResourceSubject,
     Subject,
+    Programme,
+    StudentAcademicProfile,
 )
 
 
@@ -27,6 +31,97 @@ class CategoryAdmin(admin.ModelAdmin):
 class SubjectAdmin(admin.ModelAdmin):
     list_display = ("subject_code", "subject_name")
     search_fields = ("subject_code", "subject_name")
+
+
+@admin.register(Programme)
+class ProgrammeAdmin(admin.ModelAdmin):
+    list_display = (
+        "official_title",
+        "level",
+        "school",
+        "curriculum_status",
+        "is_active",
+    )
+    list_filter = ("level", "school", "curriculum_status", "is_active")
+    search_fields = ("official_title", "school", "source_key")
+    readonly_fields = ("source_key", "curriculum_last_verified_at", "updated_at")
+    list_editable = ("is_active",)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(CurriculumSubject)
+class CurriculumSubjectAdmin(admin.ModelAdmin):
+    list_display = (
+        "subject_name",
+        "programme",
+        "year_of_study",
+        "semester",
+        "official_code",
+    )
+    list_filter = ("programme__level", "programme__school", "year_of_study", "semester")
+    search_fields = ("subject_name", "official_code", "programme__official_title")
+    autocomplete_fields = ("programme",)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(StudentAcademicProfile)
+class StudentAcademicProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "programme", "school", "year_of_study", "semester")
+    list_filter = ("programme__school", "year_of_study", "semester")
+    search_fields = ("user__email", "programme__official_title", "school")
+    autocomplete_fields = ("user", "programme")
+
+
+@admin.register(CatalogResource)
+class CatalogResourceAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "source_organization",
+        "resource_type",
+        "source_class",
+        "review_status",
+        "link_status",
+        "is_active",
+        "last_verified_at",
+    )
+    list_filter = (
+        "source_class",
+        "source_organization",
+        "resource_type",
+        "review_status",
+        "link_status",
+        "is_active",
+        "access_type",
+    )
+    search_fields = (
+        "title",
+        "canonical_url",
+        "source_organization",
+        "programme__official_title",
+        "curriculum_subjects__subject_name",
+    )
+    readonly_fields = ("source_key", "canonical_url_digest", "created_at", "updated_at")
+    autocomplete_fields = ("programme", "curriculum_subjects")
+    actions = ("approve_working_links", "disable_selected_links")
+
+    @admin.action(description="Approve selected links verified as working")
+    def approve_working_links(self, request, queryset):
+        eligible = queryset.filter(link_status=CatalogResource.LINK_WORKING)
+        changed = eligible.update(review_status=CatalogResource.REVIEW_APPROVED)
+        skipped = queryset.count() - changed
+        self.message_user(request, f"Approved {changed}; {skipped} not marked working were left unchanged.")
+
+    @admin.action(description="Disable selected catalogue links")
+    def disable_selected_links(self, request, queryset):
+        changed = queryset.update(is_active=False)
+        self.message_user(request, f"Disabled {changed} catalogue links.")
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Resource)

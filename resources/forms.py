@@ -2,7 +2,28 @@
 
 from django import forms
 
-from .models import Category, Resource, Subject
+from .models import Category, Programme, Resource, StudentAcademicProfile, Subject
+
+
+class StudentAcademicProfileForm(forms.ModelForm):
+    """Student-declared current academic context; curriculum coverage is independent."""
+
+    year_of_study = forms.IntegerField(min_value=1, max_value=6, label="Current year")
+    semester = forms.IntegerField(min_value=1, max_value=12, label="Current semester")
+
+    class Meta:
+        model = StudentAcademicProfile
+        fields = ("programme", "year_of_study", "semester")
+        widgets = {
+            "programme": forms.Select(attrs={"class": "form-select"}),
+            "year_of_study": forms.NumberInput(attrs={"class": "form-input", "min": 1, "max": 6}),
+            "semester": forms.NumberInput(attrs={"class": "form-input", "min": 1, "max": 12}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["programme"].queryset = Programme.objects.filter(is_active=True)
+        self.fields["programme"].empty_label = "Select your programme"
 
 
 class ResourceUploadForm(forms.ModelForm):

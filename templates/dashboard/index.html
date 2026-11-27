@@ -18,6 +18,21 @@
     <div class="student-hero-mark" aria-hidden="true">S</div>
   </header>
 
+  {% if academic_profile %}
+  <section class="workspace-panel student-panel" aria-label="Current academic context">
+    <span class="panel-kicker">YOUR ACADEMIC CONTEXT</span>
+    <strong>{{ academic_profile.programme.official_title }} · Year {{ academic_profile.year_of_study }} · Semester {{ academic_profile.semester }}</strong>
+    <span class="metric-note">{{ academic_profile.school }}</span>
+    <a class="text-action" href="{% url 'accounts:settings' %}">Edit profile →</a>
+  </section>
+  {% else %}
+  <section class="workspace-panel student-panel" role="status">
+    <strong>Set your academic profile to personalize the Library.</strong>
+    <p>Choose your programme and current year and semester. Curriculum availability in the Library is shown only when verified.</p>
+    <a class="text-action" href="{% url 'accounts:settings' %}">Set academic profile →</a>
+  </section>
+  {% endif %}
+
   <section class="workspace-metrics student-metrics" aria-label="Your study activity">
     <article class="workspace-metric">
       <span class="metric-icon" aria-hidden="true">⌁</span>
@@ -150,8 +165,8 @@
       <div><span class="panel-kicker">FRESH FROM THE REPOSITORY</span><h2 id="student-resources-title">Recently Added Resources</h2><p>New manuals and materials available to you.</p></div>
       <a href="{% url 'resources:library' %}" class="text-action">View library <span aria-hidden="true">→</span></a>
     </div>
-    {% if recent_activity %}
-      <ul class="student-resource-grid">
+    {% if recent_activity or recent_catalog_resources %}
+      {% if recent_activity %}<ul class="student-resource-grid">
         {% for resource in recent_activity %}
           <li class="student-resource-card">
             <div class="resource-card-topline"><span class="resource-type-mark">{% if resource.content_type == 'application/pdf' %}PDF{% else %}FILE{% endif %}</span><span class="resource-visibility">{% if resource.visibility == 'public' %}OPEN{% else %}PRIVATE{% endif %}</span></div>
@@ -160,7 +175,19 @@
             <a href="{% url 'resources:details' resource.pk %}" class="resource-card-link">Open resource <span aria-hidden="true">→</span></a>
           </li>
         {% endfor %}
-      </ul>
+      </ul>{% endif %}
+      {% if recent_catalog_resources %}
+        <ul class="student-resource-grid" aria-label="Approved catalogue resources">
+          {% for item in recent_catalog_resources %}
+            <li class="student-resource-card">
+              <div class="resource-card-topline"><span class="resource-type-mark">{{ item.get_resource_type_display }}</span><span class="resource-visibility">{{ item.source_organization }}</span></div>
+              <h3><a href="{{ item.canonical_url }}" target="_blank" rel="noopener noreferrer">{{ item.title|truncatechars:54 }}</a></h3>
+              <p>{% if item.programme %}{{ item.programme.official_title }} · {% endif %}{{ item.get_source_class_display }}</p>
+              <a href="{{ item.canonical_url }}" target="_blank" rel="noopener noreferrer" class="resource-card-link">Open resource <span aria-hidden="true">→</span></a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
     {% else %}
       <div class="workspace-empty"><span class="empty-orbit" aria-hidden="true">⌕</span><div><strong>No resources yet</strong><p>New course materials will appear here when they are published.</p></div><a href="{% url 'resources:library' %}" class="text-action">Browse library <span aria-hidden="true">→</span></a></div>
     {% endif %}
